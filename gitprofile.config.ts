@@ -67,15 +67,7 @@ const CONFIG = {
     fileUrl:
       'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', // Empty fileUrl will hide the `Download Resume` button.
   },
-  skills: [
-    'JavaScript',
-    'React',
-    'Git',
-    'Docker',
-    'CSS',
-    'C++',
-    'Python'
-  ],
+  skills: ['JavaScript', 'React', 'Git', 'Docker', 'CSS', 'C++', 'Python'],
   experiences: [
     {
       company: 'Company Name',
@@ -116,20 +108,12 @@ const CONFIG = {
   ],
   publications: [
     {
-      title: 'Publication Title',
+      title:
+        'Enhancing Network Security Through Router-Based Firewalls: An Investigation into Design, Effectiveness, and Human Factors',
       conferenceName: '',
-      journalName: 'Journal Name',
-      authors: 'John Doe, Jane Smith',
-      link: 'https://example.com',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-    },
-    {
-      title: 'Publication Title',
-      conferenceName: 'Conference Name',
-      journalName: '',
-      authors: 'John Doe, Jane Smith',
-      link: 'https://example.com',
+      journalName: '2023 5th International Conference on Computer Science and Intelligent Communication (CSIC 2023)',
+      authors: 'Jingqing Liu',
+      link: 'Not Available Yet',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
     },

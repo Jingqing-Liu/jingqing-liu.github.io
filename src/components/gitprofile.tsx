@@ -15,7 +15,7 @@ import { SanitizedConfig } from '../interfaces/sanitized-config';
 import ErrorPage from './error-page';
 import HeadTagEditor from './head-tag-editor';
 import { DEFAULT_THEMES } from '../constants/default-themes';
-import ThemeChanger from './theme-changer';
+// import ThemeChanger from './theme-changer';
 import { BG_COLOR } from '../constants';
 import AvatarCard from './avatar-card';
 import { Profile } from '../interfaces/profile';
@@ -198,14 +198,14 @@ const GitProfile = ({ config }: { config: Config }) => {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 rounded-box">
                 <div className="col-span-1">
                   <div className="grid grid-cols-1 gap-6">
-                    {!sanitizedConfig.themeConfig.disableSwitch && (
+                    {/* {!sanitizedConfig.themeConfig.disableSwitch && (
                       <ThemeChanger
                         theme={theme}
                         setTheme={setTheme}
                         loading={loading}
                         themeConfig={sanitizedConfig.themeConfig}
                       />
-                    )}
+                    )} */}
                     <AvatarCard
                       profile={profile}
                       loading={loading}

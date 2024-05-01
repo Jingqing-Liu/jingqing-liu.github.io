@@ -34,7 +34,7 @@ const CONFIG = {
       projects: [
         {
           title: 'Research and Testing of API Calls in WeChat',
-          time: "06/2023 - 12/2023",
+          time: '06/2023 - 12/2023',
           mentor:
             'X-Lab of Dr. Xing Gao | Advisor: Xing Gao (Assistant Professor, U Delaware)',
           description:
@@ -46,7 +46,7 @@ const CONFIG = {
         {
           title:
             'Invisible Threats in the Met-Averse: Roblox’s Security Vulnerabilities',
-          time: "06/2023 - 12/2023",
+          time: '06/2023 - 12/2023',
           mentor:
             'X-Lab of Dr. Xing Gao | Advisor: Xing Gao (Assistant Professor, U Delaware)',
           description:
@@ -56,7 +56,7 @@ const CONFIG = {
         {
           title:
             'Verification of Account Balances in the Bitcoin System Using Merkle Trees',
-          time: "2023 Summer",
+          time: '2023 Summer',
           mentor:
             'Advisor: Vipul Goyal (Professor, Carnegie Mellon University)',
           description:
@@ -65,7 +65,7 @@ const CONFIG = {
         },
         {
           title: 'A Design of Router Firewall',
-          time: "2022 Summer",
+          time: '2022 Summer',
           mentor: 'Advisor: Rui Zhang (Associate Prof., U Delaware)',
           description:
             '※ Conducted a survey with nearly 1000 respondents; Found that user errors caused most security breaches.\n ※ Designed a router-based firewall system that eliminates human operation errors and thus better protects users’ computers from Viruses and illegal websites. ',
@@ -88,7 +88,7 @@ const CONFIG = {
   },
   resume: {
     fileUrl:
-      'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', // Empty fileUrl will hide the `Download Resume` button.
+      'https://github.com/Jingqing-Liu/jingqing-liu.github.io/blob/main/public/CV-JingqingLiu.pdf', // Empty fileUrl will hide the `Download Resume` button.
   },
   skills: ['JavaScript', 'React', 'Git', 'Docker', 'CSS', 'C++', 'Python'],
   experiences: [

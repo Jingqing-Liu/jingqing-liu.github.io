@@ -71,10 +71,13 @@ const ExternalProjectCard = ({
       <a
         className="card shadow-lg compact bg-base-100 cursor-pointer"
         key={index}
-        href={item.link}
+        href={item.link || 'javascript:void(0);'}
         onClick={(e) => {
+          if (!item.link) {
+            e.preventDefault();
+            return;
+          }
           e.preventDefault();
-
           try {
             if (googleAnalyticId) {
               ga.event('Click External Project', {
@@ -84,7 +87,6 @@ const ExternalProjectCard = ({
           } catch (error) {
             console.error(error);
           }
-
           window?.open(item.link, '_blank');
         }}
       >
@@ -96,6 +98,10 @@ const ExternalProjectCard = ({
                   <h2 className="font-medium text-center opacity-60 mb-2">
                     {item.title}
                   </h2>
+                  <p className="text-sm text-gray-600">{item.time}</p>
+                  <p className="text-base-content opacity-50 text-sm">
+                    {item.mentor}
+                  </p>
                   {item.imageUrl && (
                     <div className="avatar opacity-90">
                       <div className="w-24 h-24 mask mask-squircle">
@@ -112,7 +118,14 @@ const ExternalProjectCard = ({
                     </div>
                   )}
                   <p className="mt-2 text-base-content text-opacity-60 text-sm text-justify">
-                    {item.description}
+                    {item.description
+                      ? item.description.split('\n').map((line, index) => (
+                          <Fragment key={index}>
+                            {line}
+                            <br />
+                          </Fragment>
+                        ))
+                      : null}
                   </p>
                 </div>
               </div>

@@ -29,24 +29,47 @@ const CONFIG = {
       },
     },
     external: {
-      header: 'My Projects',
+      header: 'My Researches',
       // To hide the `External Projects` section, keep it empty.
       projects: [
         {
-          title: 'Project Name',
+          title: 'Research and Testing of API Calls in WeChat',
+          time: "06/2023 - 12/2023",
+          mentor:
+            'X-Lab of Dr. Xing Gao | Advisor: Xing Gao (Assistant Professor, U Delaware)',
           description:
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nunc ut.',
-          imageUrl:
-            'https://img.freepik.com/free-vector/illustration-gallery-icon_53876-27002.jpg',
-          link: 'https://example.com',
+            "※ Comprehensively examined WeChat's API system, focusing on its technical operation principles and associated security vulnerabilities.\n ※ Found the variability in API implementation across different operating systems, unauthorized exposure of system resources and discrepancies in permission settings, the threat of sub-window spoofing, and other security risks. ",
+          // imageUrl:
+          //   'https://img.freepik.com/free-vector/illustration-gallery-icon_53876-27002.jpg',
+          // link: 'https://xgao-work.github.io/members.html',
         },
         {
-          title: 'Project Name',
+          title:
+            'Invisible Threats in the Met-Averse: Roblox’s Security Vulnerabilities',
+          time: "06/2023 - 12/2023",
+          mentor:
+            'X-Lab of Dr. Xing Gao | Advisor: Xing Gao (Assistant Professor, U Delaware)',
           description:
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nunc ut.',
-          imageUrl:
-            'https://img.freepik.com/free-vector/illustration-gallery-icon_53876-27002.jpg',
-          link: 'https://example.com',
+            '※ Explored how Roblox’s infrastructure circumvents firewall restrictions; Found that Roblox can be manipulated by local malware to launch connections.\n ※ Found that Roblox’s distributed computing resources can be used for resource-intensive tasks such as neural network training. ',
+          link: 'https://www.urp.udel.edu/summer-sym-pres/invisible-threats-in-the-met-averse-investigating-robloxs-security-vulnerabilities/',
+        },
+        {
+          title:
+            'Verification of Account Balances in the Bitcoin System Using Merkle Trees',
+          time: "2023 Summer",
+          mentor:
+            'Advisor: Vipul Goyal (Professor, Carnegie Mellon University)',
+          description:
+            '※ Delved into the complex structure of the Bitcoin protocol, focusing on block architecture, node categorization, and transaction validation mechanisms.\n ※ Proposed an innovative solution that integrates the Merkle tree root of the UTXO set into the unused portion of the coinbase transaction input field, to address the challenges of verifying light node account balances. \n ※ Proposed a solution that allows light nodes to use Merkle proofs when verifying their account balances, thus improving accuracy and trust; Ensured the alignment with soft fork standards, incentivizing node upgrades while maintaining the integrity of the network. ',
+          // link: 'https://www.urp.udel.edu/summer-sym-pres/invisible-threats-in-the-met-averse-investigating-robloxs-security-vulnerabilities/',
+        },
+        {
+          title: 'A Design of Router Firewall',
+          time: "2022 Summer",
+          mentor: 'Advisor: Rui Zhang (Associate Prof., U Delaware)',
+          description:
+            '※ Conducted a survey with nearly 1000 respondents; Found that user errors caused most security breaches.\n ※ Designed a router-based firewall system that eliminates human operation errors and thus better protects users’ computers from Viruses and illegal websites. ',
+          // link: 'https://www.urp.udel.edu/summer-sym-pres/invisible-threats-in-the-met-averse-investigating-robloxs-security-vulnerabilities/',
         },
       ],
     },
@@ -70,40 +93,48 @@ const CONFIG = {
   skills: ['JavaScript', 'React', 'Git', 'Docker', 'CSS', 'C++', 'Python'],
   experiences: [
     {
-      company: 'Company Name',
-      position: 'Position',
-      from: 'September 2021',
-      to: 'Present',
-      companyLink: 'https://example.com',
+      company: 'University of Delaware',
+      position:
+        'Student Teaching Assistants Mathematics Department and Computer Science Department',
+      from: 'Feb 2022',
+      to: 'Dec 2022',
+      // companyLink: 'https://example.com',
     },
     {
-      company: 'Company Name',
-      position: 'Position',
-      from: 'July 2019',
-      to: 'August 2021',
-      companyLink: 'https://example.com',
+      company: 'Beijing Eetrust Tech Co, ltd.',
+      position: 'Intern Software Engineer Research and Development Department',
+      from: 'May 2022',
+      to: 'Aug 2022',
+      // companyLink: 'https://example.com',
     },
-  ],
-  certifications: [
     {
-      name: 'Lorem ipsum',
-      body: 'Lorem ipsum dolor sit amet',
-      year: 'March 2022',
-      link: 'https://example.com',
+      company: 'China Construction Bank',
+      position: 'Intern Human Resource Department',
+      from: 'Jun 2021',
+      to: 'Aug 2021',
+      // companyLink: 'https://example.com',
     },
   ],
+  // certifications: [
+  //   {
+  //     name: 'Lorem ipsum',
+  //     body: 'Lorem ipsum dolor sit amet',
+  //     year: 'March 2022',
+  //     link: 'https://example.com',
+  //   },
+  // ],
   educations: [
     {
-      institution: 'Institution Name',
-      degree: 'Degree',
-      from: '2015',
-      to: '2019',
+      institution: 'Brown University',
+      degree: 'Computer Science Master of Science',
+      from: 'Sep 2024',
+      to: 'Jun 2026',
     },
     {
-      institution: 'Institution Name',
-      degree: 'Degree',
-      from: '2012',
-      to: '2014',
+      institution: 'University of Delaware',
+      degree: 'Computer Science Cybersecurity Bachelor of Science',
+      from: 'Sep 2020',
+      to: 'Dec 2023',
     },
   ],
   publications: [
@@ -111,11 +142,11 @@ const CONFIG = {
       title:
         'Enhancing Network Security Through Router-Based Firewalls: An Investigation into Design, Effectiveness, and Human Factors',
       conferenceName: '',
-      journalName: '2023 5th International Conference on Computer Science and Intelligent Communication (CSIC 2023)',
+      journalName:
+        '2023 5th International Conference on Computer Science and Intelligent Communication (CSIC 2023)',
       authors: 'Jingqing Liu',
-      link: 'Not Available Yet',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      link: 'https://drpress.org/ojs/index.php/HSET/article/view/18476',
+      description: `A firewall serves as a crucial computer program designed to block malicious software, thereby safeguarding the user's system. It helps prevent the unauthorized dissemination of personal information and the incursion of harmful viruses. Taking inspiration from China's "Great Firewall"—a sophisticated system utilizing advanced software and hardware to automatically filter, censor, and monitor internet content—this research aims to devise a router-based firewall system capable of autonomously shielding users' computers from viruses and unauthorized websites.`,
     },
   ],
   // Display articles from your medium or dev account. (Optional)

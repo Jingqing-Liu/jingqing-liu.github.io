@@ -6,6 +6,14 @@ export interface PersonalInfo {
   office: string;
   linkedin: string;
   github: string;
+  address: {
+    room: string;
+    institution: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
 }
 
 export const personalInfo: PersonalInfo = {
@@ -16,4 +24,12 @@ export const personalInfo: PersonalInfo = {
   office: 'Arnold Lab Room 317, Brown University',
   linkedin: 'https://www.linkedin.com/in/jingqing-liu',
   github: 'https://github.com/Jingqing-Liu',
+  address: {
+    room: 'Arnold Lab Room 317',
+    institution: 'Brown University',
+    city: 'Providence',
+    state: 'RI',
+    zipCode: '02912',
+    country: 'United States',
+  },
 };

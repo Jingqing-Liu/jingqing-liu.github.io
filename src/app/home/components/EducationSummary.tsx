@@ -2,50 +2,84 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { GraduationCap, Building } from 'lucide-react';
 import { educationData } from '../../../data';
-import Card from '../../../components/Card';
 
 const EducationSummary = () => {
   const [graduate, undergraduate] = educationData;
 
   return (
-    <section className="py-12 bg-gray-50/50">
-      <div className="container mx-auto px-6">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2 }}
-          className="text-3xl font-bold text-center mb-12 text-gray-900"
-        >
-          Education
-        </motion.h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          <Card delay={1.3}>
-            <div className="flex items-start">
-              <GraduationCap className="w-8 h-8 text-blue-500 mr-4 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="text-xl font-semibold mb-2 text-gray-900">{graduate.degree}</h3>
-                <p className="text-blue-600 font-medium mb-2">{graduate.institution}</p>
-                <p className="text-gray-600 mb-1">Computer Science</p>
-                <p className="text-sm text-gray-500">{graduate.status} • {graduate.focus}</p>
+    <section className="py-20 bg-white">
+      <div className="container mx-auto px-8">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-light text-gray-900 tracking-tight mb-4">
+              Education
+            </h2>
+            <div className="w-16 h-0.5 bg-gray-300 mx-auto rounded-full"></div>
+          </motion.div>
+
+          <div className="space-y-12">
+            {/* Graduate Education */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+              className="text-center"
+            >
+              <div className="bg-gray-50 rounded-3xl p-12 max-w-3xl mx-auto">
+                <div className="space-y-4">
+                  <div className="inline-block">
+                    <span className="text-xs font-medium text-gray-500 tracking-widest uppercase bg-white px-4 py-2 rounded-full">
+                      {graduate.status}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl md:text-3xl font-light text-gray-900 tracking-tight">
+                    {graduate.degree}
+                  </h3>
+                  <p className="text-lg text-gray-700 font-medium">
+                    {graduate.institution}
+                  </p>
+                  <div className="space-y-1 pt-2">
+                    <p className="text-sm text-gray-600">Computer Science</p>
+                    <p className="text-sm text-gray-500">{graduate.focus}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </Card>
-          
-          <Card delay={1.4}>
-            <div className="flex items-start">
-              <Building className="w-8 h-8 text-blue-500 mr-4 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="text-xl font-semibold mb-2 text-gray-900">{undergraduate.degree}</h3>
-                <p className="text-blue-600 font-medium mb-2">{undergraduate.institution}</p>
-                <p className="text-gray-600 mb-1">Computer and Information Science</p>
-                <p className="text-sm text-gray-500">GPA: {undergraduate.gpa}</p>
-                <p className="text-sm text-gray-500">Graduated 2024 • {undergraduate.status}</p>
+            </motion.div>
+
+            {/* Undergraduate Education */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
+              className="text-center"
+            >
+              <div className="bg-gray-50 rounded-3xl p-12 max-w-3xl mx-auto">
+                <div className="space-y-4">
+                  <div className="inline-block">
+                    <span className="text-xs font-medium text-gray-500 tracking-widest uppercase bg-white px-4 py-2 rounded-full">
+                      {undergraduate.status}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl md:text-3xl font-light text-gray-900 tracking-tight">
+                    {undergraduate.degree}
+                  </h3>
+                  <p className="text-lg text-gray-700 font-medium">
+                    {undergraduate.institution}
+                  </p>
+                  <div className="space-y-1 pt-2">
+                    <p className="text-sm text-gray-600">Computer and Information Science</p>
+                    <p className="text-sm text-gray-500">GPA: {undergraduate.gpa} • Graduated 2024</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </Card>
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>

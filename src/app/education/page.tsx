@@ -1,285 +1,457 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { GraduationCap, Award, Users, Calendar } from 'lucide-react';
+import React, { useRef } from 'react';
+import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import { educationData } from '../../data';
-import Card from '../../components/Card';
+
+// Advanced Animated Section Wrapper for Education Page
+const AnimatedSection = ({ 
+  children, 
+  index, 
+  animationType = "luxury",
+  className = "" 
+}: { 
+  children: React.ReactNode; 
+  index: number;
+  animationType?: "luxury" | "depth" | "parallax" | "float";
+  className?: string;
+}) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { 
+    once: false, // Allow bidirectional scroll animations
+    margin: "-15% 0px -15% 0px" 
+  });
+
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  });
+
+  // Transform values for parallax effects
+  const y = useTransform(scrollYProgress, [0, 1], [80, -80]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.85, 1, 1, 0.85]);
+
+  const animationVariants = {
+    luxury: {
+      initial: { 
+        opacity: 0, 
+        y: 100, 
+        scale: 0.85,
+        rotateX: 12
+      },
+      animate: isInView ? { 
+        opacity: 1, 
+        y: 0, 
+        scale: 1,
+        rotateX: 0,
+        transition: {
+          duration: 1.0,
+          delay: index * 0.15,
+          ease: [0.175, 0.885, 0.32, 1.275] as any,
+          scale: {
+            type: "spring",
+            damping: 25,
+            stiffness: 300
+          }
+        }
+      } : {
+        opacity: 0, 
+        y: 100, 
+        scale: 0.85,
+        rotateX: 12,
+        transition: {
+          duration: 0.5,
+          ease: [0.4, 0, 0.2, 1] as any
+        }
+      }
+    },
+    depth: {
+      initial: { 
+        opacity: 0, 
+        z: -150,
+        rotateY: 15,
+        scale: 0.9
+      },
+      animate: isInView ? { 
+        opacity: 1, 
+        z: 0,
+        rotateY: 0,
+        scale: 1,
+        transition: {
+          duration: 0.9,
+          delay: index * 0.1,
+          ease: [0.4, 0, 0.2, 1] as any
+        }
+      } : {
+        opacity: 0, 
+        z: -150,
+        rotateY: 15,
+        scale: 0.9,
+        transition: {
+          duration: 0.4,
+          ease: [0.4, 0, 0.2, 1] as any
+        }
+      }
+    },
+    parallax: {
+      initial: {},
+      animate: {}
+    },
+    float: {
+      initial: { 
+        opacity: 0, 
+        y: 50,
+        scale: 0.96
+      },
+      animate: isInView ? { 
+        opacity: 1, 
+        y: 0,
+        scale: 1,
+        transition: {
+          duration: 0.7,
+          delay: index * 0.08,
+          ease: [0.4, 0, 0.2, 1] as any
+        }
+      } : {
+        opacity: 0, 
+        y: 50,
+        scale: 0.96,
+        transition: {
+          duration: 0.3,
+          ease: [0.4, 0, 0.2, 1] as any
+        }
+      }
+    }
+  };
+
+  if (animationType === "parallax") {
+    return (
+      <motion.div
+        ref={ref}
+        style={{ 
+          y: y,
+          opacity: opacity,
+          scale: scale,
+          perspective: "1000px",
+          transformStyle: "preserve-3d"
+        }}
+        className={`will-change-transform ${className}`}
+      >
+        <motion.div
+          whileHover={{ 
+            scale: 1.01, 
+            rotateX: 1, 
+            rotateY: 1,
+            transition: { duration: 0.3 }
+          }}
+          className="transform-gpu"
+        >
+          {children}
+        </motion.div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      variants={animationVariants[animationType]}
+      initial="initial"
+      animate="animate"
+      style={{
+        perspective: "1000px",
+        transformStyle: "preserve-3d"
+      }}
+      className={`will-change-transform ${className}`}
+    >
+      <motion.div
+        whileHover={{ 
+          y: -6, 
+          scale: 1.005,
+          rotateX: 1,
+          transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] as any }
+        }}
+        className="transform-gpu"
+      >
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// Enhanced Background for Education Page
+const EducationBackground = () => {
+  const { scrollYProgress } = useScroll();
+  
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
+  const opacity1 = useTransform(scrollYProgress, [0, 0.4, 0.8, 1], [1, 0.9, 0.7, 0.5]);
+  const opacity2 = useTransform(scrollYProgress, [0, 0.6, 1], [0.2, 0.5, 0.8]);
+
+  return (
+    <div className="fixed inset-0 -z-10 overflow-hidden">
+      <motion.div 
+        style={{ y: backgroundY, opacity: opacity1 }}
+        className="absolute inset-0 bg-white"
+      />
+      <motion.div 
+        style={{ opacity: opacity2 }}
+        className="absolute inset-0 bg-gradient-to-br from-gray-50/30 to-blue-50/20"
+      />
+      
+      {/* Floating Academic Elements */}
+      <motion.div
+        animate={{ 
+          rotate: [0, 360],
+          scale: [1, 1.15, 1]
+        }}
+        transition={{
+          duration: 30,
+          repeat: Infinity,
+          ease: "linear"
+        }}
+        className="absolute top-1/3 right-1/5 w-72 h-72 bg-gradient-to-r from-blue-400/3 to-indigo-400/3 rounded-full blur-3xl"
+      />
+      <motion.div
+        animate={{ 
+          rotate: [360, 0],
+          scale: [1, 0.85, 1]
+        }}
+        transition={{
+          duration: 35,
+          repeat: Infinity,
+          ease: "linear"
+        }}
+        className="absolute bottom-1/3 left-1/5 w-96 h-96 bg-gradient-to-r from-purple-400/3 to-pink-400/3 rounded-full blur-3xl"
+      />
+    </div>
+  );
+};
 
 export default function Education() {
   const [graduate, undergraduate] = educationData;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen relative overflow-hidden">
+      <EducationBackground />
+      
       {/* Header */}
-      <section className="pt-32 pb-20">
-        <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center max-w-4xl mx-auto"
-          >
-            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-6">
-              Education
-            </h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.8 }}
-              className="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto"
-            >
-              My academic journey spans from undergraduate excellence at the University of Delaware 
-              to advanced graduate studies at Brown University, focusing on cutting-edge computer science research.
-            </motion.p>
-          </motion.div>
-        </div>
-      </section>
+      <AnimatedSection index={0} animationType="luxury">
+        <section className="pt-24 pb-20">
+          <div className="container mx-auto px-8">
+            <div className="text-center max-w-5xl mx-auto">
+              <h1 className="text-5xl md:text-7xl font-light text-gray-900 tracking-tight leading-tight mb-8">
+                Education
+              </h1>
+              <div className="space-y-4">
+                <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-5xl mx-auto font-medium">
+                  My academic journey spans from undergraduate excellence at the University of Delaware 
+                  to advanced graduate studies at Brown University, focusing on cutting-edge computer science research.
+                </p>
+                <div className="w-16 h-0.5 bg-gray-300 mx-auto rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </AnimatedSection>
 
       {/* Graduate Studies */}
-      <section className="pb-20">
-        <div className="container mx-auto px-6">
-          <Card delay={0.5} className="max-w-4xl mx-auto mb-12">
-            <div className="flex items-start mb-6">
-              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mr-6 flex-shrink-0">
-                <GraduationCap className="w-8 h-8 text-blue-600" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">Graduate Studies</h2>
-                <p className="text-xl text-blue-600 font-semibold">{graduate.institution}</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Program Details</h3>
-                <ul className="space-y-3">
-                  <motion.li
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.7 }}
-                    className="flex items-center"
-                  >
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                    <span className="text-gray-700"><strong>Degree:</strong> {graduate.degree}</span>
-                  </motion.li>
-                  <motion.li
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.8 }}
-                    className="flex items-center"
-                  >
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                    <span className="text-gray-700"><strong>Period:</strong> {graduate.period}</span>
-                  </motion.li>
-                  <motion.li
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.9 }}
-                    className="flex items-center"
-                  >
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                    <span className="text-gray-700"><strong>Research Focus:</strong> {graduate.focus}</span>
-                  </motion.li>
-                </ul>
+      <AnimatedSection index={1} animationType="parallax">
+        <section className="pb-20 bg-gray-50">
+          <div className="container mx-auto px-8">
+            <div className="max-w-5xl mx-auto">
+              <div className="bg-white rounded-3xl p-12 shadow-sm">
+              <div className="text-center mb-12">
+                <div className="inline-block">
+                  <span className="text-xs font-medium text-gray-500 tracking-widest uppercase bg-gray-50 px-4 py-2 rounded-full">
+                    Current
+                  </span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-light text-gray-900 tracking-tight mt-4 mb-2">
+                  Graduate Studies
+                </h2>
+                <p className="text-xl text-gray-700 font-medium">{graduate.institution}</p>
               </div>
               
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Research Activities</h3>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1.0 }}
-                  className="text-gray-600 leading-relaxed"
-                >
-                  {graduate.description}
-                </motion.p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Program Details</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-gray-500">Degree</p>
+                      <p className="text-gray-800">{graduate.degree}</p>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-gray-500">Period</p>
+                      <p className="text-gray-800">{graduate.period}</p>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-gray-500">Research Focus</p>
+                      <p className="text-gray-800">{graduate.focus}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Research Activities</h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {graduate.description}
+                  </p>
+                </div>
               </div>
-            </div>
-          </Card>
-        </div>
-      </section>
-
-      {/* Undergraduate Degree */}
-      <section className="py-20 bg-gray-50/50">
-        <div className="container mx-auto px-6">
-          <Card delay={1.1} className="max-w-4xl mx-auto">
-            <div className="flex items-start mb-6">
-              <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mr-6 flex-shrink-0">
-                <GraduationCap className="w-8 h-8 text-green-600" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">Undergraduate Degree</h2>
-                <p className="text-xl text-green-600 font-semibold">{undergraduate.institution}</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Academic Excellence</h3>
-                <ul className="space-y-3">
-                  <motion.li
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1.3 }}
-                    className="flex items-center"
-                  >
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                    <span className="text-gray-700"><strong>Degree:</strong> {undergraduate.degree}</span>
-                  </motion.li>
-                  <motion.li
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1.4 }}
-                    className="flex items-center"
-                  >
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                    <span className="text-gray-700"><strong>GPA:</strong> {undergraduate.gpa}</span>
-                  </motion.li>
-                  <motion.li
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1.5 }}
-                    className="flex items-center"
-                  >
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                    <span className="text-gray-700"><strong>Graduation:</strong> {undergraduate.period.split(' - ')[1]}, {undergraduate.status}</span>
-                  </motion.li>
-                  <motion.li
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1.6 }}
-                    className="flex items-center"
-                  >
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                    <span className="text-gray-700"><strong>Research Area:</strong> {undergraduate.focus}</span>
-                  </motion.li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Program Overview</h3>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1.7 }}
-                  className="text-gray-600 leading-relaxed"
-                >
-                  {undergraduate.description}
-                </motion.p>
-              </div>
-            </div>
-
-            {/* Awards and Recognition */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.8 }}
-              >
-                <div className="flex items-center mb-4">
-                  <Award className="w-6 h-6 text-yellow-500 mr-3" />
-                  <h3 className="text-lg font-semibold text-gray-900">Awards & Honors</h3>
-                </div>
-                <ul className="space-y-2">
-                  {undergraduate.awards?.map((award, index) => (
-                    <motion.li
-                      key={index}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 1.9 + (index * 0.1) }}
-                      className="flex items-start text-gray-600"
-                    >
-                      <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      {award}
-                    </motion.li>
-                  ))}
-                </ul>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 2.3 }}
-              >
-                <div className="flex items-center mb-4">
-                  <Users className="w-6 h-6 text-purple-500 mr-3" />
-                  <h3 className="text-lg font-semibold text-gray-900">Extracurricular Activities</h3>
-                </div>
-                <ul className="space-y-2">
-                  {undergraduate.activities?.map((activity, index) => (
-                    <motion.li
-                      key={index}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 2.4 + (index * 0.1) }}
-                      className="flex items-start text-gray-600"
-                    >
-                      <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      {activity}
-                    </motion.li>
-                  ))}
-                </ul>
-              </motion.div>
-            </div>
-          </Card>
-        </div>
-      </section>
-
-      {/* Academic Timeline */}
-      <section className="py-20">
-        <div className="container mx-auto px-6">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.5 }}
-            className="text-3xl font-bold text-center mb-12 text-gray-900"
-          >
-            Academic Timeline
-          </motion.h2>
-          
-          <div className="max-w-3xl mx-auto">
-            <div className="relative">
-              {/* Timeline line */}
-              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-green-500"></div>
-              
-              {/* Graduate Studies */}
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 2.6 }}
-                className="relative flex items-center mb-12"
-              >
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center relative z-10">
-                  <Calendar className="w-8 h-8 text-blue-600" />
-                </div>
-                <div className="ml-8">
-                  <h3 className="text-xl font-semibold text-gray-900">{graduate.period}</h3>
-                  <p className="text-gray-600">{graduate.degree}, {graduate.institution}</p>
-                  <p className="text-sm text-gray-500">{graduate.focus} Research</p>
-                </div>
-              </motion.div>
-              
-              {/* Undergraduate Studies */}
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 2.7 }}
-                className="relative flex items-center"
-              >
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center relative z-10">
-                  <Calendar className="w-8 h-8 text-green-600" />
-                </div>
-                <div className="ml-8">
-                  <h3 className="text-xl font-semibold text-gray-900">{undergraduate.period}</h3>
-                  <p className="text-gray-600">{undergraduate.degree}, {undergraduate.institution}</p>
-                  <p className="text-sm text-gray-500">{undergraduate.status}, GPA: {undergraduate.gpa}</p>
-                </div>
-              </motion.div>
             </div>
           </div>
         </div>
-      </section>
+        </section>
+      </AnimatedSection>
+
+      {/* Undergraduate Degree */}
+      <AnimatedSection index={2} animationType="depth">
+        <section className="py-20 bg-white">
+          <div className="container mx-auto px-8">
+            <div className="max-w-5xl mx-auto">
+              <div className="bg-gray-50 rounded-3xl p-12">
+              <div className="text-center mb-12">
+                <div className="inline-block">
+                  <span className="text-xs font-medium text-gray-500 tracking-widest uppercase bg-white px-4 py-2 rounded-full">
+                    {undergraduate.status}
+                  </span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-light text-gray-900 tracking-tight mt-4 mb-2">
+                  Undergraduate Degree
+                </h2>
+                <p className="text-xl text-gray-700 font-medium">{undergraduate.institution}</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Academic Excellence</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-gray-500">Degree</p>
+                      <p className="text-gray-800">{undergraduate.degree}</p>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-gray-500">GPA</p>
+                      <p className="text-gray-800">{undergraduate.gpa}</p>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-gray-500">Graduation</p>
+                      <p className="text-gray-800">{undergraduate.period.split(' - ')[1]}, {undergraduate.status}</p>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-gray-500">Research Area</p>
+                      <p className="text-gray-800">{undergraduate.focus}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Program Overview</h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {undergraduate.description}
+                  </p>
+                </div>
+              </div>
+
+              {/* Awards and Recognition */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Awards & Honors</h3>
+                  <div className="space-y-3">
+                    {undergraduate.awards?.map((award, index) => (
+                      <div
+                        key={index}
+                        className="flex items-start"
+                      >
+                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <p className="text-gray-600 text-sm leading-relaxed">{award}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Extracurricular Activities</h3>
+                  <div className="space-y-3">
+                    {undergraduate.activities?.map((activity, index) => (
+                      <div
+                        key={index}
+                        className="flex items-start"
+                      >
+                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <p className="text-gray-600 text-sm leading-relaxed">{activity}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </section>
+      </AnimatedSection>
+
+      {/* Academic Timeline */}
+      <AnimatedSection index={3} animationType="float">
+        <section className="py-20 bg-gray-50">
+          <div className="container mx-auto px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-light text-gray-900 tracking-tight mb-4">
+                Academic Timeline
+              </h2>
+              <div className="w-16 h-0.5 bg-gray-300 mx-auto rounded-full"></div>
+            </div>
+          
+          <div className="max-w-4xl mx-auto">
+            <div className="space-y-8">
+              {/* Graduate Studies */}
+              <div className="bg-white rounded-3xl p-8 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="inline-block">
+                    <span className="text-xs font-medium text-gray-500 tracking-widest uppercase bg-gray-50 px-3 py-1 rounded-full">
+                      Current
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium text-gray-600">{graduate.period}</p>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-semibold text-gray-900 tracking-tight">
+                    {graduate.degree}
+                  </h3>
+                  <p className="text-gray-700 font-medium">{graduate.institution}</p>
+                  <p className="text-sm text-gray-500">{graduate.focus} Research</p>
+                </div>
+              </div>
+              
+              {/* Undergraduate Studies */}
+              <div className="bg-white rounded-3xl p-8 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="inline-block">
+                    <span className="text-xs font-medium text-gray-500 tracking-widest uppercase bg-gray-50 px-3 py-1 rounded-full">
+                      {undergraduate.status}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium text-gray-600">{undergraduate.period}</p>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-semibold text-gray-900 tracking-tight">
+                    {undergraduate.degree}
+                  </h3>
+                  <p className="text-gray-700 font-medium">{undergraduate.institution}</p>
+                  <p className="text-sm text-gray-500">GPA: {undergraduate.gpa}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </section>
+      </AnimatedSection>
     </div>
   );
 }

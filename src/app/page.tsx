@@ -84,36 +84,7 @@ const AnimatedSection = ({
     }
   };
 
-  // Transition configurations
-  const getTransition = (type: string) => {
-    if (!isInView) {
-      return { duration: 0.4, ease: [0.4, 0, 0.2, 1] as any };
-    }
-    
-    switch (type) {
-      case 'luxury':
-        return {
-          duration: 1.2,
-          delay: index * 0.2,
-          ease: [0.175, 0.885, 0.32, 1.275] as any,
-          scale: { type: "spring", damping: 20, stiffness: 300 }
-        };
-      case 'depth':
-        return {
-          duration: 1.0,
-          delay: index * 0.15,
-          ease: [0.4, 0, 0.2, 1] as any
-        };
-      case 'float':
-        return {
-          duration: 0.8,
-          delay: index * 0.1,
-          ease: [0.4, 0, 0.2, 1] as any
-        };
-      default:
-        return { duration: 0.6, ease: [0.4, 0, 0.2, 1] as any };
-    }
-  };
+
 
   if (animationType === "parallax") {
     return (
@@ -150,7 +121,25 @@ const AnimatedSection = ({
       variants={animationVariants[animationType]}
       initial="initial"
       animate={isInView ? "animate" : "initial"}
-      transition={getTransition(animationType)}
+      transition={
+        animationType === 'luxury' ? {
+          duration: 1.2,
+          delay: index * 0.2,
+          ease: "backOut",
+          scale: { type: "spring", damping: 20, stiffness: 300 }
+        } : animationType === 'depth' ? {
+          duration: 1.0,
+          delay: index * 0.15,
+          ease: "easeOut"
+        } : animationType === 'float' ? {
+          duration: 0.8,
+          delay: index * 0.1,
+          ease: "easeOut"
+        } : {
+          duration: isInView ? 0.6 : 0.4,
+          ease: "easeOut"
+        }
+      }
       style={{
         perspective: "1000px",
         transformStyle: "preserve-3d"

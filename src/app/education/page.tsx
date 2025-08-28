@@ -40,30 +40,11 @@ const AnimatedSection = ({
         scale: 0.85,
         rotateX: 12
       },
-      animate: isInView ? { 
+      animate: { 
         opacity: 1, 
         y: 0, 
         scale: 1,
-        rotateX: 0,
-        transition: {
-          duration: 1.0,
-          delay: index * 0.15,
-          ease: [0.175, 0.885, 0.32, 1.275] as any,
-          scale: {
-            type: "spring",
-            damping: 25,
-            stiffness: 300
-          }
-        }
-      } : {
-        opacity: 0, 
-        y: 100, 
-        scale: 0.85,
-        rotateX: 12,
-        transition: {
-          duration: 0.5,
-          ease: [0.4, 0, 0.2, 1] as any
-        }
+        rotateX: 0
       }
     },
     depth: {
@@ -73,25 +54,11 @@ const AnimatedSection = ({
         rotateY: 15,
         scale: 0.9
       },
-      animate: isInView ? { 
+      animate: { 
         opacity: 1, 
         z: 0,
         rotateY: 0,
-        scale: 1,
-        transition: {
-          duration: 0.9,
-          delay: index * 0.1,
-          ease: [0.4, 0, 0.2, 1] as any
-        }
-      } : {
-        opacity: 0, 
-        z: -150,
-        rotateY: 15,
-        scale: 0.9,
-        transition: {
-          duration: 0.4,
-          ease: [0.4, 0, 0.2, 1] as any
-        }
+        scale: 1
       }
     },
     parallax: {
@@ -104,26 +71,15 @@ const AnimatedSection = ({
         y: 50,
         scale: 0.96
       },
-      animate: isInView ? { 
+      animate: { 
         opacity: 1, 
         y: 0,
-        scale: 1,
-        transition: {
-          duration: 0.7,
-          delay: index * 0.08,
-          ease: [0.4, 0, 0.2, 1] as any
-        }
-      } : {
-        opacity: 0, 
-        y: 50,
-        scale: 0.96,
-        transition: {
-          duration: 0.3,
-          ease: [0.4, 0, 0.2, 1] as any
-        }
+        scale: 1
       }
     }
   };
+
+
 
   if (animationType === "parallax") {
     return (
@@ -158,7 +114,26 @@ const AnimatedSection = ({
       ref={ref}
       variants={animationVariants[animationType]}
       initial="initial"
-      animate="animate"
+      animate={isInView ? "animate" : "initial"}
+      transition={
+        animationType === 'luxury' ? {
+          duration: 1.0,
+          delay: index * 0.15,
+          ease: "backOut",
+          scale: { type: "spring", damping: 25, stiffness: 300 }
+        } : animationType === 'depth' ? {
+          duration: 0.9,
+          delay: index * 0.1,
+          ease: "easeOut"
+        } : animationType === 'float' ? {
+          duration: 0.7,
+          delay: index * 0.08,
+          ease: "easeOut"
+        } : {
+          duration: isInView ? 0.5 : 0.4,
+          ease: "easeOut"
+        }
+      }
       style={{
         perspective: "1000px",
         transformStyle: "preserve-3d"
@@ -170,7 +145,7 @@ const AnimatedSection = ({
           y: -6, 
           scale: 1.005,
           rotateX: 1,
-          transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] as any }
+          transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] }
         }}
         className="transform-gpu"
       >

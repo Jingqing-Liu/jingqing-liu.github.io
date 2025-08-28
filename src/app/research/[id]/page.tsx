@@ -1,7 +1,5 @@
 import React from 'react';
-import { ArrowLeft, FileImage } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { researchDetails } from '../../../data/research-details';
 import { researchProjects } from '../../../data/research';
 import ResearchDetailClient from '@/components/ResearchDetailClient';
@@ -14,13 +12,13 @@ export async function generateStaticParams() {
 }
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function ResearchDetail({ params }: PageProps) {
-  const { id } = params;
+export default async function ResearchDetail({ params }: PageProps) {
+  const { id } = await params;
   
   // Convert ID to the key format used in researchDetails
   const project = researchProjects.find(p => p.id === id);

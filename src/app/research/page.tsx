@@ -41,30 +41,11 @@ const AnimatedSection = ({
         scale: 0.9,
         rotateX: 8
       },
-      animate: isInView ? { 
+      animate: { 
         opacity: 1, 
         y: 0, 
         scale: 1,
-        rotateX: 0,
-        transition: {
-          duration: 0.9,
-          delay: index * 0.12,
-          ease: [0.175, 0.885, 0.32, 1.275] as any,
-          scale: {
-            type: "spring",
-            damping: 20,
-            stiffness: 400
-          }
-        }
-      } : {
-        opacity: 0, 
-        y: 80, 
-        scale: 0.9,
-        rotateX: 8,
-        transition: {
-          duration: 0.4,
-          ease: [0.4, 0, 0.2, 1] as any
-        }
+        rotateX: 0
       }
     },
     depth: {
@@ -74,25 +55,11 @@ const AnimatedSection = ({
         rotateY: 10,
         scale: 0.95
       },
-      animate: isInView ? { 
+      animate: { 
         opacity: 1, 
         z: 0,
         rotateY: 0,
-        scale: 1,
-        transition: {
-          duration: 0.8,
-          delay: index * 0.1,
-          ease: [0.4, 0, 0.2, 1] as any
-        }
-      } : {
-        opacity: 0, 
-        z: -100,
-        rotateY: 10,
-        scale: 0.95,
-        transition: {
-          duration: 0.3,
-          ease: [0.4, 0, 0.2, 1] as any
-        }
+        scale: 1
       }
     },
     parallax: {
@@ -105,23 +72,10 @@ const AnimatedSection = ({
         y: 40,
         scale: 0.98
       },
-      animate: isInView ? { 
+      animate: { 
         opacity: 1, 
         y: 0,
-        scale: 1,
-        transition: {
-          duration: 0.6,
-          delay: index * 0.08,
-          ease: [0.4, 0, 0.2, 1] as any
-        }
-      } : {
-        opacity: 0, 
-        y: 40,
-        scale: 0.98,
-        transition: {
-          duration: 0.25,
-          ease: [0.4, 0, 0.2, 1] as any
-        }
+        scale: 1
       }
     },
     slide: {
@@ -130,26 +84,15 @@ const AnimatedSection = ({
         x: -60,
         rotateY: 15
       },
-      animate: isInView ? { 
+      animate: { 
         opacity: 1, 
         x: 0,
-        rotateY: 0,
-        transition: {
-          duration: 0.7,
-          delay: index * 0.1,
-          ease: [0.4, 0, 0.2, 1] as any
-        }
-      } : {
-        opacity: 0, 
-        x: -60,
-        rotateY: 15,
-        transition: {
-          duration: 0.3,
-          ease: [0.4, 0, 0.2, 1] as any
-        }
+        rotateY: 0
       }
     }
   };
+
+
 
   if (animationType === "parallax") {
     return (
@@ -183,7 +126,30 @@ const AnimatedSection = ({
       ref={ref}
       variants={animationVariants[animationType]}
       initial="initial"
-      animate="animate"
+      animate={isInView ? "animate" : "initial"}
+      transition={
+        animationType === 'luxury' ? {
+          duration: 0.9,
+          delay: index * 0.12,
+          ease: "backOut",
+          scale: { type: "spring", damping: 20, stiffness: 400 }
+        } : animationType === 'depth' ? {
+          duration: 0.8,
+          delay: index * 0.1,
+          ease: "easeOut"
+        } : animationType === 'float' ? {
+          duration: 0.6,
+          delay: index * 0.08,
+          ease: "easeOut"
+        } : animationType === 'slide' ? {
+          duration: 0.7,
+          delay: index * 0.1,
+          ease: "easeOut"
+        } : {
+          duration: isInView ? 0.4 : 0.3,
+          ease: "easeOut"
+        }
+      }
       style={{
         perspective: "1000px",
         transformStyle: "preserve-3d"
@@ -195,7 +161,7 @@ const AnimatedSection = ({
           y: -4, 
           scale: 1.005,
           rotateX: 0.5,
-          transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] as any }
+          transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] }
         }}
         className="transform-gpu"
       >

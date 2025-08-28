@@ -38,7 +38,7 @@ const ContactSection = () => {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-light text-gray-900 tracking-tight mb-4">
-              Let's Connect
+              Let&apos;s Connect
             </h2>
             <div className="w-16 h-0.5 bg-gray-300 mx-auto rounded-full"></div>
           </motion.div>

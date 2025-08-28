@@ -2,8 +2,9 @@
 
 import React, { useRef } from 'react';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
-import { Briefcase, GraduationCap, Building, Calendar } from 'lucide-react';
+import { Briefcase, GraduationCap, Building } from 'lucide-react';
 import { experienceData, skillCategories } from '../../data';
+import type { Experience } from '../../data/experience';
 
 // Enhanced Background for Experience Page
 const ExperienceBackground = () => {
@@ -54,7 +55,7 @@ const ExperienceBackground = () => {
 };
 
 // Individual Experience Card Component with Bidirectional Scroll Animations
-const ExperienceCard = ({ exp, index }: { exp: any; index: number }) => {
+const ExperienceCard = ({ exp, index }: { exp: Experience; index: number }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { 
     once: false, // Allow bidirectional scroll animations
@@ -129,39 +130,7 @@ const ExperienceCard = ({ exp, index }: { exp: any; index: number }) => {
     }
   };
 
-  // Corresponding transition configurations
-  const transitionConfigs = {
-    flip: {
-      duration: 0.8,
-      delay: index * 0.2,
-      ease: [0.4, 0, 0.2, 1] as any
-    },
-    flash: {
-      duration: 0.6,
-      delay: index * 0.15,
-      ease: [0.175, 0.885, 0.32, 1.275] as any,
-      scale: {
-        type: "spring",
-        damping: 15,
-        stiffness: 300
-      }
-    },
-    slideIn: {
-      duration: 0.7,
-      delay: index * 0.2,
-      ease: [0.4, 0, 0.2, 1] as any
-    },
-    luxury: {
-      duration: 1.2,
-      delay: index * 0.25,
-      ease: [0.175, 0.885, 0.32, 1.275] as any,
-      scale: {
-        type: "spring",
-        damping: 12,
-        stiffness: 200
-      }
-    }
-  };
+
 
   return (
     <motion.div
@@ -170,7 +139,11 @@ const ExperienceCard = ({ exp, index }: { exp: any; index: number }) => {
       variants={animationVariants.flip} // 🎨 Animation effect selection: flip(3D Flip) | flash(Flash Pop) | slideIn(Slide from Left) | luxury(Luxury Combined)
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
-      transition={transitionConfigs.flip} // 🎨 Corresponding transition config: flip | flash | slideIn | luxury
+      transition={{
+        duration: 0.8,
+        delay: index * 0.2,
+        ease: "easeOut"
+      }}
       style={{
         perspective: "1000px"
       }}
@@ -232,7 +205,7 @@ const ExperienceCard = ({ exp, index }: { exp: any; index: number }) => {
                   transition={{
                     delay: index * 0.2 + 0.5 + projIndex * 0.1,
                     duration: 0.4,
-                    ease: [0.4, 0, 0.2, 1]
+                    ease: "easeOut"
                   }}
                 >
                   <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
@@ -257,7 +230,7 @@ const ExperienceCard = ({ exp, index }: { exp: any; index: number }) => {
                   transition={{
                     delay: index * 0.2 + 0.6 + achIndex * 0.1,
                     duration: 0.4,
-                    ease: [0.4, 0, 0.2, 1]
+                    ease: "easeOut"
                   }}
                 >
                   <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
@@ -282,7 +255,7 @@ const ExperienceCard = ({ exp, index }: { exp: any; index: number }) => {
                   transition={{
                     delay: index * 0.2 + 0.7 + respIndex * 0.1,
                     duration: 0.4,
-                    ease: [0.4, 0, 0.2, 1]
+                    ease: "easeOut"
                   }}
                 >
                   <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
@@ -307,7 +280,7 @@ const ExperienceCard = ({ exp, index }: { exp: any; index: number }) => {
                   transition={{
                     delay: index * 0.2 + 0.8 + techIndex * 0.05,
                     duration: 0.3,
-                    ease: [0.4, 0, 0.2, 1]
+                    ease: "easeOut"
                   }}
                 >
                   {tech}
@@ -321,106 +294,117 @@ const ExperienceCard = ({ exp, index }: { exp: any; index: number }) => {
   );
 };
 
+// Individual Skill Card Component
+const SkillCard = ({ skill, skillKey, index }: { 
+  skill: { icon: string; name: string; description: string }; 
+  skillKey: string; 
+  index: number 
+}) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { 
+    once: false, // Allow bidirectional scroll animations
+    margin: "-5% 0px -5% 0px" 
+  });
+
+  return (
+    <motion.div
+      key={skillKey}
+      ref={ref}
+      initial={{ opacity: 0, y: 50, scale: 0.8 }}
+      animate={isInView ? { 
+        opacity: 1, 
+        y: 0, 
+        scale: 1 
+      } : { 
+        opacity: 0, 
+        y: 50, 
+        scale: 0.8 
+      }}
+      transition={{ 
+        delay: index * 0.15, 
+        duration: 0.6, 
+        ease: "backOut",
+        scale: {
+          type: "spring",
+          damping: 20,
+          stiffness: 300
+        }
+      }}
+      className="group"
+    >
+      <motion.div
+        whileHover={{ 
+          y: -8, 
+          scale: 1.02,
+          rotateX: 5,
+          rotateY: 5 
+        }}
+        transition={{ 
+          duration: 0.3, 
+          ease: "easeOut" 
+        }}
+        className="bg-gray-50 rounded-3xl p-8 text-center h-full hover:shadow-2xl transition-all duration-500 ease-out"
+        style={{
+          transformStyle: "preserve-3d"
+        }}
+      >
+        <motion.div 
+          className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-gray-100 transition-colors duration-300"
+          animate={isInView ? {
+            rotate: [0, 10, -10, 0],
+            scale: [1, 1.1, 1]
+          } : {}}
+          transition={{
+            delay: index * 0.15 + 0.3,
+            duration: 0.8,
+            ease: [0.4, 0, 0.6, 1]
+          }}
+        >
+          <span className="text-3xl">{skill.icon}</span>
+        </motion.div>
+        
+        <motion.h3 
+          className="text-xl font-semibold mb-4 text-gray-900 tracking-tight"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{
+            delay: index * 0.15 + 0.4,
+            duration: 0.5,
+            ease: "easeOut"
+          }}
+        >
+          {skill.name}
+        </motion.h3>
+        
+        <motion.p 
+          className="text-gray-600 leading-relaxed text-sm"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{
+            delay: index * 0.15 + 0.5,
+            duration: 0.5,
+            ease: "easeOut"
+          }}
+        >
+          {skill.description}
+        </motion.p>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 // Skills Grid Component with Bidirectional Scroll Animations
 const SkillsGrid = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-      {Object.entries(skillCategories).map(([key, skill], index) => {
-        const ref = useRef(null);
-        const isInView = useInView(ref, { 
-          once: false, // Allow bidirectional scroll animations
-          margin: "-5% 0px -5% 0px" 
-        });
-
-        return (
-          <motion.div
-            key={key}
-            ref={ref}
-            initial={{ opacity: 0, y: 50, scale: 0.8 }}
-            animate={isInView ? { 
-              opacity: 1, 
-              y: 0, 
-              scale: 1 
-            } : { 
-              opacity: 0, 
-              y: 50, 
-              scale: 0.8 
-            }}
-            transition={{ 
-              delay: index * 0.15, 
-              duration: 0.6, 
-              ease: [0.175, 0.885, 0.32, 1.275],
-              scale: {
-                type: "spring",
-                damping: 20,
-                stiffness: 300
-              }
-            }}
-            className="group"
-          >
-            <motion.div
-              whileHover={{ 
-                y: -8, 
-                scale: 1.02,
-                rotateX: 5,
-                rotateY: 5 
-              }}
-              transition={{ 
-                duration: 0.3, 
-                ease: [0.4, 0, 0.2, 1]
-              }}
-              className="bg-gray-50 rounded-3xl p-8 text-center h-full hover:shadow-2xl transition-all duration-500 ease-out"
-              style={{
-                transformStyle: "preserve-3d"
-              }}
-            >
-              <motion.div 
-                className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-gray-100 transition-colors duration-300"
-                animate={isInView ? {
-                  rotate: [0, 10, -10, 0],
-                  scale: [1, 1.1, 1]
-                } : {}}
-                transition={{
-                  delay: index * 0.15 + 0.3,
-                  duration: 0.8,
-                  ease: [0.4, 0, 0.6, 1]
-                }}
-              >
-                <span className="text-3xl">{skill.icon}</span>
-              </motion.div>
-              
-              <motion.h3 
-                className="text-xl font-semibold mb-4 text-gray-900 tracking-tight"
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{
-                  delay: index * 0.15 + 0.4,
-                  duration: 0.5,
-                  ease: [0.4, 0, 0.2, 1]
-                }}
-              >
-                {skill.name}
-              </motion.h3>
-              
-              <motion.p 
-                className="text-gray-600 leading-relaxed text-sm"
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{
-                  delay: index * 0.15 + 0.5,
-                  duration: 0.5,
-                  ease: [0.4, 0, 0.2, 1]
-                }}
-              >
-                {skill.description}
-              </motion.p>
-            </motion.div>
-          </motion.div>
-        );
-      })}
+      {Object.entries(skillCategories).map(([key, skill], index) => (
+        <SkillCard key={key} skill={skill} skillKey={key} index={index} />
+      ))}
     </div>
   );
 };
+
+
 
 export default function Experience() {
 
@@ -434,13 +418,13 @@ export default function Experience() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] as any }}
+            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
             className="text-center max-w-5xl mx-auto"
           >
             <motion.h1
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1, duration: 0.6, ease: [0.4, 0, 0.2, 1] as any }}
+              transition={{ delay: 0.1, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
               className="text-5xl md:text-7xl font-light text-gray-900 tracking-tight leading-tight mb-8"
             >
               Experience
@@ -448,7 +432,7 @@ export default function Experience() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.6, ease: [0.4, 0, 0.2, 1] as any }}
+              transition={{ delay: 0.3, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
               className="space-y-4"
             >
               <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-5xl mx-auto font-medium text-center">

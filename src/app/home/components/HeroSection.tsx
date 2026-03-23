@@ -2,9 +2,34 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Terminal, Network } from 'lucide-react';
+import { Shield, Terminal, Network, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import { personalInfo } from '../../../data';
 import { useLanguage } from '../../../i18n/LanguageContext';
+
+const TerminalSnippet = () => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.8, delay: 1.0 }}
+    className="liquid-glass-card overflow-hidden"
+  >
+    <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-black/5">
+      <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
+      <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
+      <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
+      <span className="ml-2 text-[10px] text-[#8e8e93] font-mono">~/security-research</span>
+    </div>
+    <div className="p-4 font-mono text-[11px] leading-relaxed space-y-1">
+      <div><span className="text-[#007aff]">$</span> <span className="text-[#48484a]">nmap -sV --script vuln target.local</span></div>
+      <div className="text-[#8e8e93]">Starting vulnerability scan...</div>
+      <div className="text-[#8e8e93]">Discovered 3 open ports on distributed nodes</div>
+      <div><span className="text-[#007aff]">$</span> <span className="text-[#48484a]">python3 exploit_poc.py --protocol merkle</span></div>
+      <div className="text-emerald-600">✓ Protocol analysis complete — report generated</div>
+      <div><span className="text-[#007aff]">$</span> <span className="text-[#48484a] inline-flex items-center">_<span className="w-1.5 h-3.5 bg-[#007aff] ml-0.5 animate-pulse inline-block" /></span></div>
+    </div>
+  </motion.div>
+);
 
 const HeroSection = () => {
   const { t } = useLanguage();
@@ -26,7 +51,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="mb-8"
+            className="mb-10"
           >
             <span className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono tracking-wider uppercase text-[#48484a] liquid-glass-pill">
               <span className="w-1.5 h-1.5 bg-[#007aff] rounded-full animate-pulse" />
@@ -34,13 +59,13 @@ const HeroSection = () => {
             </span>
           </motion.div>
 
-          {/* Name */}
-          <div className="mb-8">
+          {/* Name — bigger */}
+          <div className="mb-10">
             <motion.h1
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-              className="text-6xl md:text-8xl lg:text-9xl font-bold text-[#1c1c1e] tracking-tight leading-[0.9] mb-2"
+              className="text-7xl md:text-[9rem] lg:text-[10rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85] mb-2"
             >
               {personalInfo.name.split(' ')[0]}
             </motion.h1>
@@ -48,82 +73,89 @@ const HeroSection = () => {
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
-              className="text-6xl md:text-8xl lg:text-9xl font-bold text-[#1c1c1e] tracking-tight leading-[0.9]"
+              className="text-7xl md:text-[9rem] lg:text-[10rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85]"
             >
               {personalInfo.name.split(' ')[1]}
             </motion.h1>
           </div>
 
-          {/* Tagline */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-            className="mb-12 max-w-2xl"
-          >
-            <p className="text-xl md:text-2xl text-[#48484a] font-light leading-relaxed">
-              {t('hero.tagline.prefix')}
-              <span className="text-[#1c1c1e] font-medium">{t('hero.tagline.vr')}</span>,
-              <span className="text-[#1c1c1e] font-medium">{t('hero.tagline.sa')}</span>
-              {t('hero.tagline.and')}
-              <span className="text-[#1c1c1e] font-medium">{t('hero.tagline.pa')}</span>
-              {t('hero.tagline.period')}
-            </p>
-            <div className="mt-4 flex items-center gap-3 text-sm text-[#8e8e93]">
-              <span className="font-mono">{t('hero.subtitle')}</span>
-              <span className="w-1 h-1 bg-[#8e8e93] rounded-full" />
-              <span className="font-mono">{personalInfo.address.institution}</span>
-            </div>
-          </motion.div>
+          {/* Two-column: tagline + terminal */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-20">
+            {/* Left: tagline + CTA */}
+            <div>
+              {/* Tagline — lighter, more contrast with name */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
+                className="mb-8"
+              >
+                <p className="text-lg md:text-xl text-[#636366] font-light leading-relaxed">
+                  {t('hero.tagline')}
+                </p>
+                <div className="mt-4 flex items-center gap-3 text-xs text-[#aeaeb2]">
+                  <span className="font-mono">{t('hero.subtitle')}</span>
+                  <span className="w-1 h-1 bg-[#aeaeb2] rounded-full" />
+                  <span className="font-mono">{personalInfo.address.institution}</span>
+                </div>
+              </motion.div>
 
-          {/* Highlight cards */}
+              {/* CTA Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.9 }}
+                className="flex items-center gap-4"
+              >
+                <Link
+                  href="/research"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-[#007aff] liquid-glass-pill hover:text-[#0056b3] transition-colors no-underline"
+                  style={{ borderRadius: '99em' }}
+                >
+                  {t('hero.cta.research')}
+                  <ArrowRight size={14} />
+                </Link>
+                <Link
+                  href="/resume.pdf"
+                  target="_blank"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-[#636366] liquid-glass-pill hover:text-[#007aff] transition-colors no-underline"
+                  style={{ borderRadius: '99em' }}
+                >
+                  {t('hero.cta.resume')}
+                </Link>
+              </motion.div>
+            </div>
+
+            {/* Right: Terminal visual anchor */}
+            <TerminalSnippet />
+          </div>
+
+          {/* Highlight cards — supplementary, with hover float */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.9 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12"
+            transition={{ duration: 0.8, delay: 1.2 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4"
           >
             {highlights.map((item, index) => (
               <motion.div
                 key={item.label}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.0 + index * 0.15 }}
-                whileHover={{ y: -6, scale: 1.02 }}
-                className="liquid-glass-card p-6 group cursor-default"
+                transition={{ duration: 0.6, delay: 1.3 + index * 0.15 }}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                className="liquid-glass-card p-5 cursor-default"
               >
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 liquid-glass-pill"
-                    style={{ borderRadius: '12px' }}
-                  >
-                    <item.icon size={20} className="text-[#007aff]" />
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 liquid-glass-pill">
+                    <item.icon size={18} className="text-[#007aff]" />
                   </div>
                   <div>
-                    <h3 className="text-[#1c1c1e] font-semibold text-sm mb-1">{item.label}</h3>
-                    <p className="text-[#8e8e93] text-xs leading-relaxed mb-0">{item.desc}</p>
+                    <h3 className="text-[#1c1c1e] font-semibold text-xs mb-0.5">{item.label}</h3>
+                    <p className="text-[#8e8e93] text-[11px] leading-relaxed mb-0">{item.desc}</p>
                   </div>
                 </div>
               </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Skills */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 1.4 }}
-            className="flex flex-wrap gap-2"
-          >
-            {['Network Security', 'Penetration Testing', 'React', 'Node.js', 'Python', 'Distributed Systems', 'Blockchain', 'API Security'].map((skill, i) => (
-              <motion.span
-                key={skill}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, delay: 1.5 + i * 0.06 }}
-                className="skill-tag liquid-glass-pill"
-              >
-                {skill}
-              </motion.span>
             ))}
           </motion.div>
         </div>

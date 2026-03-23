@@ -39,19 +39,16 @@ const translations: Record<Lang, Record<string, string>> = {
 
     // Hero
     'hero.tag': 'Cybersecurity Researcher & Engineer',
-    'hero.tagline.prefix': 'Securing the digital frontier through',
-    'hero.tagline.vr': ' vulnerability research',
-    'hero.tagline.sa': ' systems architecture',
-    'hero.tagline.and': ', and',
-    'hero.tagline.pa': ' protocol analysis',
-    'hero.tagline.period': '.',
+    'hero.tagline': 'Security Researcher specializing in vulnerability discovery across distributed systems and real-world protocols.',
     'hero.subtitle': 'M.S. Computer Science',
+    'hero.cta.research': 'View Research',
+    'hero.cta.resume': 'Resume',
     'hero.highlight.security': 'Network Security',
     'hero.highlight.security.desc': 'API & Platform Vulnerability Research',
     'hero.highlight.systems': 'Systems Architecture',
     'hero.highlight.systems.desc': 'Full-Stack & Distributed Systems',
-    'hero.highlight.blockchain': 'Blockchain Security',
-    'hero.highlight.blockchain.desc': 'Cryptographic Protocol Analysis',
+    'hero.highlight.blockchain': 'Applied Cryptography',
+    'hero.highlight.blockchain.desc': 'Blockchain & Cryptographic Protocol Analysis',
 
     // Home sections
     'home.experience.tag': 'Experience',
@@ -123,19 +120,16 @@ const translations: Record<Lang, Record<string, string>> = {
 
     // Hero
     'hero.tag': '网络安全研究员 & 工程师',
-    'hero.tagline.prefix': '通过',
-    'hero.tagline.vr': '漏洞研究',
-    'hero.tagline.sa': '系统架构',
-    'hero.tagline.and': '和',
-    'hero.tagline.pa': '协议分析',
-    'hero.tagline.period': '守护数字前沿。',
+    'hero.tagline': '专注于分布式系统与真实协议中的漏洞发现与安全研究。',
     'hero.subtitle': '计算机科学硕士',
+    'hero.cta.research': '查看研究',
+    'hero.cta.resume': '简历',
     'hero.highlight.security': '网络安全',
     'hero.highlight.security.desc': 'API 与平台漏洞研究',
     'hero.highlight.systems': '系统架构',
     'hero.highlight.systems.desc': '全栈与分布式系统',
-    'hero.highlight.blockchain': '区块链安全',
-    'hero.highlight.blockchain.desc': '密码协议分析',
+    'hero.highlight.blockchain': '应用密码学',
+    'hero.highlight.blockchain.desc': '区块链与密码协议分析',
 
     // Home sections
     'home.experience.tag': '经历',

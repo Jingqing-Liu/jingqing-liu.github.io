@@ -38,16 +38,16 @@ const ExperienceHighlights = () => {
   const topExperiences = experienceData.slice(0, 3);
 
   return (
-    <section className="py-12 relative">
+    <section className="py-16 relative">
       <div className="container mx-auto px-6 md:px-8">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center justify-between mb-12">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Briefcase size={16} className="text-[#007aff]" />
                 <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">{t('home.experience.tag')}</span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#1c1c1e] tracking-tight">
+              <h2 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight">
                 {t('home.experience.title')}
               </h2>
             </div>
@@ -62,6 +62,7 @@ const ExperienceHighlights = () => {
                 key={exp.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
@@ -103,16 +104,16 @@ const ResearchHighlights = () => {
   const topResearch = researchProjects.slice(0, 3);
 
   return (
-    <section className="py-12 relative">
+    <section className="py-16 relative">
       <div className="container mx-auto px-6 md:px-8">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center justify-between mb-12">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <BookOpen size={16} className="text-[#007aff]" />
                 <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">{t('home.research.tag')}</span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#1c1c1e] tracking-tight">
+              <h2 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight">
                 {t('home.research.title')}
               </h2>
             </div>
@@ -127,6 +128,7 @@ const ResearchHighlights = () => {
                 key={project.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >

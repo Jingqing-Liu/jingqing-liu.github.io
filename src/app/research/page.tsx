@@ -1,310 +1,183 @@
 'use client';
 
-import React, { useRef } from 'react';
-import { motion, useInView, useScroll, useTransform } from 'framer-motion';
-import { researchProjects, researchCategories } from '../../data';
-import ResearchCard from '../../components/ResearchCard';
+import React, { useRef, useState, useMemo } from 'react';
+import { motion, useInView } from 'framer-motion';
+import { FlaskConical, User, FileImage, Search } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { researchProjects } from '../../data';
 
-// Advanced Animated Section Wrapper for Research Page
-const AnimatedSection = ({ 
-  children, 
-  index, 
-  animationType = "luxury",
-  className = "" 
-}: { 
-  children: React.ReactNode; 
-  index: number;
-  animationType?: "luxury" | "depth" | "parallax" | "float" | "slide";
-  className?: string;
-}) => {
+const AnimatedSection = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { 
-    once: false, // Allow bidirectional scroll animations
-    margin: "-10% 0px -10% 0px" 
-  });
-
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"]
-  });
-
-  // Transform values for parallax effects
-  const y = useTransform(scrollYProgress, [0, 1], [60, -60]);
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.9, 1, 1, 0.9]);
-
-  const animationVariants = {
-    luxury: {
-      initial: { 
-        opacity: 0, 
-        y: 80, 
-        scale: 0.9,
-        rotateX: 8
-      },
-      animate: { 
-        opacity: 1, 
-        y: 0, 
-        scale: 1,
-        rotateX: 0
-      }
-    },
-    depth: {
-      initial: { 
-        opacity: 0, 
-        z: -100,
-        rotateY: 10,
-        scale: 0.95
-      },
-      animate: { 
-        opacity: 1, 
-        z: 0,
-        rotateY: 0,
-        scale: 1
-      }
-    },
-    parallax: {
-      initial: {},
-      animate: {}
-    },
-    float: {
-      initial: { 
-        opacity: 0, 
-        y: 40,
-        scale: 0.98
-      },
-      animate: { 
-        opacity: 1, 
-        y: 0,
-        scale: 1
-      }
-    },
-    slide: {
-      initial: { 
-        opacity: 0, 
-        x: -60,
-        rotateY: 15
-      },
-      animate: { 
-        opacity: 1, 
-        x: 0,
-        rotateY: 0
-      }
-    }
-  };
-
-
-
-  if (animationType === "parallax") {
-    return (
-      <motion.div
-        ref={ref}
-        style={{ 
-          y: y,
-          opacity: opacity,
-          scale: scale,
-          perspective: "1000px",
-          transformStyle: "preserve-3d"
-        }}
-        className={`will-change-transform ${className}`}
-      >
-        <motion.div
-          whileHover={{ 
-            scale: 1.01, 
-            rotateX: 1,
-            transition: { duration: 0.3 }
-          }}
-          className="transform-gpu"
-        >
-          {children}
-        </motion.div>
-      </motion.div>
-    );
-  }
+  const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" });
 
   return (
     <motion.div
       ref={ref}
-      variants={animationVariants[animationType]}
-      initial="initial"
-      animate={isInView ? "animate" : "initial"}
-      transition={
-        animationType === 'luxury' ? {
-          duration: 0.9,
-          delay: index * 0.12,
-          ease: "backOut",
-          scale: { type: "spring", damping: 20, stiffness: 400 }
-        } : animationType === 'depth' ? {
-          duration: 0.8,
-          delay: index * 0.1,
-          ease: "easeOut"
-        } : animationType === 'float' ? {
-          duration: 0.6,
-          delay: index * 0.08,
-          ease: "easeOut"
-        } : animationType === 'slide' ? {
-          duration: 0.7,
-          delay: index * 0.1,
-          ease: "easeOut"
-        } : {
-          duration: isInView ? 0.4 : 0.3,
-          ease: "easeOut"
-        }
-      }
-      style={{
-        perspective: "1000px",
-        transformStyle: "preserve-3d"
-      }}
+      initial={{ opacity: 0, y: 50 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
       className={`will-change-transform ${className}`}
     >
-      <motion.div
-        whileHover={{ 
-          y: -4, 
-          scale: 1.005,
-          rotateX: 0.5,
-          transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] }
-        }}
-        className="transform-gpu"
-      >
-        {children}
-      </motion.div>
+      {children}
     </motion.div>
   );
 };
 
-// Enhanced Background for Research Page
-const ResearchBackground = () => {
-  const { scrollYProgress } = useScroll();
-  
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '25%']);
-  const opacity1 = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.6]);
-  const opacity2 = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.1, 0.3, 0.6, 0.9]);
-
-  return (
-    <div className="fixed inset-0 -z-10 overflow-hidden">
-      <motion.div 
-        style={{ y: backgroundY, opacity: opacity1 }}
-        className="absolute inset-0 bg-white"
-      />
-      <motion.div 
-        style={{ opacity: opacity2 }}
-        className="absolute inset-0 bg-gradient-to-br from-gray-50/40 to-cyan-50/20"
-      />
-      
-      {/* Floating Research Elements */}
-      <motion.div
-        animate={{ 
-          rotate: [0, 360],
-          scale: [1, 1.1, 1]
-        }}
-        transition={{
-          duration: 25,
-          repeat: Infinity,
-          ease: "linear"
-        }}
-        className="absolute top-1/4 right-1/6 w-80 h-80 bg-gradient-to-r from-cyan-400/4 to-blue-400/4 rounded-full blur-3xl"
-      />
-      <motion.div
-        animate={{ 
-          rotate: [360, 0],
-          scale: [1, 0.9, 1]
-        }}
-        transition={{
-          duration: 28,
-          repeat: Infinity,
-          ease: "linear"
-        }}
-        className="absolute bottom-1/4 left-1/6 w-96 h-96 bg-gradient-to-r from-indigo-400/4 to-purple-400/4 rounded-full blur-3xl"
-      />
-    </div>
-  );
-};
-
 export default function Research() {
+  const [query, setQuery] = useState('');
+
+  const filteredProjects = useMemo(() => {
+    if (!query.trim()) return researchProjects;
+    const q = query.toLowerCase();
+    return researchProjects.filter(
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.advisor.toLowerCase().includes(q) ||
+        p.keyPoints.some((k) => k.toLowerCase().includes(q))
+    );
+  }, [query]);
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      <ResearchBackground />
-      
+    <div className="min-h-screen relative" style={{ background: '#f2f2f7' }}>
+      {/* Background gradient orbs */}
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full opacity-25"
+          style={{ background: 'radial-gradient(circle, #a8d8ff 0%, transparent 70%)' }} />
+        <div className="absolute bottom-[10%] left-[-10%] w-[450px] h-[450px] rounded-full opacity-20"
+          style={{ background: 'radial-gradient(circle, #c7b8ea 0%, transparent 70%)' }} />
+        <div className="absolute top-[50%] right-[30%] w-[300px] h-[300px] rounded-full opacity-15"
+          style={{ background: 'radial-gradient(circle, #ffd6a5 0%, transparent 70%)' }} />
+      </div>
+
       {/* Header */}
-      <AnimatedSection index={0} animationType="luxury">
-        <section className="pt-24 pb-20">
-          <div className="container mx-auto px-8">
-            <div className="text-center max-w-5xl mx-auto">
-              <h1 className="text-5xl md:text-7xl font-light text-gray-900 tracking-tight leading-tight mb-8">
-                Research
-              </h1>
-              <div className="space-y-4">
-                <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-5xl mx-auto font-medium text-center">
-                  Explore my research work in cybersecurity, network security, and distributed systems. Each project represents a deep dive into cutting-edge technologies and security challenges.
-                </p>
-                <div className="w-16 h-0.5 bg-gray-300 mx-auto rounded-full"></div>
-              </div>
-            </div>
+      <section className="pt-24 pb-16">
+        <div className="container mx-auto px-6 md:px-8">
+          <div className="max-w-5xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mb-6"
+            >
+              <span className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono tracking-wider uppercase text-[#48484a] liquid-glass-pill">
+                <FlaskConical size={14} className="text-[#007aff]" />
+                Research Portfolio
+              </span>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-5xl md:text-7xl font-bold text-[#1c1c1e] tracking-tight leading-tight mb-6"
+            >
+              Research
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-lg text-[#48484a] leading-relaxed mx-auto text-center"
+            >
+              Exploring cybersecurity, network security, and distributed systems
+              — from platform vulnerabilities to blockchain protocol design.
+            </motion.p>
           </div>
-        </section>
-      </AnimatedSection>
+        </div>
+      </section>
 
-      {/* Research Projects Grid */}
-      <AnimatedSection index={1} animationType="parallax">
-        <section className="pb-20 bg-gray-50">
-          <div className="container mx-auto px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-light text-gray-900 tracking-tight mb-4">
-                Projects
-              </h2>
-              <div className="w-12 h-0.5 bg-gray-300 mx-auto rounded-full"></div>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              {researchProjects.map((project, index) => (
-                <AnimatedSection key={project.id} index={index} animationType="slide">
-                  <ResearchCard
-                    id={project.id}
-                    title={project.title}
-                    advisor={project.advisor}
-                    keyPoints={project.keyPoints}
-                    poster={project.poster}
-                    delay={0}
-                    showDetails={project.showDetails}
-                  />
-                </AnimatedSection>
-              ))}
-            </div>
+      {/* Search Bar */}
+      <div className="container mx-auto px-6 md:px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="relative">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8e8e93]" />
+            <input
+              type="text"
+              placeholder="Search projects, advisors, keywords..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="w-full pl-11 pr-4 py-3 text-sm text-[#1c1c1e] placeholder-[#8e8e93] liquid-glass-card border-none outline-none focus:ring-2 focus:ring-[#007aff]/30 rounded-2xl transition-all"
+            />
           </div>
-        </section>
-      </AnimatedSection>
+        </div>
+      </div>
 
-      {/* Research Focus Areas */}
-      <AnimatedSection index={2} animationType="depth">
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-light text-gray-900 tracking-tight mb-4">
-                Focus Areas
-              </h2>
-              <div className="w-12 h-0.5 bg-gray-300 mx-auto rounded-full"></div>
-            </div>
-
-            <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {Object.entries(researchCategories).slice(0, 3).map(([key, category], index) => (
-                  <AnimatedSection key={key} index={index} animationType="float">
-                    <div className="group">
-                      <div className="bg-gray-50 rounded-3xl p-8 text-center h-full hover:shadow-lg transition-all duration-300 ease-out">
-                        <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-gray-100 transition-colors duration-300">
-                          <span className="text-3xl">{category.icon}</span>
+      {/* Research Posts List */}
+      <AnimatedSection>
+        <section className="py-8 pb-16">
+          <div className="container mx-auto px-6 md:px-8">
+            <div className="max-w-5xl mx-auto space-y-6">
+              {filteredProjects.map((project, index) => (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.08 }}
+                >
+                  <div className="liquid-glass-card p-6 hover:shadow-lg transition-shadow duration-300">
+                    <div className="flex flex-col md:flex-row gap-6">
+                      {/* Text Content */}
+                      <div className="flex-1 min-w-0">
+                        {/* Advisor Tag */}
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-[#007aff] liquid-glass-pill px-2 py-0.5">
+                            <User size={10} />
+                            Advisor
+                          </span>
+                          <span className="text-xs text-[#8e8e93] font-mono truncate">{project.advisor}</span>
                         </div>
-                        <h3 className="text-xl font-semibold mb-4 text-gray-900 tracking-tight">
-                          {category.name}
+
+                        {/* Title */}
+                        <h3 className="text-lg font-semibold text-[#1c1c1e] mb-3 leading-snug">
+                          {project.title}
                         </h3>
-                        <p className="text-gray-600 leading-relaxed text-sm">
-                          {category.description}
-                        </p>
+
+                        {/* Key Points */}
+                        <div className="space-y-1 mb-4">
+                          {project.keyPoints.map((point, i) => (
+                            <div key={i} className="flex items-start gap-2">
+                              <div className="w-1.5 h-1.5 bg-[#007aff] rounded-full flex-shrink-0 mt-1.5" />
+                              <p className="text-xs text-[#48484a] leading-snug">{point}</p>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Action Link */}
+                        {project.showDetails && (
+                          <Link
+                            href={`/research/${project.id}`}
+                            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#007aff] hover:text-[#0056b3] transition-colors"
+                          >
+                            {project.poster && <FileImage size={12} />}
+                            <span>{project.poster ? 'View Details & Poster' : 'Learn More'}</span>
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Link>
+                        )}
                       </div>
+
+                      {/* Poster Thumbnail */}
+                      {project.poster && (
+                        <div className="md:w-48 flex-shrink-0">
+                          <div className="rounded-xl overflow-hidden">
+                            <Image
+                              src={project.poster}
+                              alt={`${project.title} poster`}
+                              width={192}
+                              height={128}
+                              className="w-full h-32 object-cover hover:scale-105 transition-transform duration-500"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </AnimatedSection>
-                ))}
-              </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>

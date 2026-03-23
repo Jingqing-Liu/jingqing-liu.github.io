@@ -1,491 +1,173 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { motion, useInView, useScroll, useTransform } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
+import Link from 'next/link';
 import { Briefcase, GraduationCap, Building } from 'lucide-react';
-import { experienceData, skillCategories } from '../../data';
+import { experienceData } from '../../data';
 import type { Experience } from '../../data/experience';
 
-// Enhanced Background for Experience Page
-const ExperienceBackground = () => {
-  const { scrollYProgress } = useScroll();
-  
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '40%']);
-  const opacity1 = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [1, 0.9, 0.7, 0.5]);
-  const opacity2 = useTransform(scrollYProgress, [0, 0.4, 0.8, 1], [0.1, 0.4, 0.7, 1]);
-
-  return (
-    <div className="fixed inset-0 -z-10 overflow-hidden">
-      <motion.div 
-        style={{ y: backgroundY, opacity: opacity1 }}
-        className="absolute inset-0 bg-white"
-      />
-      <motion.div 
-        style={{ opacity: opacity2 }}
-        className="absolute inset-0 bg-gradient-to-br from-gray-50/50 to-green-50/20"
-      />
-      
-      {/* Floating Experience Elements */}
-      <motion.div
-        animate={{ 
-          rotate: [0, 360],
-          scale: [1, 1.2, 1]
-        }}
-        transition={{
-          duration: 35,
-          repeat: Infinity,
-          ease: "linear"
-        }}
-        className="absolute top-1/5 right-1/4 w-96 h-96 bg-gradient-to-r from-green-400/3 to-teal-400/3 rounded-full blur-3xl"
-      />
-      <motion.div
-        animate={{ 
-          rotate: [360, 0],
-          scale: [1, 0.8, 1]
-        }}
-        transition={{
-          duration: 40,
-          repeat: Infinity,
-          ease: "linear"
-        }}
-        className="absolute bottom-1/5 left-1/4 w-80 h-80 bg-gradient-to-r from-blue-400/3 to-indigo-400/3 rounded-full blur-3xl"
-      />
-    </div>
-  );
-};
-
-// Individual Experience Card Component with Bidirectional Scroll Animations
-const ExperienceCard = ({ exp, index }: { exp: Experience; index: number }) => {
+const AnimatedSection = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { 
-    once: false, // Allow bidirectional scroll animations
-    margin: "-10% 0px -10% 0px" 
-  });
-
-  const getIconComponent = (type: string) => {
-    switch (type) {
-      case 'Research': return GraduationCap;
-      case 'Academic': return GraduationCap;
-      case 'Industry': return Briefcase;
-      case 'Finance': return Building;
-      default: return Briefcase;
-    }
-  };
-
-  const IconComponent = getIconComponent(exp.type);
-
-  // Multiple Animation Effect Options
-  const animationVariants = {
-    // Option 1: 3D Flip Effect
-    flip: {
-      hidden: { 
-        opacity: 0,
-        rotateY: -90,
-        scale: 0.8
-      },
-      visible: { 
-        opacity: 1,
-        rotateY: 0,
-        scale: 1
-      }
-    },
-    // Option 2: Flash Appear Effect
-    flash: {
-      hidden: { 
-        opacity: 0,
-        scale: 0.3
-      },
-      visible: { 
-        opacity: 1,
-        scale: 1
-      }
-    },
-    // Option 3: Slide In from Left
-    slideIn: {
-      hidden: { 
-        opacity: 0,
-        x: -100,
-        rotateX: -15
-      },
-      visible: { 
-        opacity: 1,
-        x: 0,
-        rotateX: 0
-      }
-    },
-    // Option 4: Luxury Combined Effect
-    luxury: {
-      hidden: { 
-        opacity: 0,
-        scale: 0.5,
-        rotateY: -180,
-        y: 100
-      },
-      visible: { 
-        opacity: 1,
-        scale: 1,
-        rotateY: 0,
-        y: 0
-      }
-    }
-  };
-
-
+  const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" });
 
   return (
     <motion.div
       ref={ref}
-      className="relative mb-12 last:mb-0 group"
-      variants={animationVariants.flip} // 🎨 Animation effect selection: flip(3D Flip) | flash(Flash Pop) | slideIn(Slide from Left) | luxury(Luxury Combined)
-      initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
-      transition={{
-        duration: 0.8,
-        delay: index * 0.2,
-        ease: "easeOut"
-      }}
-      style={{
-        perspective: "1000px"
-      }}
+      initial={{ opacity: 0, y: 50 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
+      className={`will-change-transform ${className}`}
     >
-      <motion.div
-        whileHover={{ y: -4 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        className="ml-16 md:ml-32 bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-500 ease-out"
-        style={{
-          transformStyle: "preserve-3d"
-        }}
-      >
-        {/* Icon */}
-        <motion.div 
-          className="absolute -left-24 md:-left-40 top-8 w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center border border-gray-200 shadow-sm"
-          animate={isInView ? {
-            scale: [1, 1.2, 1],
-            rotate: [0, 360, 0]
-          } : {}}
-          transition={{
-            delay: index * 0.2 + 0.3,
-            duration: 0.8,
-            ease: "easeInOut"
-          }}
-        >
-          <IconComponent className="w-8 h-8 text-gray-700" />
-        </motion.div>
-
-        {/* Header */}
-        <div className="mb-8 space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <h3 className="text-xl font-semibold text-gray-900 tracking-tight">{exp.title}</h3>
-            <div className="inline-block mt-2 md:mt-0">
-              <span className="text-xs font-medium text-gray-500 tracking-widest uppercase bg-gray-50 px-3 py-1 rounded-full">
-                {exp.period}
-              </span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <p className="text-lg text-gray-700 font-medium">{exp.company}</p>
-            {exp.supervisor && (
-              <p className="text-sm text-gray-500">Supervisor: {exp.supervisor}</p>
-            )}
-            <p className="text-gray-600 leading-relaxed">{exp.description}</p>
-          </div>
-        </div>
-
-        {/* Projects (for research roles) */}
-        {exp.projects && (
-          <div className="mb-8 space-y-4">
-            <h4 className="text-sm font-semibold text-gray-900 tracking-tight">Research Projects</h4>
-            <div className="space-y-3">
-              {exp.projects.map((project: string, projIndex: number) => (
-                <motion.div 
-                  key={projIndex} 
-                  className="flex items-start"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-                  transition={{
-                    delay: index * 0.2 + 0.5 + projIndex * 0.1,
-                    duration: 0.4,
-                    ease: "easeOut"
-                  }}
-                >
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                  <p className="text-sm text-gray-600 leading-relaxed">{project}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Achievements */}
-        {exp.achievements && (
-          <div className="mb-8 space-y-4">
-            <h4 className="text-sm font-semibold text-gray-900 tracking-tight">Key Achievements</h4>
-            <div className="space-y-3">
-              {exp.achievements.map((achievement: string, achIndex: number) => (
-                <motion.div 
-                  key={achIndex} 
-                  className="flex items-start"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-                  transition={{
-                    delay: index * 0.2 + 0.6 + achIndex * 0.1,
-                    duration: 0.4,
-                    ease: "easeOut"
-                  }}
-                >
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                  <p className="text-sm text-gray-600 leading-relaxed">{achievement}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Responsibilities */}
-        {exp.responsibilities && (
-          <div className="mb-8 space-y-4">
-            <h4 className="text-sm font-semibold text-gray-900 tracking-tight">Key Responsibilities</h4>
-            <div className="space-y-3">
-              {exp.responsibilities.map((responsibility: string, respIndex: number) => (
-                <motion.div 
-                  key={respIndex} 
-                  className="flex items-start"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-                  transition={{
-                    delay: index * 0.2 + 0.7 + respIndex * 0.1,
-                    duration: 0.4,
-                    ease: "easeOut"
-                  }}
-                >
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                  <p className="text-sm text-gray-600 leading-relaxed">{responsibility}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Technologies */}
-        {exp.technologies && (
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-gray-900 tracking-tight">Technologies Used</h4>
-            <div className="flex flex-wrap gap-2">
-              {exp.technologies.map((tech: string, techIndex: number) => (
-                <motion.span
-                  key={techIndex}
-                  className="px-3 py-1.5 bg-gray-50 text-gray-700 rounded-full text-xs font-medium"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
-                  transition={{
-                    delay: index * 0.2 + 0.8 + techIndex * 0.05,
-                    duration: 0.3,
-                    ease: "easeOut"
-                  }}
-                >
-                  {tech}
-                </motion.span>
-              ))}
-            </div>
-          </div>
-        )}
-      </motion.div>
+      {children}
     </motion.div>
   );
 };
 
-// Individual Skill Card Component
-const SkillCard = ({ skill, skillKey, index }: { 
-  skill: { icon: string; name: string; description: string }; 
-  skillKey: string; 
-  index: number 
-}) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { 
-    once: false, // Allow bidirectional scroll animations
-    margin: "-5% 0px -5% 0px" 
-  });
-
-  return (
-    <motion.div
-      key={skillKey}
-      ref={ref}
-      initial={{ opacity: 0, y: 50, scale: 0.8 }}
-      animate={isInView ? { 
-        opacity: 1, 
-        y: 0, 
-        scale: 1 
-      } : { 
-        opacity: 0, 
-        y: 50, 
-        scale: 0.8 
-      }}
-      transition={{ 
-        delay: index * 0.15, 
-        duration: 0.6, 
-        ease: "backOut",
-        scale: {
-          type: "spring",
-          damping: 20,
-          stiffness: 300
-        }
-      }}
-      className="group"
-    >
-      <motion.div
-        whileHover={{ 
-          y: -8, 
-          scale: 1.02,
-          rotateX: 5,
-          rotateY: 5 
-        }}
-        transition={{ 
-          duration: 0.3, 
-          ease: "easeOut" 
-        }}
-        className="bg-gray-50 rounded-3xl p-8 text-center h-full hover:shadow-2xl transition-all duration-500 ease-out"
-        style={{
-          transformStyle: "preserve-3d"
-        }}
-      >
-        <motion.div 
-          className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-gray-100 transition-colors duration-300"
-          animate={isInView ? {
-            rotate: [0, 10, -10, 0],
-            scale: [1, 1.1, 1]
-          } : {}}
-          transition={{
-            delay: index * 0.15 + 0.3,
-            duration: 0.8,
-            ease: [0.4, 0, 0.6, 1]
-          }}
-        >
-          <span className="text-3xl">{skill.icon}</span>
-        </motion.div>
-        
-        <motion.h3 
-          className="text-xl font-semibold mb-4 text-gray-900 tracking-tight"
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{
-            delay: index * 0.15 + 0.4,
-            duration: 0.5,
-            ease: "easeOut"
-          }}
-        >
-          {skill.name}
-        </motion.h3>
-        
-        <motion.p 
-          className="text-gray-600 leading-relaxed text-sm"
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{
-            delay: index * 0.15 + 0.5,
-            duration: 0.5,
-            ease: "easeOut"
-          }}
-        >
-          {skill.description}
-        </motion.p>
-      </motion.div>
-    </motion.div>
-  );
+const getTypeIcon = (type: string) => {
+  switch (type) {
+    case 'Research': return GraduationCap;
+    case 'Academic': return GraduationCap;
+    case 'Industry': return Briefcase;
+    case 'Finance': return Building;
+    default: return Briefcase;
+  }
 };
 
-// Skills Grid Component with Bidirectional Scroll Animations
-const SkillsGrid = () => {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-      {Object.entries(skillCategories).map(([key, skill], index) => (
-        <SkillCard key={key} skill={skill} skillKey={key} index={index} />
-      ))}
-    </div>
-  );
+const getTypeColor = (type: string) => {
+  switch (type) {
+    case 'Research': return 'text-purple-600';
+    case 'Academic': return 'text-[#007aff]';
+    case 'Industry': return 'text-emerald-600';
+    case 'Finance': return 'text-amber-600';
+    default: return 'text-[#007aff]';
+  }
 };
 
+const getDotColor = (type: string) => {
+  switch (type) {
+    case 'Research': return 'bg-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.4)]';
+    case 'Academic': return 'bg-[#007aff] shadow-[0_0_12px_rgba(0,122,255,0.4)]';
+    case 'Industry': return 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.4)]';
+    case 'Finance': return 'bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.4)]';
+    default: return 'bg-[#007aff] shadow-[0_0_12px_rgba(0,122,255,0.4)]';
+  }
+};
 
-
-export default function Experience() {
-
+export default function ExperiencePage() {
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      <ExperienceBackground />
-      
+    <div className="min-h-screen relative" style={{ background: '#f2f2f7' }}>
+      {/* Background gradient orbs */}
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full opacity-25"
+          style={{ background: 'radial-gradient(circle, #a8d8ff 0%, transparent 70%)' }} />
+        <div className="absolute bottom-[10%] left-[-10%] w-[450px] h-[450px] rounded-full opacity-20"
+          style={{ background: 'radial-gradient(circle, #c7b8ea 0%, transparent 70%)' }} />
+        <div className="absolute top-[50%] right-[30%] w-[300px] h-[300px] rounded-full opacity-15"
+          style={{ background: 'radial-gradient(circle, #ffd6a5 0%, transparent 70%)' }} />
+      </div>
+
       {/* Header */}
-      <section className="pt-24 pb-20">
-        <div className="container mx-auto px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-            className="text-center max-w-5xl mx-auto"
-          >
+      <section className="pt-24 pb-16">
+        <div className="container mx-auto px-6 md:px-8">
+          <div className="max-w-5xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mb-6"
+            >
+              <span className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono tracking-wider uppercase text-[#48484a] liquid-glass-pill">
+                <Briefcase size={14} className="text-[#007aff]" />
+                Professional Journey
+              </span>
+            </motion.div>
+
             <motion.h1
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-              className="text-5xl md:text-7xl font-light text-gray-900 tracking-tight leading-tight mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-5xl md:text-7xl font-bold text-[#1c1c1e] tracking-tight leading-tight mb-6"
             >
               Experience
             </motion.h1>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-              className="space-y-4"
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-lg text-[#48484a] leading-relaxed mx-auto text-center"
             >
-              <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-5xl mx-auto font-medium text-center">
-                My professional journey spans research, academia, and industry, providing me with 
-                diverse perspectives on technology, security, and innovation.
-              </p>
-              <div className="w-16 h-0.5 bg-gray-300 mx-auto rounded-full"></div>
-            </motion.div>
-          </motion.div>
+              From research and academia to industry — diverse perspectives
+              on technology, security, and innovation.
+            </motion.p>
+          </div>
         </div>
       </section>
 
       {/* Experience Timeline */}
-      <section className="pb-20 bg-gray-50">
-        <div className="container mx-auto px-8">
-          <div className="max-w-5xl mx-auto">
-            <div className="relative">
-              {/* Timeline line */}
-              <div className="absolute left-8 md:left-16 top-0 bottom-0 w-1 bg-gray-200 rounded-full"></div>
-              
-              {experienceData.map((exp, index) => (
-                <ExperienceCard 
-                  key={exp.id} 
-                  exp={exp} 
-                  index={index} 
-                />
-              ))}
+      <AnimatedSection>
+        <section className="py-8 pb-16">
+          <div className="container mx-auto px-6 md:px-8">
+            <div className="max-w-5xl mx-auto">
+              <div className="relative">
+                {/* Timeline line */}
+                <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#007aff]/30 via-[#007aff]/10 to-transparent" />
+
+                {experienceData.map((exp: Experience, index: number) => {
+                  const isLeft = index % 2 === 0;
+                  const IconComponent = getTypeIcon(exp.type);
+                  const typeColor = getTypeColor(exp.type);
+                  const dotColor = getDotColor(exp.type);
+
+                  return (
+                    <motion.div
+                      key={exp.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.05 }}
+                      className={`relative flex flex-col ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'} items-start gap-6 mb-10`}
+                    >
+                      {/* Dot */}
+                      <div className={`absolute left-6 md:left-1/2 -translate-x-1/2 w-3 h-3 rounded-full z-10 ${dotColor}`} />
+
+                      {/* Card */}
+                      <Link
+                        href={`/experience/${exp.id}`}
+                        className="ml-14 md:ml-0 md:w-[calc(50%-2rem)] block"
+                      >
+                        <div className="liquid-glass-card p-5 hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                          {/* Type & Period */}
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider ${typeColor} liquid-glass-pill px-2 py-0.5`}>
+                              <IconComponent size={10} />
+                              {exp.type}
+                            </span>
+                            <span className="text-xs text-[#8e8e93] font-mono">{exp.period}</span>
+                          </div>
+
+                          {/* Title & Company */}
+                          <h3 className="text-base font-semibold text-[#1c1c1e] mb-1 group-hover:text-[#007aff] transition-colors">{exp.title}</h3>
+                          <p className="text-sm text-[#636366]">{exp.company}</p>
+
+                          {/* Arrow hint */}
+                          <div className="mt-3 flex items-center text-xs text-[#8e8e93] group-hover:text-[#007aff] transition-colors">
+                            <span>View details</span>
+                            <svg className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Skills Summary */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.5, duration: 0.6, ease: "easeOut" }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-light text-gray-900 tracking-tight mb-4">
-              Skills & Expertise
-            </h2>
-            <div className="w-12 h-0.5 bg-gray-300 mx-auto rounded-full"></div>
-          </motion.div>
-
-          <div className="max-w-6xl mx-auto">
-            <SkillsGrid />
-          </div>
-        </div>
-      </section>
+        </section>
+      </AnimatedSection>
     </div>
   );
 }
-

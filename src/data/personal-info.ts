@@ -18,7 +18,7 @@ export interface PersonalInfo {
 
 export const personalInfo: PersonalInfo = {
   name: 'Jingqing Liu',
-  title: 'Master of Computer Science at Brown University',
+  title: 'Master of Computer Science',
   description: 'Specializing in Network Security and Cybersecurity Research',
   email: 'jingqing_liu@brown.edu',
   office: 'Arnold Lab Room 317, Brown University',

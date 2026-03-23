@@ -13,12 +13,8 @@ const ContactSection = () => {
   ];
 
   return (
-    <section className="py-24 relative">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[20%] right-[5%] w-[300px] h-[300px] rounded-full opacity-15"
-          style={{ background: 'radial-gradient(circle, #ffd6a5 0%, transparent 70%)' }} />
-      </div>
-      <div className="container mx-auto px-6 md:px-8 relative z-10">
+    <section className="py-12 relative">
+      <div className="container mx-auto px-6 md:px-8">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -3,9 +3,7 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import HeroSection from './home/components/HeroSection';
-import ContactSection from './home/components/ContactSection';
 import EducationSummary from './home/components/EducationSummary';
-import QuickLinks from './home/components/QuickLinks';
 import { researchProjects } from '../data/research';
 import { experienceData } from '../data/experience';
 import { Shield, ExternalLink, ChevronRight, Briefcase, BookOpen } from 'lucide-react';
@@ -38,21 +36,16 @@ const ExperienceHighlights = () => {
   const topExperiences = experienceData.slice(0, 3);
 
   return (
-    <section className="py-24 relative">
-      {/* Subtle background gradient */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-[-10%] w-[400px] h-[400px] rounded-full opacity-15"
-          style={{ background: 'radial-gradient(circle, #a8d8ff 0%, transparent 70%)' }} />
-      </div>
-      <div className="container mx-auto px-6 md:px-8 relative z-10">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-12">
+    <section className="py-12 relative">
+      <div className="container mx-auto px-6 md:px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-10">
             <div>
-              <div className="flex items-center gap-3 mb-3">
-                <Briefcase size={18} className="text-[#007aff]" />
+              <div className="flex items-center gap-2 mb-2">
+                <Briefcase size={16} className="text-[#007aff]" />
                 <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">Experience</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight mb-0">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#1c1c1e] tracking-tight">
                 Where I&apos;ve Worked
               </h2>
             </div>
@@ -119,20 +112,16 @@ const ResearchHighlights = () => {
   const topResearch = researchProjects.slice(0, 3);
 
   return (
-    <section className="py-24 relative">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute bottom-0 left-[-5%] w-[350px] h-[350px] rounded-full opacity-15"
-          style={{ background: 'radial-gradient(circle, #c7b8ea 0%, transparent 70%)' }} />
-      </div>
-      <div className="container mx-auto px-6 md:px-8 relative z-10">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-12">
+    <section className="py-12 relative">
+      <div className="container mx-auto px-6 md:px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-10">
             <div>
-              <div className="flex items-center gap-3 mb-3">
-                <BookOpen size={18} className="text-[#007aff]" />
+              <div className="flex items-center gap-2 mb-2">
+                <BookOpen size={16} className="text-[#007aff]" />
                 <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">Research</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight mb-0">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#1c1c1e] tracking-tight">
                 Security Research
               </h2>
             </div>
@@ -186,16 +175,24 @@ const ResearchHighlights = () => {
 export default function HomePage() {
   return (
     <div className="min-h-screen relative" style={{ background: '#f2f2f7' }}>
+      {/* Shared background gradient orbs – same as Hero */}
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full opacity-40"
+          style={{ background: 'radial-gradient(circle, #a8d8ff 0%, transparent 70%)' }} />
+        <div className="absolute top-[10%] right-[-15%] w-[500px] h-[500px] rounded-full opacity-30"
+          style={{ background: 'radial-gradient(circle, #c7b8ea 0%, transparent 70%)' }} />
+        <div className="absolute bottom-[-10%] left-[20%] w-[550px] h-[550px] rounded-full opacity-25"
+          style={{ background: 'radial-gradient(circle, #ffd6a5 0%, transparent 70%)' }} />
+        <div className="absolute bottom-[20%] right-[10%] w-[400px] h-[400px] rounded-full opacity-20"
+          style={{ background: 'radial-gradient(circle, #a5d6ff 0%, transparent 70%)' }} />
+        <div className="absolute top-[50%] left-[40%] w-[350px] h-[350px] rounded-full opacity-15"
+          style={{ background: 'radial-gradient(circle, #ffc0cb 0%, transparent 70%)' }} />
+      </div>
+
       <HeroSection />
-      <div className="section-divider" />
       <AnimatedSection><ExperienceHighlights /></AnimatedSection>
-      <div className="section-divider" />
       <AnimatedSection><ResearchHighlights /></AnimatedSection>
-      <div className="section-divider" />
       <AnimatedSection><EducationSummary /></AnimatedSection>
-      <div className="section-divider" />
-      <AnimatedSection><ContactSection /></AnimatedSection>
-      <AnimatedSection><QuickLinks /></AnimatedSection>
     </div>
   );
 }

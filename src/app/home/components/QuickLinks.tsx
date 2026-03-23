@@ -15,7 +15,7 @@ const QuickLinks = () => {
   const quickLinkItems = navItems.filter(item => item.href !== '/');
 
   return (
-    <section className="py-24">
+    <section className="py-12">
       <div className="container mx-auto px-6 md:px-8">
         <div className="max-w-6xl mx-auto">
           <motion.div

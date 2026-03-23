@@ -13,31 +13,7 @@ const highlights = [
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden" style={{ background: '#f2f2f7' }}>
-      {/* Gradient mesh background - gives the glass something to refract */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Soft color orbs */}
-        <div
-          className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full opacity-40"
-          style={{ background: 'radial-gradient(circle, #a8d8ff 0%, transparent 70%)' }}
-        />
-        <div
-          className="absolute top-[10%] right-[-15%] w-[500px] h-[500px] rounded-full opacity-30"
-          style={{ background: 'radial-gradient(circle, #c7b8ea 0%, transparent 70%)' }}
-        />
-        <div
-          className="absolute bottom-[-10%] left-[20%] w-[550px] h-[550px] rounded-full opacity-25"
-          style={{ background: 'radial-gradient(circle, #ffd6a5 0%, transparent 70%)' }}
-        />
-        <div
-          className="absolute bottom-[20%] right-[10%] w-[400px] h-[400px] rounded-full opacity-20"
-          style={{ background: 'radial-gradient(circle, #a5d6ff 0%, transparent 70%)' }}
-        />
-        <div
-          className="absolute top-[50%] left-[40%] w-[350px] h-[350px] rounded-full opacity-15"
-          style={{ background: 'radial-gradient(circle, #ffc0cb 0%, transparent 70%)' }}
-        />
-      </div>
+    <section className="relative min-h-screen flex items-center overflow-hidden">
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-6 md:px-8 py-20">

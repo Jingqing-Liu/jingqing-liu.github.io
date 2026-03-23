@@ -1,205 +1,24 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { motion, useInView, useScroll, useTransform } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
+import { GraduationCap, Award, BookOpen, Calendar, MapPin, Star } from 'lucide-react';
 import { educationData } from '../../data';
 
-// Advanced Animated Section Wrapper for Education Page
-const AnimatedSection = ({ 
-  children, 
-  index, 
-  animationType = "luxury",
-  className = "" 
-}: { 
-  children: React.ReactNode; 
-  index: number;
-  animationType?: "luxury" | "depth" | "parallax" | "float";
-  className?: string;
-}) => {
+const AnimatedSection = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { 
-    once: false, // Allow bidirectional scroll animations
-    margin: "-15% 0px -15% 0px" 
-  });
-
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"]
-  });
-
-  // Transform values for parallax effects
-  const y = useTransform(scrollYProgress, [0, 1], [80, -80]);
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.85, 1, 1, 0.85]);
-
-  const animationVariants = {
-    luxury: {
-      initial: { 
-        opacity: 0, 
-        y: 100, 
-        scale: 0.85,
-        rotateX: 12
-      },
-      animate: { 
-        opacity: 1, 
-        y: 0, 
-        scale: 1,
-        rotateX: 0
-      }
-    },
-    depth: {
-      initial: { 
-        opacity: 0, 
-        z: -150,
-        rotateY: 15,
-        scale: 0.9
-      },
-      animate: { 
-        opacity: 1, 
-        z: 0,
-        rotateY: 0,
-        scale: 1
-      }
-    },
-    parallax: {
-      initial: {},
-      animate: {}
-    },
-    float: {
-      initial: { 
-        opacity: 0, 
-        y: 50,
-        scale: 0.96
-      },
-      animate: { 
-        opacity: 1, 
-        y: 0,
-        scale: 1
-      }
-    }
-  };
-
-
-
-  if (animationType === "parallax") {
-    return (
-      <motion.div
-        ref={ref}
-        style={{ 
-          y: y,
-          opacity: opacity,
-          scale: scale,
-          perspective: "1000px",
-          transformStyle: "preserve-3d"
-        }}
-        className={`will-change-transform ${className}`}
-      >
-        <motion.div
-          whileHover={{ 
-            scale: 1.01, 
-            rotateX: 1, 
-            rotateY: 1,
-            transition: { duration: 0.3 }
-          }}
-          className="transform-gpu"
-        >
-          {children}
-        </motion.div>
-      </motion.div>
-    );
-  }
+  const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" });
 
   return (
     <motion.div
       ref={ref}
-      variants={animationVariants[animationType]}
-      initial="initial"
-      animate={isInView ? "animate" : "initial"}
-      transition={
-        animationType === 'luxury' ? {
-          duration: 1.0,
-          delay: index * 0.15,
-          ease: "backOut",
-          scale: { type: "spring", damping: 25, stiffness: 300 }
-        } : animationType === 'depth' ? {
-          duration: 0.9,
-          delay: index * 0.1,
-          ease: "easeOut"
-        } : animationType === 'float' ? {
-          duration: 0.7,
-          delay: index * 0.08,
-          ease: "easeOut"
-        } : {
-          duration: isInView ? 0.5 : 0.4,
-          ease: "easeOut"
-        }
-      }
-      style={{
-        perspective: "1000px",
-        transformStyle: "preserve-3d"
-      }}
+      initial={{ opacity: 0, y: 50 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
       className={`will-change-transform ${className}`}
     >
-      <motion.div
-        whileHover={{ 
-          y: -6, 
-          scale: 1.005,
-          rotateX: 1,
-          transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] }
-        }}
-        className="transform-gpu"
-      >
-        {children}
-      </motion.div>
+      {children}
     </motion.div>
-  );
-};
-
-// Enhanced Background for Education Page
-const EducationBackground = () => {
-  const { scrollYProgress } = useScroll();
-  
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
-  const opacity1 = useTransform(scrollYProgress, [0, 0.4, 0.8, 1], [1, 0.9, 0.7, 0.5]);
-  const opacity2 = useTransform(scrollYProgress, [0, 0.6, 1], [0.2, 0.5, 0.8]);
-
-  return (
-    <div className="fixed inset-0 -z-10 overflow-hidden">
-      <motion.div 
-        style={{ y: backgroundY, opacity: opacity1 }}
-        className="absolute inset-0 bg-white"
-      />
-      <motion.div 
-        style={{ opacity: opacity2 }}
-        className="absolute inset-0 bg-gradient-to-br from-gray-50/30 to-blue-50/20"
-      />
-      
-      {/* Floating Academic Elements */}
-      <motion.div
-        animate={{ 
-          rotate: [0, 360],
-          scale: [1, 1.15, 1]
-        }}
-        transition={{
-          duration: 30,
-          repeat: Infinity,
-          ease: "linear"
-        }}
-        className="absolute top-1/3 right-1/5 w-72 h-72 bg-gradient-to-r from-blue-400/3 to-indigo-400/3 rounded-full blur-3xl"
-      />
-      <motion.div
-        animate={{ 
-          rotate: [360, 0],
-          scale: [1, 0.85, 1]
-        }}
-        transition={{
-          duration: 35,
-          repeat: Infinity,
-          ease: "linear"
-        }}
-        className="absolute bottom-1/3 left-1/5 w-96 h-96 bg-gradient-to-r from-purple-400/3 to-pink-400/3 rounded-full blur-3xl"
-      />
-    </div>
   );
 };
 
@@ -207,224 +26,280 @@ export default function Education() {
   const [graduate, undergraduate] = educationData;
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      <EducationBackground />
-      
+    <div className="min-h-screen relative" style={{ background: '#f2f2f7' }}>
+      {/* Background gradient orbs */}
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full opacity-25"
+          style={{ background: 'radial-gradient(circle, #a8d8ff 0%, transparent 70%)' }} />
+        <div className="absolute bottom-[10%] left-[-10%] w-[450px] h-[450px] rounded-full opacity-20"
+          style={{ background: 'radial-gradient(circle, #c7b8ea 0%, transparent 70%)' }} />
+        <div className="absolute top-[50%] right-[30%] w-[300px] h-[300px] rounded-full opacity-15"
+          style={{ background: 'radial-gradient(circle, #ffd6a5 0%, transparent 70%)' }} />
+      </div>
+
       {/* Header */}
-      <AnimatedSection index={0} animationType="luxury">
-        <section className="pt-24 pb-20">
-          <div className="container mx-auto px-8">
-            <div className="text-center max-w-5xl mx-auto">
-              <h1 className="text-5xl md:text-7xl font-light text-gray-900 tracking-tight leading-tight mb-8">
-                Education
-              </h1>
-              <div className="space-y-4">
-                <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-5xl mx-auto font-medium">
-                  My academic journey spans from undergraduate excellence at the University of Delaware 
-                  to advanced graduate studies at Brown University, focusing on cutting-edge computer science research.
-                </p>
-                <div className="w-16 h-0.5 bg-gray-300 mx-auto rounded-full"></div>
-              </div>
-            </div>
+      <section className="pt-24 pb-16">
+        <div className="container mx-auto px-6 md:px-8">
+          <div className="max-w-5xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mb-6"
+            >
+              <span className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono tracking-wider uppercase text-[#48484a] liquid-glass-pill">
+                <GraduationCap size={14} className="text-[#007aff]" />
+                Academic Background
+              </span>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-5xl md:text-7xl font-bold text-[#1c1c1e] tracking-tight leading-tight mb-6"
+            >
+              Education
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-lg text-[#48484a] leading-relaxed mx-auto"
+              style={{ textAlign: 'center' }}
+            >
+              From undergraduate excellence at the University of Delaware
+              to advanced graduate studies at Brown University.
+            </motion.p>
           </div>
-        </section>
-      </AnimatedSection>
+        </div>
+      </section>
 
       {/* Graduate Studies */}
-      <AnimatedSection index={1} animationType="parallax">
-        <section className="pb-20 bg-gray-50">
-          <div className="container mx-auto px-8">
+      <AnimatedSection>
+        <section className="pb-8">
+          <div className="container mx-auto px-6 md:px-8">
             <div className="max-w-5xl mx-auto">
-              <div className="bg-white rounded-3xl p-12 shadow-sm">
-              <div className="text-center mb-12">
-                <div className="inline-block">
-                  <span className="text-xs font-medium text-gray-500 tracking-widest uppercase bg-gray-50 px-4 py-2 rounded-full">
-                    Current
-                  </span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-light text-gray-900 tracking-tight mt-4 mb-2">
-                  Graduate Studies
-                </h2>
-                <p className="text-xl text-gray-700 font-medium">{graduate.institution}</p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Program Details</h3>
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-gray-500">Degree</p>
-                      <p className="text-gray-800">{graduate.degree}</p>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-gray-500">Period</p>
-                      <p className="text-gray-800">{graduate.period}</p>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-gray-500">Research Focus</p>
-                      <p className="text-gray-800">{graduate.focus}</p>
-                    </div>
+              <div className="liquid-glass-card p-8 md:p-12">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono tracking-wider uppercase text-[#007aff] liquid-glass-pill mb-4">
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                      Current
+                    </span>
+                    <h2 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight mb-2">
+                      Graduate Studies
+                    </h2>
+                    <p className="text-xl text-[#007aff] font-semibold">{graduate.institution}</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-[#8e8e93] liquid-glass-pill px-3 py-1.5">
+                    <Calendar size={14} />
+                    <span className="font-mono">{graduate.period}</span>
                   </div>
                 </div>
-                
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Research Activities</h3>
-                  <p className="text-gray-600 leading-relaxed">
+
+                {/* Program Details */}
+                <div className="space-y-4 mb-8">
+                  <h3 className="text-[11px] font-semibold text-[#636366] tracking-wider uppercase">Program Details</h3>
+                  <div className="space-y-3">
+                    {[
+                      { label: 'Degree', value: graduate.degree, icon: GraduationCap },
+                      { label: 'Expected', value: graduate.status, icon: Calendar },
+                      { label: 'Focus', value: graduate.focus, icon: BookOpen },
+                    ].map((item) => (
+                      <div key={item.label} className="flex items-center py-1">
+                        <item.icon size={14} className="text-[#007aff] flex-shrink-0 w-5" />
+                        <span className="text-xs text-[#636366] w-20 flex-shrink-0 ml-2">{item.label}</span>
+                        <span className="text-sm text-[#1c1c1e] font-medium">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Overview */}
+                <div className="space-y-4">
+                  <h3 className="text-[11px] font-semibold text-[#636366] tracking-wider uppercase">Overview</h3>
+                  <p className="text-sm text-[#48484a] leading-relaxed">
                     {graduate.description}
                   </p>
                 </div>
               </div>
             </div>
           </div>
-        </div>
         </section>
       </AnimatedSection>
 
       {/* Undergraduate Degree */}
-      <AnimatedSection index={2} animationType="depth">
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-8">
+      <AnimatedSection>
+        <section className="py-8">
+          <div className="container mx-auto px-6 md:px-8">
             <div className="max-w-5xl mx-auto">
-              <div className="bg-gray-50 rounded-3xl p-12">
-              <div className="text-center mb-12">
-                <div className="inline-block">
-                  <span className="text-xs font-medium text-gray-500 tracking-widest uppercase bg-white px-4 py-2 rounded-full">
-                    {undergraduate.status}
-                  </span>
+              <div className="liquid-glass-card p-8 md:p-12">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono tracking-wider uppercase text-purple-600 liquid-glass-pill mb-4">
+                      <Award size={12} />
+                      {undergraduate.status}
+                    </span>
+                    <h2 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight mb-2">
+                      Undergraduate Degree
+                    </h2>
+                    <p className="text-xl text-[#007aff] font-semibold">{undergraduate.institution}</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-[#8e8e93] liquid-glass-pill px-3 py-1.5">
+                    <Calendar size={14} />
+                    <span className="font-mono">{undergraduate.period}</span>
+                  </div>
                 </div>
-                <h2 className="text-3xl md:text-4xl font-light text-gray-900 tracking-tight mt-4 mb-2">
-                  Undergraduate Degree
-                </h2>
-                <p className="text-xl text-gray-700 font-medium">{undergraduate.institution}</p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Academic Excellence</h3>
+
+                {/* Details + Awards grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                   <div className="space-y-4">
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-gray-500">Degree</p>
-                      <p className="text-gray-800">{undergraduate.degree}</p>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-gray-500">GPA</p>
-                      <p className="text-gray-800">{undergraduate.gpa}</p>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-gray-500">Graduation</p>
-                      <p className="text-gray-800">{undergraduate.period.split(' - ')[1]}, {undergraduate.status}</p>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-gray-500">Research Area</p>
-                      <p className="text-gray-800">{undergraduate.focus}</p>
+                    <h3 className="text-[11px] font-semibold text-[#636366] tracking-wider uppercase">Program Details</h3>
+                    <div className="space-y-3">
+                      {[
+                        { label: 'Degree', value: undergraduate.degree, icon: GraduationCap },
+                        { label: 'GPA', value: undergraduate.gpa || '', icon: Star },
+                        { label: 'Focus', value: undergraduate.focus, icon: BookOpen },
+                        { label: 'Location', value: 'Newark, Delaware', icon: MapPin },
+                      ].map((item) => (
+                        <div key={item.label} className="flex items-center py-1">
+                          <item.icon size={14} className="text-[#007aff] flex-shrink-0 w-5" />
+                          <span className="text-xs text-[#636366] w-20 flex-shrink-0 ml-2">{item.label}</span>
+                          <span className="text-sm text-[#1c1c1e] font-medium">{item.value}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
-                
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Program Overview</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    {undergraduate.description}
-                  </p>
-                </div>
-              </div>
 
-              {/* Awards and Recognition */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Awards & Honors</h3>
-                  <div className="space-y-3">
-                    {undergraduate.awards?.map((award, index) => (
-                      <div
-                        key={index}
-                        className="flex items-start"
-                      >
-                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        <p className="text-gray-600 text-sm leading-relaxed">{award}</p>
-                      </div>
-                    ))}
+                  <div className="space-y-4">
+                    <h3 className="text-[11px] font-semibold text-[#636366] tracking-wider uppercase flex items-center gap-2">
+                      <Award size={13} className="text-[#007aff]" />
+                      Awards & Honors
+                    </h3>
+                    <div className="space-y-2">
+                      {undergraduate.awards?.map((award, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -10 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: index * 0.05 }}
+                          className="flex items-center gap-3 p-3 rounded-xl liquid-glass-pill"
+                          style={{ borderRadius: '12px' }}
+                        >
+                          <div className="w-1.5 h-1.5 bg-[#007aff] rounded-full flex-shrink-0" />
+                          <span className="text-sm text-[#1c1c1e]">{award}</span>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
+
                 </div>
 
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Extracurricular Activities</h3>
-                  <div className="space-y-3">
-                    {undergraduate.activities?.map((activity, index) => (
-                      <div
-                        key={index}
-                        className="flex items-start"
-                      >
-                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        <p className="text-gray-600 text-sm leading-relaxed">{activity}</p>
-                      </div>
-                    ))}
+                {/* Overview + Activities */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <h3 className="text-[11px] font-semibold text-[#636366] tracking-wider uppercase">Overview</h3>
+                    <p className="text-sm text-[#48484a] leading-relaxed">
+                      {undergraduate.description}
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="text-[11px] font-semibold text-[#636366] tracking-wider uppercase flex items-center gap-2">
+                      <BookOpen size={13} className="text-[#007aff]" />
+                      Activities
+                    </h3>
+                    <div className="space-y-2">
+                      {undergraduate.activities?.map((activity, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-3 p-3 rounded-xl liquid-glass-pill"
+                          style={{ borderRadius: '12px' }}
+                        >
+                          <div className="w-1.5 h-1.5 bg-purple-500 rounded-full flex-shrink-0" />
+                          <span className="text-sm text-[#1c1c1e]">{activity}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
         </section>
       </AnimatedSection>
 
       {/* Academic Timeline */}
-      <AnimatedSection index={3} animationType="float">
-        <section className="py-20 bg-gray-50">
-          <div className="container mx-auto px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-light text-gray-900 tracking-tight mb-4">
-                Academic Timeline
-              </h2>
-              <div className="w-16 h-0.5 bg-gray-300 mx-auto rounded-full"></div>
-            </div>
-          
-          <div className="max-w-4xl mx-auto">
-            <div className="space-y-8">
-              {/* Graduate Studies */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="inline-block">
-                    <span className="text-xs font-medium text-gray-500 tracking-widest uppercase bg-gray-50 px-3 py-1 rounded-full">
-                      Current
-                    </span>
-                  </div>
-                  <p className="text-sm font-medium text-gray-600">{graduate.period}</p>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-semibold text-gray-900 tracking-tight">
-                    {graduate.degree}
-                  </h3>
-                  <p className="text-gray-700 font-medium">{graduate.institution}</p>
-                  <p className="text-sm text-gray-500">{graduate.focus} Research</p>
-                </div>
+      <AnimatedSection>
+        <section className="py-16">
+          <div className="container mx-auto px-6 md:px-8">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight mb-0">
+                  Academic Timeline
+                </h2>
               </div>
-              
-              {/* Undergraduate Studies */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="inline-block">
-                    <span className="text-xs font-medium text-gray-500 tracking-widest uppercase bg-gray-50 px-3 py-1 rounded-full">
-                      {undergraduate.status}
-                    </span>
+
+              <div className="relative">
+                {/* Timeline line */}
+                <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#007aff]/30 via-[#007aff]/10 to-transparent" />
+
+                {/* Graduate */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="relative flex flex-col md:flex-row items-start gap-6 mb-8"
+                >
+                  {/* Dot */}
+                  <div className="absolute left-6 md:left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-[#007aff] shadow-[0_0_12px_rgba(0,122,255,0.4)] z-10" />
+
+                  {/* Card */}
+                  <div className="ml-14 md:ml-0 md:w-[calc(50%-2rem)] liquid-glass-card p-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-[#007aff] liquid-glass-pill px-2 py-0.5">
+                        Current
+                      </span>
+                      <span className="text-xs text-[#8e8e93] font-mono">{graduate.period}</span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-[#1c1c1e] mb-1">{graduate.degree}</h3>
+                    <p className="text-sm text-[#007aff] font-medium mb-1">{graduate.institution}</p>
+                    <p className="text-xs text-[#8e8e93] mb-0">{graduate.focus}</p>
                   </div>
-                  <p className="text-sm font-medium text-gray-600">{undergraduate.period}</p>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-semibold text-gray-900 tracking-tight">
-                    {undergraduate.degree}
-                  </h3>
-                  <p className="text-gray-700 font-medium">{undergraduate.institution}</p>
-                  <p className="text-sm text-gray-500">GPA: {undergraduate.gpa}</p>
-                </div>
+                </motion.div>
+
+                {/* Undergraduate */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 }}
+                  className="relative flex flex-col md:flex-row-reverse items-start gap-6"
+                >
+                  {/* Dot */}
+                  <div className="absolute left-6 md:left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.4)] z-10" />
+
+                  {/* Card */}
+                  <div className="ml-14 md:ml-0 md:w-[calc(50%-2rem)] liquid-glass-card p-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-purple-600 liquid-glass-pill px-2 py-0.5">
+                        {undergraduate.status}
+                      </span>
+                      <span className="text-xs text-[#8e8e93] font-mono">{undergraduate.period}</span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-[#1c1c1e] mb-1">{undergraduate.degree}</h3>
+                    <p className="text-sm text-[#007aff] font-medium mb-1">{undergraduate.institution}</p>
+                    <p className="text-xs text-[#8e8e93] mb-0">GPA: {undergraduate.gpa}</p>
+                  </div>
+                </motion.div>
               </div>
             </div>
           </div>
-        </div>
         </section>
       </AnimatedSection>
     </div>

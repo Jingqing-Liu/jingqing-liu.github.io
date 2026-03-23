@@ -11,10 +11,7 @@ const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -25,58 +22,36 @@ const Navigation = () => {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled 
-            ? 'bg-white/80 backdrop-blur-xl border-b border-gray-200 shadow-sm' 
-            : 'bg-transparent'
+          scrolled ? 'liquid-glass-nav' : 'bg-transparent'
         }`}
-        style={{
-          backdropFilter: scrolled ? 'blur(20px)' : 'none',
-          WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
-        }}
       >
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link href="/" className="font-display font-semibold text-xl">
-              <motion.span
-                whileHover={{ scale: 1.05 }}
-                className="text-gray-900"
-              >
+            <Link href="/" className="font-semibold text-lg no-underline">
+              <motion.span whileHover={{ scale: 1.05 }} className="text-[#1c1c1e]">
                 {personalInfo.name}
               </motion.span>
             </Link>
 
-            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="relative group"
-                >
+                <Link key={item.name} href={item.href} className="relative group no-underline">
                   <motion.span
                     whileHover={{ y: -2 }}
-                    className="text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium"
+                    className="text-[#48484a] hover:text-[#007aff] transition-colors duration-200 font-medium text-sm"
                   >
                     {item.name}
                   </motion.span>
-                  <motion.div
-                    className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 group-hover:w-full transition-all duration-300"
-                    whileHover={{ width: '100%' }}
-                  />
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#007aff] rounded-full group-hover:w-full transition-all duration-300" />
                 </Link>
               ))}
             </div>
 
-            {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="md:hidden p-2 rounded-xl hover:bg-black/5 transition-colors text-[#1c1c1e] border-0 bg-transparent cursor-pointer"
             >
-              <motion.div
-                animate={{ rotate: isOpen ? 90 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
+              <motion.div animate={{ rotate: isOpen ? 90 : 0 }} transition={{ duration: 0.2 }}>
                 {isOpen ? <X size={24} /> : <Menu size={24} />}
               </motion.div>
             </button>
@@ -84,7 +59,6 @@ const Navigation = () => {
         </div>
       </motion.nav>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <>
@@ -100,14 +74,15 @@ const Navigation = () => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 md:hidden"
+              className="fixed top-0 right-0 h-full w-80 z-50 md:hidden liquid-glass-nav"
+              style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(40px) saturate(200%)' }}
             >
               <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                  <span className="font-display font-semibold text-xl">Menu</span>
+                <div className="flex items-center justify-between p-6 border-b border-black/5">
+                  <span className="font-semibold text-xl text-[#1c1c1e]">Menu</span>
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="p-2 rounded-xl hover:bg-black/5 transition-colors text-[#1c1c1e] border-0 bg-transparent cursor-pointer"
                   >
                     <X size={24} />
                   </button>
@@ -124,7 +99,7 @@ const Navigation = () => {
                         <Link
                           href={item.href}
                           onClick={() => setIsOpen(false)}
-                          className="block text-xl font-medium text-gray-900 hover:text-blue-600 transition-colors"
+                          className="block text-xl font-medium text-[#48484a] hover:text-[#007aff] transition-colors no-underline"
                         >
                           {item.name}
                         </Link>
@@ -138,7 +113,6 @@ const Navigation = () => {
         )}
       </AnimatePresence>
 
-      {/* Spacer for fixed navigation */}
       <div className="h-16" />
     </>
   );

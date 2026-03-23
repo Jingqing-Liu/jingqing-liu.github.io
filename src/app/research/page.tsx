@@ -6,6 +6,7 @@ import { FlaskConical, User, FileImage, Search } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { researchProjects } from '../../data';
+import { useLanguage, localize, localizeArray } from '../../i18n/LanguageContext';
 
 const AnimatedSection = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
   const ref = useRef(null);
@@ -25,6 +26,7 @@ const AnimatedSection = ({ children, className = '' }: { children: React.ReactNo
 };
 
 export default function Research() {
+  const { t, lang } = useLanguage();
   const [query, setQuery] = useState('');
 
   const filteredProjects = useMemo(() => {
@@ -33,8 +35,11 @@ export default function Research() {
     return researchProjects.filter(
       (p) =>
         p.title.toLowerCase().includes(q) ||
+        (p.title_zh && p.title_zh.includes(q)) ||
         p.advisor.toLowerCase().includes(q) ||
-        p.keyPoints.some((k) => k.toLowerCase().includes(q))
+        (p.advisor_zh && p.advisor_zh.includes(q)) ||
+        p.keyPoints.some((k) => k.toLowerCase().includes(q)) ||
+        (p.keyPoints_zh && p.keyPoints_zh.some((k) => k.includes(q)))
     );
   }, [query]);
 
@@ -62,7 +67,7 @@ export default function Research() {
             >
               <span className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono tracking-wider uppercase text-[#48484a] liquid-glass-pill">
                 <FlaskConical size={14} className="text-[#007aff]" />
-                Research Portfolio
+                {t('research.badge')}
               </span>
             </motion.div>
 
@@ -72,7 +77,7 @@ export default function Research() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-5xl md:text-7xl font-bold text-[#1c1c1e] tracking-tight leading-tight mb-6"
             >
-              Research
+              {t('research.title')}
             </motion.h1>
 
             <motion.p
@@ -81,8 +86,7 @@ export default function Research() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="text-lg text-[#48484a] leading-relaxed mx-auto text-center"
             >
-              Exploring cybersecurity, network security, and distributed systems
-              — from platform vulnerabilities to blockchain protocol design.
+              {t('research.subtitle')}
             </motion.p>
           </div>
         </div>
@@ -95,7 +99,7 @@ export default function Research() {
             <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8e8e93]" />
             <input
               type="text"
-              placeholder="Search projects, advisors, keywords..."
+              placeholder={t('research.search')}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="w-full pl-11 pr-4 py-3 text-sm text-[#1c1c1e] placeholder-[#8e8e93] liquid-glass-card border-none outline-none focus:ring-2 focus:ring-[#007aff]/30 rounded-2xl transition-all"
@@ -125,19 +129,19 @@ export default function Research() {
                         <div className="flex items-center gap-2 mb-3">
                           <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-[#007aff] liquid-glass-pill px-2 py-0.5">
                             <User size={10} />
-                            Advisor
+                            {t('research.advisor')}
                           </span>
-                          <span className="text-xs text-[#8e8e93] font-mono truncate">{project.advisor}</span>
+                          <span className="text-xs text-[#8e8e93] font-mono truncate">{localize(lang, project.advisor, project.advisor_zh)}</span>
                         </div>
 
                         {/* Title */}
                         <h3 className="text-lg font-semibold text-[#1c1c1e] mb-3 leading-snug">
-                          {project.title}
+                          {localize(lang, project.title, project.title_zh)}
                         </h3>
 
                         {/* Key Points */}
                         <div className="space-y-1 mb-4">
-                          {project.keyPoints.map((point, i) => (
+                          {localizeArray(lang, project.keyPoints, project.keyPoints_zh).map((point, i) => (
                             <div key={i} className="flex items-start gap-2">
                               <div className="w-1.5 h-1.5 bg-[#007aff] rounded-full flex-shrink-0 mt-1.5" />
                               <p className="text-xs text-[#48484a] leading-snug">{point}</p>
@@ -152,7 +156,7 @@ export default function Research() {
                             className="inline-flex items-center gap-1.5 text-xs font-medium text-[#007aff] hover:text-[#0056b3] transition-colors"
                           >
                             {project.poster && <FileImage size={12} />}
-                            <span>{project.poster ? 'View Details & Poster' : 'Learn More'}</span>
+                            <span>{project.poster ? t('research.viewDetails') : t('research.learnMore')}</span>
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>

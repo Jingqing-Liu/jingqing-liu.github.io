@@ -4,21 +4,24 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Terminal, Network } from 'lucide-react';
 import { personalInfo } from '../../../data';
-
-const highlights = [
-  { icon: Shield, label: 'Network Security', desc: 'API & Platform Vulnerability Research' },
-  { icon: Terminal, label: 'Systems Architecture', desc: 'Full-Stack & Distributed Systems' },
-  { icon: Network, label: 'Blockchain Security', desc: 'Cryptographic Protocol Analysis' },
-];
+import { useLanguage } from '../../../i18n/LanguageContext';
 
 const HeroSection = () => {
+  const { t } = useLanguage();
+
+  const highlights = [
+    { icon: Shield, label: t('hero.highlight.security'), desc: t('hero.highlight.security.desc') },
+    { icon: Terminal, label: t('hero.highlight.systems'), desc: t('hero.highlight.systems.desc') },
+    { icon: Network, label: t('hero.highlight.blockchain'), desc: t('hero.highlight.blockchain.desc') },
+  ];
+
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-6 md:px-8 py-20">
         <div className="max-w-6xl mx-auto">
-          {/* Top tag - liquid glass pill */}
+          {/* Top tag */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -27,7 +30,7 @@ const HeroSection = () => {
           >
             <span className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono tracking-wider uppercase text-[#48484a] liquid-glass-pill">
               <span className="w-1.5 h-1.5 bg-[#007aff] rounded-full animate-pulse" />
-              Cybersecurity Researcher & Engineer
+              {t('hero.tag')}
             </span>
           </motion.div>
 
@@ -59,19 +62,21 @@ const HeroSection = () => {
             className="mb-12 max-w-2xl"
           >
             <p className="text-xl md:text-2xl text-[#48484a] font-light leading-relaxed">
-              Securing the digital frontier through
-              <span className="text-[#1c1c1e] font-medium"> vulnerability research</span>,
-              <span className="text-[#1c1c1e] font-medium"> systems architecture</span>, and
-              <span className="text-[#1c1c1e] font-medium"> protocol analysis</span>.
+              {t('hero.tagline.prefix')}
+              <span className="text-[#1c1c1e] font-medium">{t('hero.tagline.vr')}</span>,
+              <span className="text-[#1c1c1e] font-medium">{t('hero.tagline.sa')}</span>
+              {t('hero.tagline.and')}
+              <span className="text-[#1c1c1e] font-medium">{t('hero.tagline.pa')}</span>
+              {t('hero.tagline.period')}
             </p>
             <div className="mt-4 flex items-center gap-3 text-sm text-[#8e8e93]">
-              <span className="font-mono">M.S. Computer Science</span>
+              <span className="font-mono">{t('hero.subtitle')}</span>
               <span className="w-1 h-1 bg-[#8e8e93] rounded-full" />
               <span className="font-mono">{personalInfo.address.institution}</span>
             </div>
           </motion.div>
 
-          {/* Highlight cards - Liquid Glass */}
+          {/* Highlight cards */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -102,7 +107,7 @@ const HeroSection = () => {
             ))}
           </motion.div>
 
-          {/* Skills - Liquid Glass pills */}
+          {/* Skills */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

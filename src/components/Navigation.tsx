@@ -4,11 +4,20 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { navItems, personalInfo } from '../data';
+import { personalInfo } from '../data';
+import { useLanguage } from '../i18n/LanguageContext';
+
+const navKeys = [
+  { key: 'nav.home', href: '/' },
+  { key: 'nav.education', href: '/education' },
+  { key: 'nav.research', href: '/research' },
+  { key: 'nav.experience', href: '/experience' },
+];
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { lang, setLang, t } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -34,27 +43,45 @@ const Navigation = () => {
             </Link>
 
             <div className="hidden md:flex items-center space-x-8">
-              {navItems.map((item) => (
-                <Link key={item.name} href={item.href} className="relative group no-underline">
+              {navKeys.map((item) => (
+                <Link key={item.key} href={item.href} className="relative group no-underline">
                   <motion.span
                     whileHover={{ y: -2 }}
                     className="text-[#48484a] hover:text-[#007aff] transition-colors duration-200 font-medium text-sm"
                   >
-                    {item.name}
+                    {t(item.key)}
                   </motion.span>
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#007aff] rounded-full group-hover:w-full transition-all duration-300" />
                 </Link>
               ))}
+
+              {/* Language Toggle */}
+              <button
+                onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
+                className="text-xs font-mono text-[#8e8e93] hover:text-[#007aff] transition-colors border-0 bg-transparent cursor-pointer px-2 py-1 liquid-glass-pill"
+              >
+                {lang === 'en' ? '中文' : 'EN'}
+              </button>
             </div>
 
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden p-2 rounded-xl hover:bg-black/5 transition-colors text-[#1c1c1e] border-0 bg-transparent cursor-pointer"
-            >
-              <motion.div animate={{ rotate: isOpen ? 90 : 0 }} transition={{ duration: 0.2 }}>
-                {isOpen ? <X size={24} /> : <Menu size={24} />}
-              </motion.div>
-            </button>
+            <div className="md:hidden flex items-center gap-3">
+              {/* Mobile Language Toggle */}
+              <button
+                onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
+                className="text-xs font-mono text-[#8e8e93] hover:text-[#007aff] transition-colors border-0 bg-transparent cursor-pointer px-2 py-1 liquid-glass-pill"
+              >
+                {lang === 'en' ? '中文' : 'EN'}
+              </button>
+
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="p-2 rounded-xl hover:bg-black/5 transition-colors text-[#1c1c1e] border-0 bg-transparent cursor-pointer"
+              >
+                <motion.div animate={{ rotate: isOpen ? 90 : 0 }} transition={{ duration: 0.2 }}>
+                  {isOpen ? <X size={24} /> : <Menu size={24} />}
+                </motion.div>
+              </button>
+            </div>
           </div>
         </div>
       </motion.nav>
@@ -79,7 +106,7 @@ const Navigation = () => {
             >
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between p-6 border-b border-black/5">
-                  <span className="font-semibold text-xl text-[#1c1c1e]">Menu</span>
+                  <span className="font-semibold text-xl text-[#1c1c1e]">{t('nav.menu')}</span>
                   <button
                     onClick={() => setIsOpen(false)}
                     className="p-2 rounded-xl hover:bg-black/5 transition-colors text-[#1c1c1e] border-0 bg-transparent cursor-pointer"
@@ -89,9 +116,9 @@ const Navigation = () => {
                 </div>
                 <div className="flex-1 p-6">
                   <div className="space-y-6">
-                    {navItems.map((item, index) => (
+                    {navKeys.map((item, index) => (
                       <motion.div
-                        key={item.name}
+                        key={item.key}
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
@@ -101,7 +128,7 @@ const Navigation = () => {
                           onClick={() => setIsOpen(false)}
                           className="block text-xl font-medium text-[#48484a] hover:text-[#007aff] transition-colors no-underline"
                         >
-                          {item.name}
+                          {t(item.key)}
                         </Link>
                       </motion.div>
                     ))}

@@ -6,12 +6,14 @@ import { ArrowLeft, FlaskConical, User, FileImage } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ResearchDetailType } from '../data/research-details';
+import { useLanguage, localize, localizeArray } from '../i18n/LanguageContext';
 
 interface ResearchDetailClientProps {
   detail: ResearchDetailType;
 }
 
 export default function ResearchDetailClient({ detail }: ResearchDetailClientProps) {
+  const { t, lang } = useLanguage();
   return (
     <div className="min-h-screen relative" style={{ background: '#f2f2f7' }}>
       {/* Background gradient orbs */}
@@ -36,7 +38,7 @@ export default function ResearchDetailClient({ detail }: ResearchDetailClientPro
               className="inline-flex items-center gap-2 text-sm text-[#8e8e93] hover:text-[#007aff] transition-colors"
             >
               <ArrowLeft size={16} />
-              Back to Research
+              {t('research.back')}
             </Link>
           </motion.div>
 
@@ -50,16 +52,16 @@ export default function ResearchDetailClient({ detail }: ResearchDetailClientPro
             <div className="flex items-center gap-2 mb-4">
               <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-[#007aff] liquid-glass-pill px-2 py-0.5">
                 <FlaskConical size={10} />
-                Research
+                {t('research.title')}
               </span>
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight leading-tight mb-4">
-              {detail.title}
+              {localize(lang, detail.title, detail.title_zh)}
             </h1>
             {detail.advisor && (
               <div className="flex items-center gap-2">
                 <User size={14} className="text-[#8e8e93]" />
-                <span className="text-sm text-[#636366]">{detail.advisor}</span>
+                <span className="text-sm text-[#636366]">{localize(lang, detail.advisor, detail.advisor_zh)}</span>
               </div>
             )}
           </motion.div>
@@ -74,7 +76,7 @@ export default function ResearchDetailClient({ detail }: ResearchDetailClientPro
             >
               <div className="flex items-center gap-2 mb-4">
                 <FileImage size={14} className="text-[#007aff]" />
-                <h2 className="text-[11px] font-semibold text-[#636366] tracking-wider uppercase">Research Poster</h2>
+                <h2 className="text-[11px] font-semibold text-[#636366] tracking-wider uppercase">{t('research.poster')}</h2>
               </div>
               <div className="rounded-2xl overflow-hidden">
                 <Image
@@ -99,11 +101,11 @@ export default function ResearchDetailClient({ detail }: ResearchDetailClientPro
               >
                 {section.subtitle && (
                   <h2 className="text-sm font-semibold text-[#1c1c1e] tracking-tight mb-2">
-                    {section.subtitle}
+                    {localize(lang, section.subtitle, section.subtitle_zh)}
                   </h2>
                 )}
                 <div className="space-y-3">
-                  {section.paragraphs.map((paragraph, pIndex) => (
+                  {localizeArray(lang, section.paragraphs, section.paragraphs_zh).map((paragraph, pIndex) => (
                     <p key={pIndex} className="text-sm text-[#48484a] leading-relaxed">
                       {paragraph}
                     </p>
@@ -128,7 +130,7 @@ export default function ResearchDetailClient({ detail }: ResearchDetailClientPro
               className="inline-flex items-center gap-2 text-sm text-[#8e8e93] hover:text-[#007aff] transition-colors"
             >
               <ArrowLeft size={14} />
-              Back to All Research
+              {t('research.backAll')}
             </Link>
           </motion.div>
         </div>

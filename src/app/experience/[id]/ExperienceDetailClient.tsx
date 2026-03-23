@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowLeft, Briefcase, GraduationCap, Building, Clock, Wrench } from 'lucide-react';
 import type { Experience } from '../../../data/experience';
+import { useLanguage, localize, localizeArray } from '../../../i18n/LanguageContext';
 
 const getTypeIcon = (type: string) => {
   switch (type) {
@@ -42,12 +43,12 @@ const BulletList = ({ title, icon: Icon, items }: { title: string; icon: React.E
 );
 
 export default function ExperienceDetailClient({ exp }: { exp: Experience }) {
+  const { t, lang } = useLanguage();
   const IconComponent = getTypeIcon(exp.type);
   const typeColor = getTypeColor(exp.type);
 
   return (
     <div className="min-h-screen relative" style={{ background: '#f2f2f7' }}>
-      {/* Background gradient orbs */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full opacity-25"
           style={{ background: 'radial-gradient(circle, #a8d8ff 0%, transparent 70%)' }} />
@@ -57,23 +58,18 @@ export default function ExperienceDetailClient({ exp }: { exp: Experience }) {
 
       <div className="container mx-auto px-6 md:px-8 pt-24 pb-16">
         <div className="max-w-4xl mx-auto">
-          {/* Back Link */}
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
             className="mb-8"
           >
-            <Link
-              href="/experience"
-              className="inline-flex items-center gap-2 text-sm text-[#8e8e93] hover:text-[#007aff] transition-colors"
-            >
+            <Link href="/experience" className="inline-flex items-center gap-2 text-sm text-[#8e8e93] hover:text-[#007aff] transition-colors">
               <ArrowLeft size={16} />
-              Back to Experience
+              {t('exp.back')}
             </Link>
           </motion.div>
 
-          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -83,48 +79,42 @@ export default function ExperienceDetailClient({ exp }: { exp: Experience }) {
             <div className="flex items-center gap-2 mb-4">
               <span className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider ${typeColor} liquid-glass-pill px-2 py-0.5`}>
                 <IconComponent size={10} />
-                {exp.type}
+                {t(`exp.type.${exp.type}`)}
               </span>
               <span className="text-xs text-[#8e8e93] font-mono">{exp.period}</span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight mb-2">{exp.title}</h1>
-            <p className="text-lg text-[#007aff] font-medium">{exp.company}</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight mb-2">{localize(lang, exp.title, exp.title_zh)}</h1>
+            <p className="text-lg text-[#007aff] font-medium">{localize(lang, exp.company, exp.company_zh)}</p>
             {exp.supervisor && (
-              <p className="text-sm text-[#636366] mt-2">Supervisor: {exp.supervisor}</p>
+              <p className="text-sm text-[#636366] mt-2">{t('exp.supervisor')}: {localize(lang, exp.supervisor, exp.supervisor_zh)}</p>
             )}
           </motion.div>
 
-          {/* Content */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="space-y-6"
           >
-            {/* Description */}
-            <p className="text-sm text-[#48484a] leading-relaxed">{exp.description}</p>
+            <p className="text-sm text-[#48484a] leading-relaxed">{localize(lang, exp.description, exp.description_zh)}</p>
 
-            {/* Projects */}
             {exp.projects && exp.projects.length > 0 && (
-              <BulletList title="Projects" icon={Clock} items={exp.projects} />
+              <BulletList title={t('exp.projects')} icon={Clock} items={localizeArray(lang, exp.projects, exp.projects_zh)} />
             )}
 
-            {/* Achievements */}
             {exp.achievements && exp.achievements.length > 0 && (
-              <BulletList title="Key Achievements" icon={GraduationCap} items={exp.achievements} />
+              <BulletList title={t('exp.achievements')} icon={GraduationCap} items={localizeArray(lang, exp.achievements, exp.achievements_zh)} />
             )}
 
-            {/* Responsibilities */}
             {exp.responsibilities && exp.responsibilities.length > 0 && (
-              <BulletList title="Responsibilities" icon={Briefcase} items={exp.responsibilities} />
+              <BulletList title={t('exp.responsibilities')} icon={Briefcase} items={localizeArray(lang, exp.responsibilities, exp.responsibilities_zh)} />
             )}
 
-            {/* Technologies */}
             {exp.technologies && exp.technologies.length > 0 && (
               <div>
                 <h4 className="text-[11px] font-semibold text-[#636366] tracking-wider uppercase flex items-center gap-1.5 mb-3">
                   <Wrench size={12} className="text-[#007aff]" />
-                  Technologies
+                  {t('exp.technologies')}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {exp.technologies.map((tech, i) => (

@@ -8,6 +8,7 @@ import { researchProjects } from '../data/research';
 import { experienceData } from '../data/experience';
 import { Shield, ExternalLink, ChevronRight, Briefcase, BookOpen } from 'lucide-react';
 import Link from 'next/link';
+import { useLanguage, localize } from '../i18n/LanguageContext';
 
 const AnimatedSection = ({
   children,
@@ -33,6 +34,7 @@ const AnimatedSection = ({
 };
 
 const ExperienceHighlights = () => {
+  const { t, lang } = useLanguage();
   const topExperiences = experienceData.slice(0, 3);
 
   return (
@@ -43,14 +45,14 @@ const ExperienceHighlights = () => {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Briefcase size={16} className="text-[#007aff]" />
-                <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">Experience</span>
+                <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">{t('home.experience.tag')}</span>
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-[#1c1c1e] tracking-tight">
-                Where I&apos;ve Worked
+                {t('home.experience.title')}
               </h2>
             </div>
             <Link href="/experience" className="hidden md:flex items-center gap-1 text-sm text-[#8e8e93] hover:text-[#007aff] transition-colors no-underline">
-              View all <ChevronRight size={14} />
+              {t('home.experience.viewAll')} <ChevronRight size={14} />
             </Link>
           </div>
 
@@ -73,12 +75,12 @@ const ExperienceHighlights = () => {
                         exp.type === 'Academic' ? 'text-green-600' :
                         'text-orange-600'
                       }`} style={{ borderRadius: '99em' }}>
-                        {exp.type}
+                        {t(`exp.type.${exp.type}`)}
                       </span>
                       <span className="text-xs text-[#8e8e93] font-mono">{exp.period}</span>
                     </div>
-                    <h3 className="text-lg font-semibold text-[#1c1c1e] mb-1">{exp.title}</h3>
-                    <p className="text-sm text-[#48484a] mb-0">{exp.company}</p>
+                    <h3 className="text-lg font-semibold text-[#1c1c1e] mb-1">{localize(lang, exp.title, exp.title_zh)}</h3>
+                    <p className="text-sm text-[#48484a] mb-0">{localize(lang, exp.company, exp.company_zh)}</p>
                   </div>
                   {exp.technologies && (
                     <div className="flex flex-wrap gap-1.5 md:max-w-xs">
@@ -100,7 +102,7 @@ const ExperienceHighlights = () => {
           </div>
 
           <Link href="/experience" className="md:hidden flex items-center gap-1 text-sm text-[#8e8e93] hover:text-[#007aff] transition-colors mt-6 no-underline">
-            View all experience <ChevronRight size={14} />
+            {t('home.experience.viewAllMobile')} <ChevronRight size={14} />
           </Link>
         </div>
       </div>
@@ -109,6 +111,7 @@ const ExperienceHighlights = () => {
 };
 
 const ResearchHighlights = () => {
+  const { t, lang } = useLanguage();
   const topResearch = researchProjects.slice(0, 3);
 
   return (
@@ -119,14 +122,14 @@ const ResearchHighlights = () => {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <BookOpen size={16} className="text-[#007aff]" />
-                <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">Research</span>
+                <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">{t('home.research.tag')}</span>
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-[#1c1c1e] tracking-tight">
-                Security Research
+                {t('home.research.title')}
               </h2>
             </div>
             <Link href="/research" className="hidden md:flex items-center gap-1 text-sm text-[#8e8e93] hover:text-[#007aff] transition-colors no-underline">
-              View all <ChevronRight size={14} />
+              {t('home.research.viewAll')} <ChevronRight size={14} />
             </Link>
           </div>
 
@@ -144,17 +147,17 @@ const ResearchHighlights = () => {
                     <div className="flex items-center gap-2 mb-4">
                       <Shield size={16} className="text-[#007aff]" />
                       <span className="text-[10px] font-mono uppercase tracking-wider text-[#8e8e93]">
-                        {project.advisor.split('(')[0].trim()}
+                        {localize(lang, project.advisor, project.advisor_zh).split('(').shift()?.split('（').shift()?.trim()}
                       </span>
                     </div>
                     <h3 className="text-[#1c1c1e] font-semibold text-sm mb-3 leading-snug group-hover:text-[#007aff] transition-colors">
-                      {project.title}
+                      {localize(lang, project.title, project.title_zh)}
                     </h3>
                     <p className="text-xs text-[#8e8e93] leading-relaxed mb-4 line-clamp-3">
-                      {project.keyPoints[0]}
+                      {lang === 'zh' && project.keyPoints_zh ? project.keyPoints_zh[0] : project.keyPoints[0]}
                     </p>
                     <div className="flex items-center gap-1 text-xs text-[#007aff]">
-                      <span>Read more</span>
+                      <span>{t('home.research.readMore')}</span>
                       <ExternalLink size={10} />
                     </div>
                   </div>
@@ -164,7 +167,7 @@ const ResearchHighlights = () => {
           </div>
 
           <Link href="/research" className="md:hidden flex items-center gap-1 text-sm text-[#8e8e93] hover:text-[#007aff] transition-colors mt-6 no-underline">
-            View all research <ChevronRight size={14} />
+            {t('home.research.viewAllMobile')} <ChevronRight size={14} />
           </Link>
         </div>
       </div>

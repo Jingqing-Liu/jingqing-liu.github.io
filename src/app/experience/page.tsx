@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Briefcase, GraduationCap, Building } from 'lucide-react';
 import { experienceData } from '../../data';
 import type { Experience } from '../../data/experience';
+import { useLanguage, localize } from '../../i18n/LanguageContext';
 
 const AnimatedSection = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
   const ref = useRef(null);
@@ -55,6 +56,7 @@ const getDotColor = (type: string) => {
 };
 
 export default function ExperiencePage() {
+  const { t, lang } = useLanguage();
   return (
     <div className="min-h-screen relative" style={{ background: '#f2f2f7' }}>
       {/* Background gradient orbs */}
@@ -79,7 +81,7 @@ export default function ExperiencePage() {
             >
               <span className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono tracking-wider uppercase text-[#48484a] liquid-glass-pill">
                 <Briefcase size={14} className="text-[#007aff]" />
-                Professional Journey
+                {t('exp.badge')}
               </span>
             </motion.div>
 
@@ -89,7 +91,7 @@ export default function ExperiencePage() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-5xl md:text-7xl font-bold text-[#1c1c1e] tracking-tight leading-tight mb-6"
             >
-              Experience
+              {t('exp.title')}
             </motion.h1>
 
             <motion.p
@@ -98,8 +100,7 @@ export default function ExperiencePage() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="text-lg text-[#48484a] leading-relaxed mx-auto text-center"
             >
-              From research and academia to industry — diverse perspectives
-              on technology, security, and innovation.
+              {t('exp.subtitle')}
             </motion.p>
           </div>
         </div>
@@ -142,18 +143,18 @@ export default function ExperiencePage() {
                           <div className="flex items-center gap-2 mb-2">
                             <span className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider ${typeColor} liquid-glass-pill px-2 py-0.5`}>
                               <IconComponent size={10} />
-                              {exp.type}
+                              {t(`exp.type.${exp.type}`)}
                             </span>
                             <span className="text-xs text-[#8e8e93] font-mono">{exp.period}</span>
                           </div>
 
                           {/* Title & Company */}
-                          <h3 className="text-base font-semibold text-[#1c1c1e] mb-1 group-hover:text-[#007aff] transition-colors">{exp.title}</h3>
-                          <p className="text-sm text-[#636366]">{exp.company}</p>
+                          <h3 className="text-base font-semibold text-[#1c1c1e] mb-1 group-hover:text-[#007aff] transition-colors">{localize(lang, exp.title, exp.title_zh)}</h3>
+                          <p className="text-sm text-[#636366]">{localize(lang, exp.company, exp.company_zh)}</p>
 
                           {/* Arrow hint */}
                           <div className="mt-3 flex items-center text-xs text-[#8e8e93] group-hover:text-[#007aff] transition-colors">
-                            <span>View details</span>
+                            <span>{t('exp.viewDetails')}</span>
                             <svg className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>

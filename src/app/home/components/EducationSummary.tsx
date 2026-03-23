@@ -5,9 +5,11 @@ import { motion } from 'framer-motion';
 import { GraduationCap, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { educationData } from '../../../data';
+import { useLanguage, localize } from '../../../i18n/LanguageContext';
 
 const EducationSummary = () => {
   const [graduate, undergraduate] = educationData;
+  const { t, lang } = useLanguage();
 
   return (
     <section className="py-12 relative">
@@ -17,14 +19,14 @@ const EducationSummary = () => {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <GraduationCap size={16} className="text-[#007aff]" />
-                <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">Education</span>
+                <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">{t('home.education.tag')}</span>
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-[#1c1c1e] tracking-tight">
-                Academic Background
+                {t('home.education.title')}
               </h2>
             </div>
             <Link href="/education" className="hidden md:flex items-center gap-1 text-sm text-[#8e8e93] hover:text-[#007aff] transition-colors no-underline">
-              View all <ChevronRight size={14} />
+              {t('home.education.viewAll')} <ChevronRight size={14} />
             </Link>
           </div>
 
@@ -38,14 +40,14 @@ const EducationSummary = () => {
             >
               <div className="mb-4">
                 <span className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 text-[#007aff] liquid-glass-pill">
-                  {graduate.status}
+                  {graduate.status ? localize(lang, graduate.status, graduate.status_zh) : ''}
                 </span>
               </div>
-              <h3 className="text-xl font-semibold text-[#1c1c1e] mb-2">{graduate.degree}</h3>
-              <p className="text-base text-[#007aff] font-medium mb-3">{graduate.institution}</p>
+              <h3 className="text-xl font-semibold text-[#1c1c1e] mb-2">{localize(lang, graduate.degree, graduate.degree_zh)}</h3>
+              <p className="text-base text-[#007aff] font-medium mb-3">{localize(lang, graduate.institution, graduate.institution_zh)}</p>
               <div className="space-y-1">
-                <p className="text-sm text-[#48484a] mb-0">Computer Science</p>
-                <p className="text-xs text-[#8e8e93] mb-0">{graduate.focus}</p>
+                <p className="text-sm text-[#48484a] mb-0">{localize(lang, 'Computer Science', '计算机科学')}</p>
+                <p className="text-xs text-[#8e8e93] mb-0">{localize(lang, graduate.focus, graduate.focus_zh)}</p>
               </div>
             </motion.div>
 
@@ -58,14 +60,14 @@ const EducationSummary = () => {
             >
               <div className="mb-4">
                 <span className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 text-purple-600 liquid-glass-pill">
-                  {undergraduate.status}
+                  {undergraduate.status ? localize(lang, undergraduate.status, undergraduate.status_zh) : ''}
                 </span>
               </div>
-              <h3 className="text-xl font-semibold text-[#1c1c1e] mb-2">{undergraduate.degree}</h3>
-              <p className="text-base text-[#007aff] font-medium mb-3">{undergraduate.institution}</p>
+              <h3 className="text-xl font-semibold text-[#1c1c1e] mb-2">{localize(lang, undergraduate.degree, undergraduate.degree_zh)}</h3>
+              <p className="text-base text-[#007aff] font-medium mb-3">{localize(lang, undergraduate.institution, undergraduate.institution_zh)}</p>
               <div className="space-y-1">
-                <p className="text-sm text-[#48484a] mb-0">Computer and Information Science</p>
-                <p className="text-xs text-[#8e8e93] mb-0">GPA: {undergraduate.gpa} &bull; Graduated 2024</p>
+                <p className="text-sm text-[#48484a] mb-0">{localize(lang, 'Computer and Information Science', '计算机与信息科学')}</p>
+                <p className="text-xs text-[#8e8e93] mb-0">GPA: {undergraduate.gpa} &bull; {localize(lang, 'Graduated 2024', '2024 年毕业')}</p>
               </div>
             </motion.div>
           </div>

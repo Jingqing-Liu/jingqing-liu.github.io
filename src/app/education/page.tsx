@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { GraduationCap, Award, BookOpen, MapPin, Star } from 'lucide-react';
 import { educationData } from '../../data';
+import { useLanguage, localize, localizeArray } from '../../i18n/LanguageContext';
 
 const AnimatedSection = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
   const ref = useRef(null);
@@ -23,12 +24,13 @@ const AnimatedSection = ({ children, className = '' }: { children: React.ReactNo
 };
 
 export default function Education() {
+  const { t, lang } = useLanguage();
   const [graduate, undergraduate] = educationData;
 
   // Build unified timeline entries sorted by year (newest first)
   type TimelineEntry =
     | { type: 'education'; data: typeof graduate; year: number }
-    | { type: 'award'; title: string; year: number };
+    | { type: 'award'; title: string; title_zh?: string; year: number };
 
   const timelineEntries: TimelineEntry[] = [
     { type: 'education' as const, data: graduate, year: 2026 },
@@ -36,6 +38,7 @@ export default function Education() {
     ...(undergraduate.awards?.map((a) => ({
       type: 'award' as const,
       title: a.title,
+      title_zh: a.title_zh,
       year: a.year,
     })) || []),
   ].sort((a, b) => b.year - a.year || (a.type === 'education' ? 1 : -1));
@@ -64,7 +67,7 @@ export default function Education() {
             >
               <span className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono tracking-wider uppercase text-[#48484a] liquid-glass-pill">
                 <GraduationCap size={14} className="text-[#007aff]" />
-                Academic Journey
+                {t('edu.badge')}
               </span>
             </motion.div>
 
@@ -74,7 +77,7 @@ export default function Education() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-5xl md:text-7xl font-bold text-[#1c1c1e] tracking-tight leading-tight mb-6"
             >
-              Education
+              {t('edu.title')}
             </motion.h1>
 
             <motion.p
@@ -84,8 +87,7 @@ export default function Education() {
               className="text-lg text-[#48484a] leading-relaxed mx-auto"
               style={{ textAlign: 'center' }}
             >
-              A journey through Computer Science — from cybersecurity foundations
-              at Delaware to AI and systems research at Brown.
+              {t('edu.subtitle')}
             </motion.p>
           </div>
         </div>
@@ -123,21 +125,21 @@ export default function Education() {
                           <div className="flex items-center gap-2 mb-3">
                             {edu.status && (
                               <span className={`text-[10px] font-mono uppercase tracking-wider liquid-glass-pill px-2 py-0.5 ${isCurrent ? 'text-[#007aff]' : 'text-purple-600'}`}>
-                                {edu.status}
+                                {localize(lang, edu.status, edu.status_zh)}
                               </span>
                             )}
                             <span className="text-xs text-[#8e8e93] font-mono">{edu.period}</span>
                           </div>
-                          <h3 className="text-lg font-semibold text-[#1c1c1e] mb-3">{edu.institution}</h3>
+                          <h3 className="text-lg font-semibold text-[#1c1c1e] mb-3">{localize(lang, edu.institution, edu.institution_zh)}</h3>
 
                           {/* Program Details */}
                           <div className="space-y-2 mb-4">
                             {([
-                                  ...(edu.degreeType ? [{ label: 'Degree', value: edu.degreeType, icon: GraduationCap }] : []),
-                                  ...(edu.major ? [{ label: 'Major', value: edu.major, icon: BookOpen }] : []),
-                                  { label: 'GPA', value: edu.gpa || '', icon: Star },
-                                  { label: 'Focus', value: edu.focus, icon: BookOpen },
-                                  { label: 'Location', value: isCurrent ? 'Providence, RI' : 'Newark, Delaware', icon: MapPin },
+                                  ...(edu.degreeType ? [{ label: t('edu.label.degree'), value: localize(lang, edu.degreeType, edu.degreeType_zh), icon: GraduationCap }] : []),
+                                  ...(edu.major ? [{ label: t('edu.label.major'), value: localize(lang, edu.major, edu.major_zh), icon: BookOpen }] : []),
+                                  { label: t('edu.label.gpa'), value: edu.gpa || '', icon: Star },
+                                  { label: t('edu.label.focus'), value: localize(lang, edu.focus, edu.focus_zh), icon: BookOpen },
+                                  { label: t('edu.label.location'), value: isCurrent ? 'Providence, RI' : 'Newark, Delaware', icon: MapPin },
                                 ]
                             ).map((item) => (
                               <div key={item.label} className="flex items-center py-0.5">
@@ -150,7 +152,7 @@ export default function Education() {
 
                           {/* Overview */}
                           <p className={`text-xs text-[#48484a] leading-relaxed ${edu.activities && edu.activities.length > 0 ? 'mb-4' : ''}`}>
-                            {edu.description}
+                            {localize(lang, edu.description, edu.description_zh)}
                           </p>
 
                           {/* Activities */}
@@ -158,9 +160,9 @@ export default function Education() {
                             <div className="space-y-2">
                               <h4 className="text-[11px] font-semibold text-[#636366] tracking-wider uppercase flex items-center gap-1.5">
                                 <BookOpen size={12} className="text-[#007aff]" />
-                                Activities
+                                {t('edu.label.activities')}
                               </h4>
-                              {edu.activities.map((activity, i) => (
+                              {localizeArray(lang, edu.activities, edu.activities_zh).map((activity, i) => (
                                 <div key={i} className="flex items-center gap-2 py-1">
                                   <div className="w-1.5 h-1.5 bg-purple-500 rounded-full flex-shrink-0" />
                                   <span className="text-xs text-[#1c1c1e]">{activity}</span>
@@ -191,11 +193,11 @@ export default function Education() {
                         <div className="flex items-center gap-2 mb-2">
                           <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-amber-600 liquid-glass-pill px-2 py-0.5">
                             <Award size={10} />
-                            Award
+                            {t('edu.award')}
                           </span>
                           <span className="text-xs text-[#8e8e93] font-mono">{entry.year}</span>
                         </div>
-                        <p className="text-sm font-medium text-[#1c1c1e]">{entry.title}</p>
+                        <p className="text-sm font-medium text-[#1c1c1e]">{localize(lang, entry.title, entry.title_zh)}</p>
                       </div>
                     </motion.div>
                   );

@@ -56,47 +56,35 @@ const ExperienceHighlights = () => {
             </Link>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {topExperiences.map((exp, index) => (
               <motion.div
                 key={exp.id}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="liquid-glass-card p-6 md:p-8"
               >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider liquid-glass-pill ${
+                <Link href={`/experience/${exp.id}`} className="no-underline">
+                  <div className="liquid-glass-card p-6 h-full group cursor-pointer">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Briefcase size={16} className="text-[#007aff]" />
+                      <span className={`text-[10px] font-mono uppercase tracking-wider ${
                         exp.type === 'Research' ? 'text-purple-600' :
                         exp.type === 'Industry' ? 'text-[#007aff]' :
                         exp.type === 'Academic' ? 'text-green-600' :
                         'text-orange-600'
-                      }`} style={{ borderRadius: '99em' }}>
+                      }`}>
                         {t(`exp.type.${exp.type}`)}
                       </span>
-                      <span className="text-xs text-[#8e8e93] font-mono">{exp.period}</span>
                     </div>
-                    <h3 className="text-lg font-semibold text-[#1c1c1e] mb-1">{localize(lang, exp.title, exp.title_zh)}</h3>
-                    <p className="text-sm text-[#48484a] mb-0">{localize(lang, exp.company, exp.company_zh)}</p>
+                    <h3 className="text-[#1c1c1e] font-semibold text-sm mb-2 leading-snug group-hover:text-[#007aff] transition-colors">
+                      {localize(lang, exp.title, exp.title_zh)}
+                    </h3>
+                    <p className="text-xs text-[#8e8e93] mb-3">{localize(lang, exp.company, exp.company_zh)}</p>
+                    <span className="text-[10px] text-[#aeaeb2] font-mono">{exp.period}</span>
                   </div>
-                  {exp.technologies && (
-                    <div className="flex flex-wrap gap-1.5 md:max-w-xs">
-                      {exp.technologies.slice(0, 5).map(tech => (
-                        <span key={tech} className="text-[10px] px-2 py-0.5 text-[#8e8e93] liquid-glass-pill">
-                          {tech}
-                        </span>
-                      ))}
-                      {exp.technologies.length > 5 && (
-                        <span className="text-[10px] px-2 py-0.5 text-[#aeaeb2] liquid-glass-pill">
-                          +{exp.technologies.length - 5}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
+                </Link>
               </motion.div>
             ))}
           </div>

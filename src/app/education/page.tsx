@@ -95,7 +95,7 @@ export default function Education() {
       <AnimatedSection>
         <section className="py-8 pb-16">
           <div className="container mx-auto px-6 md:px-8">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-5xl mx-auto">
               <div className="relative">
                 {/* Timeline line */}
                 <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#007aff]/30 via-[#007aff]/10 to-transparent" />

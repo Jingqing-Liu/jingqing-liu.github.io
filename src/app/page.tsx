@@ -174,9 +174,9 @@ const ResearchHighlights = () => {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen relative" style={{ background: '#f2f2f7' }}>
-      {/* Shared background gradient orbs – same as Hero */}
-      <div className="fixed inset-0 -z-10 pointer-events-none">
+    <div className="min-h-screen relative">
+      {/* Fixed background: base color + gradient orbs */}
+      <div className="fixed inset-0 -z-10 pointer-events-none" style={{ background: '#f2f2f7' }}>
         <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full opacity-40"
           style={{ background: 'radial-gradient(circle, #a8d8ff 0%, transparent 70%)' }} />
         <div className="absolute top-[10%] right-[-15%] w-[500px] h-[500px] rounded-full opacity-30"

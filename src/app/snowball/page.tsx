@@ -6,15 +6,12 @@ import { Cat } from 'lucide-react';
 import Image from 'next/image';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-const photos = [
-  { src: '/snowball/snowball-1.jpeg', alt: 'Snowball 1' },
-  { src: '/snowball/snowball-2.jpeg', alt: 'Snowball 2' },
-  { src: '/snowball/snowball-3.jpeg', alt: 'Snowball 3' },
-  { src: '/snowball/snowball-4.jpeg', alt: 'Snowball 4' },
-  { src: '/snowball/snowball-5.jpeg', alt: 'Snowball 5' },
+const cats = [
+  { nameKey: 'cats.snowball', photo: '/snowball/snowball-1.jpeg' },
+  { nameKey: 'cats.latte', photo: '/latte/latte-1.jpg' },
 ];
 
-export default function SnowballPage() {
+export default function CatsPage() {
   const { t } = useLanguage();
 
   return (
@@ -41,7 +38,7 @@ export default function SnowballPage() {
             >
               <span className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono tracking-wider uppercase text-[#48484a] liquid-glass-pill">
                 <Cat size={14} className="text-[#007aff]" />
-                {t('snowball.badge')}
+                {t('cats.badge')}
               </span>
             </motion.div>
 
@@ -51,7 +48,7 @@ export default function SnowballPage() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-[2.625rem] md:text-[4.25rem] font-bold text-[#1c1c1e] tracking-tight leading-tight mb-6"
             >
-              {t('snowball.title')}
+              {t('cats.title')}
             </motion.h1>
 
             <motion.p
@@ -60,54 +57,42 @@ export default function SnowballPage() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="text-base text-[#48484a] leading-relaxed text-center"
             >
-              {t('snowball.subtitle')}
+              {t('cats.subtitle')}
             </motion.p>
           </div>
         </div>
       </section>
 
-      {/* Gallery */}
+      {/* Cats */}
       <section className="pb-16">
         <div className="container mx-auto px-6 md:px-8">
-          <div className="max-w-5xl mx-auto columns-1 md:columns-2 gap-4 space-y-4">
-            {photos.map((photo, index) => (
+          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+            {cats.map((cat, index) => (
               <motion.div
-                key={photo.src}
+                key={cat.nameKey}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
-                className="break-inside-avoid"
+                transition={{ duration: 0.6, delay: 0.2 + index * 0.15 }}
+                className="liquid-glass-card overflow-hidden"
               >
-                <div className="liquid-glass-card overflow-hidden">
+                <div className="aspect-[4/3] relative">
                   <Image
-                    src={photo.src}
-                    alt={photo.alt}
-                    width={800}
-                    height={600}
-                    className="w-full h-auto object-cover"
+                    src={cat.photo}
+                    alt={t(cat.nameKey)}
+                    fill
+                    className="object-cover"
                     priority={index < 2}
                   />
                 </div>
+                <div className="p-5 text-center">
+                  <h2 className="text-[1.625rem] font-bold text-[#1c1c1e] tracking-tight">
+                    {t(cat.nameKey)}
+                  </h2>
+                </div>
               </motion.div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Description */}
-      <section className="pb-16">
-        <div className="container mx-auto px-6 md:px-8">
-          <div className="max-w-5xl mx-auto text-center">
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-sm text-[#636366] leading-relaxed"
-            >
-              {t('snowball.description')}
-            </motion.p>
           </div>
         </div>
       </section>

@@ -35,7 +35,7 @@ const translations: Record<Lang, Record<string, string>> = {
     'nav.education': 'Education',
     'nav.research': 'Research',
     'nav.experience': 'Experience',
-    'nav.snowball': 'Snowball',
+    'nav.snowball': 'My Cats',
     'nav.menu': 'Menu',
 
     // Hero
@@ -107,11 +107,12 @@ const translations: Record<Lang, Record<string, string>> = {
     'exp.type.Industry': 'Industry',
     'exp.type.Finance': 'Finance',
 
-    // Snowball
-    'snowball.badge': 'My Cat',
-    'snowball.title': 'Snowball',
-    'snowball.subtitle': 'My beloved companion.',
-    'snowball.description': 'Snowball is my adorable cat who keeps me company through long coding sessions and late-night research.',
+    // Cats
+    'cats.badge': 'My Cats',
+    'cats.title': 'My Cats',
+    'cats.subtitle': 'My beloved companions.',
+    'cats.snowball': 'Snowball',
+    'cats.latte': 'Latte',
 
     // Footer
     'footer.navigation': 'Navigation',
@@ -125,7 +126,7 @@ const translations: Record<Lang, Record<string, string>> = {
     'nav.education': '教育',
     'nav.research': '研究',
     'nav.experience': '经历',
-    'nav.snowball': '雪球',
+    'nav.snowball': '我的猫咪',
     'nav.menu': '菜单',
 
     // Hero
@@ -197,11 +198,12 @@ const translations: Record<Lang, Record<string, string>> = {
     'exp.type.Industry': '工业',
     'exp.type.Finance': '金融',
 
-    // Snowball
-    'snowball.badge': '我的猫咪',
-    'snowball.title': '雪球',
-    'snowball.subtitle': '我最亲爱的伙伴。',
-    'snowball.description': '雪球是我可爱的猫咪，在漫长的编程和深夜研究中一直陪伴着我。',
+    // Cats
+    'cats.badge': '我的猫咪',
+    'cats.title': '我的猫咪',
+    'cats.subtitle': '我最亲爱的伙伴们。',
+    'cats.snowball': '雪球',
+    'cats.latte': '拿铁',
 
     // Footer
     'footer.navigation': '导航',

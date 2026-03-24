@@ -100,11 +100,24 @@ const HeroSection = () => {
                 </div>
               </motion.div>
 
+              {/* Proof line — concrete past work */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.85 }}
+                className="mb-8 flex items-start gap-3 text-xs text-[#8e8e93]"
+              >
+                <span className="font-mono text-[#aeaeb2] flex-shrink-0 mt-px">{t('hero.proof.label')}</span>
+                <span className="text-[#48484a]">
+                  {t('hero.proof.items')}
+                </span>
+              </motion.div>
+
               {/* CTA Buttons */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.9 }}
+                transition={{ duration: 0.6, delay: 1.0 }}
                 className="flex items-center gap-4"
               >
                 <Link

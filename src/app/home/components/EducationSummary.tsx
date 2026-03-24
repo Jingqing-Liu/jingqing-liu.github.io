@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { GraduationCap, ChevronRight, BookOpen, MapPin, Star } from 'lucide-react';
+import { GraduationCap, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { educationData } from '../../../data';
 import { useLanguage, localize } from '../../../i18n/LanguageContext';
@@ -61,15 +61,14 @@ const EducationSummary = () => {
 
                 <div className="space-y-2">
                   {[
-                    ...(edu.degreeType ? [{ label: t('edu.label.degree'), value: localize(lang, edu.degreeType, edu.degreeType_zh), icon: GraduationCap }] : []),
-                    ...(edu.major ? [{ label: t('edu.label.major'), value: localize(lang, edu.major, edu.major_zh), icon: BookOpen }] : []),
-                    { label: t('edu.label.gpa'), value: edu.gpa || '', icon: Star },
-                    { label: t('edu.label.focus'), value: localize(lang, edu.focus, edu.focus_zh), icon: BookOpen },
-                    { label: t('edu.label.location'), value: location, icon: MapPin },
+                    ...(edu.degreeType ? [{ label: t('edu.label.degree'), value: localize(lang, edu.degreeType, edu.degreeType_zh) }] : []),
+                    ...(edu.major ? [{ label: t('edu.label.major'), value: localize(lang, edu.major, edu.major_zh) }] : []),
+                    { label: t('edu.label.gpa'), value: edu.gpa || '' },
+                    { label: t('edu.label.focus'), value: localize(lang, edu.focus, edu.focus_zh) },
+                    { label: t('edu.label.location'), value: location },
                   ].map((item) => (
                     <div key={item.label} className="flex items-center py-0.5">
-                      <item.icon size={13} className="text-[#007aff] flex-shrink-0 w-4" />
-                      <span className="text-xs text-[#636366] w-16 flex-shrink-0 ml-2">{item.label}</span>
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-[#8e8e93] w-16 flex-shrink-0">{item.label}</span>
                       <span className="text-sm text-[#1c1c1e] font-medium">{item.value}</span>
                     </div>
                   ))}

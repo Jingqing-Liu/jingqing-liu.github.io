@@ -6,7 +6,7 @@ import HeroSection from './home/components/HeroSection';
 import EducationSummary from './home/components/EducationSummary';
 import { researchProjects } from '../data/research';
 import { experienceData } from '../data/experience';
-import { Shield, ExternalLink, ChevronRight, Briefcase, BookOpen } from 'lucide-react';
+import { ChevronRight, Briefcase, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage, localize } from '../i18n/LanguageContext';
 
@@ -56,34 +56,35 @@ const ExperienceHighlights = () => {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="divide-y divide-[#c6c6c8]/40">
             {topExperiences.map((exp, index) => (
               <motion.div
                 key={exp.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
-                <Link href={`/experience/${exp.id}`} className="no-underline">
-                  <div className="liquid-glass-card p-6 h-full group cursor-pointer">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Briefcase size={16} className="text-[#007aff]" />
-                      <span className={`text-[10px] font-mono uppercase tracking-wider ${
-                        exp.type === 'Research' ? 'text-purple-600' :
-                        exp.type === 'Industry' ? 'text-[#007aff]' :
-                        exp.type === 'Academic' ? 'text-green-600' :
-                        'text-orange-600'
-                      }`}>
-                        {t(`exp.type.${exp.type}`)}
-                      </span>
+                <Link href={`/experience/${exp.id}`} className="no-underline group block py-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`text-[10px] font-mono uppercase tracking-wider ${
+                          exp.type === 'Research' ? 'text-purple-600' :
+                          exp.type === 'Industry' ? 'text-[#007aff]' :
+                          exp.type === 'Academic' ? 'text-green-600' :
+                          'text-orange-600'
+                        }`}>
+                          {t(`exp.type.${exp.type}`)}
+                        </span>
+                        <span className="text-xs text-[#aeaeb2] font-mono">{exp.period}</span>
+                      </div>
+                      <h3 className="text-[#1c1c1e] font-semibold text-base mb-1 leading-snug group-hover:text-[#007aff] transition-colors">
+                        {localize(lang, exp.title, exp.title_zh)}
+                      </h3>
+                      <p className="text-sm text-[#8e8e93]">{localize(lang, exp.company, exp.company_zh)}</p>
                     </div>
-                    <h3 className="text-[#1c1c1e] font-semibold text-base mb-2 leading-snug group-hover:text-[#007aff] transition-colors">
-                      {localize(lang, exp.title, exp.title_zh)}
-                    </h3>
-                    <p className="text-sm text-[#8e8e93] mb-3">{localize(lang, exp.company, exp.company_zh)}</p>
-                    <span className="text-xs text-[#aeaeb2] font-mono">{exp.period}</span>
+                    <ChevronRight size={16} className="text-[#c7c7cc] group-hover:text-[#007aff] transition-colors flex-shrink-0 mt-2" />
                   </div>
                 </Link>
               </motion.div>
@@ -122,35 +123,31 @@ const ResearchHighlights = () => {
             </Link>
           </div>
 
-          <div className="space-y-4">
+          <div className="divide-y divide-[#c6c6c8]/40">
             {topResearch.map((project, index) => (
               <motion.div
                 key={project.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
-                <Link href={project.detailsLink} className="no-underline">
-                  <div className="liquid-glass-card p-6 group cursor-pointer">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Shield size={14} className="text-[#007aff]" />
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-[#8e8e93]">
-                            {t('research.advisor')}: {localize(lang, project.advisor, project.advisor_zh)}
-                          </span>
-                        </div>
-                        <h3 className="text-[#1c1c1e] font-semibold text-base leading-snug group-hover:text-[#007aff] transition-colors mb-2">
-                          {localize(lang, project.title, project.title_zh)}
-                        </h3>
-                        <p className="text-sm text-[#8e8e93] leading-relaxed line-clamp-2">
-                          {lang === 'zh' && project.keyPoints_zh ? project.keyPoints_zh[0] : project.keyPoints[0]}
-                        </p>
+                <Link href={project.detailsLink} className="no-underline group block py-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-[#8e8e93]">
+                          {t('research.advisor')}: {localize(lang, project.advisor, project.advisor_zh)}
+                        </span>
                       </div>
-                      <ExternalLink size={14} className="text-[#aeaeb2] group-hover:text-[#007aff] transition-colors flex-shrink-0" />
+                      <h3 className="text-[#1c1c1e] font-semibold text-base leading-snug group-hover:text-[#007aff] transition-colors mb-2">
+                        {localize(lang, project.title, project.title_zh)}
+                      </h3>
+                      <p className="text-sm text-[#8e8e93] leading-relaxed line-clamp-2">
+                        {lang === 'zh' && project.keyPoints_zh ? project.keyPoints_zh[0] : project.keyPoints[0]}
+                      </p>
                     </div>
+                    <ChevronRight size={16} className="text-[#c7c7cc] group-hover:text-[#007aff] transition-colors flex-shrink-0 mt-2" />
                   </div>
                 </Link>
               </motion.div>
@@ -184,8 +181,11 @@ export default function HomePage() {
       </div>
 
       <HeroSection />
+      <div className="max-w-5xl mx-auto px-6 md:px-8"><div className="h-px" style={{ background: 'linear-gradient(to right, transparent, #c6c6c8, transparent)' }} /></div>
       <AnimatedSection><ExperienceHighlights /></AnimatedSection>
+      <div className="max-w-5xl mx-auto px-6 md:px-8"><div className="h-px" style={{ background: 'linear-gradient(to right, transparent, #c6c6c8, transparent)' }} /></div>
       <AnimatedSection><ResearchHighlights /></AnimatedSection>
+      <div className="max-w-5xl mx-auto px-6 md:px-8"><div className="h-px" style={{ background: 'linear-gradient(to right, transparent, #c6c6c8, transparent)' }} /></div>
       <AnimatedSection><EducationSummary /></AnimatedSection>
     </div>
   );

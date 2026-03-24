@@ -2,6 +2,8 @@ import type { MetadataRoute } from 'next';
 import { researchProjects } from '../data/research';
 import { experienceData } from '../data/experience';
 
+export const dynamic = 'force-static';
+
 const BASE_URL = 'https://jingqing-liu.github.io';
 
 export default function sitemap(): MetadataRoute.Sitemap {

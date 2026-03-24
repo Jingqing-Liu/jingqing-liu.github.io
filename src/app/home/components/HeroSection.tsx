@@ -143,32 +143,24 @@ const HeroSection = () => {
             <TerminalSnippet />
           </div>
 
-          {/* Highlight cards — supplementary, with hover float */}
+          {/* Direction tags — lightweight pills */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1.2 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 1.2 }}
+            className="flex flex-wrap gap-3"
           >
             {highlights.map((item, index) => (
-              <motion.div
+              <motion.span
                 key={item.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.3 + index * 0.15 }}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                className="liquid-glass-card p-5 cursor-default"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 1.3 + index * 0.1 }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#636366] liquid-glass-pill cursor-default"
               >
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 liquid-glass-pill">
-                    <item.icon size={18} className="text-[#007aff]" />
-                  </div>
-                  <div>
-                    <h3 className="text-[#1c1c1e] font-semibold text-xs mb-0.5">{item.label}</h3>
-                    <p className="text-[#8e8e93] text-[11px] leading-relaxed mb-0">{item.desc}</p>
-                  </div>
-                </div>
-              </motion.div>
+                <item.icon size={12} className="text-[#007aff]" />
+                {item.label}
+              </motion.span>
             ))}
           </motion.div>
         </div>

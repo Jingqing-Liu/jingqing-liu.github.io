@@ -2,7 +2,7 @@
 
 import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { GraduationCap, Award, BookOpen, MapPin, Star } from 'lucide-react';
+import { GraduationCap, Award, BookOpen } from 'lucide-react';
 import { educationData } from '../../data';
 import { useLanguage, localize, localizeArray } from '../../i18n/LanguageContext';
 
@@ -25,23 +25,11 @@ const AnimatedSection = ({ children, className = '' }: { children: React.ReactNo
 
 export default function Education() {
   const { t, lang } = useLanguage();
-  const [graduate, undergraduate] = educationData;
 
-  // Build unified timeline entries sorted by year (newest first)
-  type TimelineEntry =
-    | { type: 'education'; data: typeof graduate; year: number }
-    | { type: 'award'; title: string; title_zh?: string; year: number };
-
-  const timelineEntries: TimelineEntry[] = [
-    { type: 'education' as const, data: graduate, year: 2026 },
-    { type: 'education' as const, data: undergraduate, year: 2020 },
-    ...(undergraduate.awards?.map((a) => ({
-      type: 'award' as const,
-      title: a.title,
-      title_zh: a.title_zh,
-      year: a.year,
-    })) || []),
-  ].sort((a, b) => b.year - a.year || (a.type === 'education' ? 1 : -1));
+  const eduEntries = [
+    { edu: educationData[0], color: 'text-[#007aff]', location: 'Providence, RI' },
+    { edu: educationData[1], color: 'text-purple-600', location: 'Newark, Delaware' },
+  ];
 
   return (
     <div className="min-h-screen relative" style={{ background: '#f2f2f7' }}>
@@ -84,8 +72,7 @@ export default function Education() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-base text-[#48484a] leading-relaxed mx-auto"
-              style={{ textAlign: 'center' }}
+              className="text-base text-[#48484a] leading-relaxed mx-auto text-center"
             >
               {t('edu.subtitle')}
             </motion.p>
@@ -93,116 +80,99 @@ export default function Education() {
         </div>
       </section>
 
-      {/* Academic Timeline */}
+      {/* Education Sections */}
       <AnimatedSection>
         <section className="py-8 pb-16">
           <div className="container mx-auto px-6 md:px-8">
             <div className="max-w-5xl mx-auto">
-              <div className="relative">
-                {/* Timeline line */}
-                <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#007aff]/30 via-[#007aff]/10 to-transparent" />
+              {eduEntries.map(({ edu, color, location }, index) => (
+                <div key={edu.id}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1, duration: 0.6 }}
+                    className="py-10"
+                  >
+                    {/* Status & Period */}
+                    <div className="flex items-center gap-3 mb-3">
+                      {edu.status && (
+                        <span className={`text-[10px] font-mono uppercase tracking-wider ${color}`}>
+                          {localize(lang, edu.status, edu.status_zh)}
+                        </span>
+                      )}
+                      <span className="text-xs text-[#aeaeb2] font-mono">{edu.period}</span>
+                    </div>
 
-                {timelineEntries.map((entry, index) => {
-                  const isLeft = index % 2 === 0;
+                    {/* Institution */}
+                    <h2 className="text-[1.625rem] md:text-[2.625rem] font-bold text-[#1c1c1e] tracking-tight mb-6">
+                      {localize(lang, edu.institution, edu.institution_zh)}
+                    </h2>
 
-                  if (entry.type === 'education') {
-                    const edu = entry.data;
-                    const isCurrent = edu.id === 'brown-ms';
-                    return (
-                      <motion.div
-                        key={edu.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: index * 0.05 }}
-                        className={`relative flex flex-col ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'} items-start gap-6 mb-10`}
-                      >
-                        {/* Dot */}
-                        <div className={`absolute left-6 md:left-1/2 -translate-x-1/2 w-3 h-3 rounded-full z-10 ${isCurrent ? 'bg-[#007aff] shadow-[0_0_12px_rgba(0,122,255,0.4)]' : 'bg-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.4)]'}`} />
+                    {/* Info Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-4 mb-8">
+                      {[
+                        ...(edu.degreeType ? [{ label: t('edu.label.degree'), value: localize(lang, edu.degreeType, edu.degreeType_zh) }] : []),
+                        ...(edu.major ? [{ label: t('edu.label.major'), value: localize(lang, edu.major, edu.major_zh) }] : []),
+                        { label: t('edu.label.gpa'), value: edu.gpa || '' },
+                        { label: t('edu.label.focus'), value: localize(lang, edu.focus, edu.focus_zh) },
+                        { label: t('edu.label.location'), value: location },
+                      ].map((item) => (
+                        <div key={item.label}>
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-[#8e8e93] block mb-1">{item.label}</span>
+                          <span className="text-sm text-[#1c1c1e] font-medium">{item.value}</span>
+                        </div>
+                      ))}
+                    </div>
 
-                        {/* Card */}
-                        <div className="ml-14 md:ml-0 md:w-[calc(50%-2rem)] liquid-glass-card p-6">
-                          <div className="flex items-center gap-2 mb-3">
-                            {edu.status && (
-                              <span className={`text-[10px] font-mono uppercase tracking-wider liquid-glass-pill px-2 py-0.5 ${isCurrent ? 'text-[#007aff]' : 'text-purple-600'}`}>
-                                {localize(lang, edu.status, edu.status_zh)}
-                              </span>
-                            )}
-                            <span className="text-xs text-[#8e8e93] font-mono">{edu.period}</span>
-                          </div>
-                          <h3 className="text-[1.625rem] font-semibold text-[#1c1c1e] mb-3">{localize(lang, edu.institution, edu.institution_zh)}</h3>
+                    {/* Description */}
+                    <p className="text-sm text-[#48484a] leading-relaxed mb-8 max-w-3xl">
+                      {localize(lang, edu.description, edu.description_zh)}
+                    </p>
 
-                          {/* Program Details */}
-                          <div className="space-y-2 mb-4">
-                            {([
-                                  ...(edu.degreeType ? [{ label: t('edu.label.degree'), value: localize(lang, edu.degreeType, edu.degreeType_zh), icon: GraduationCap }] : []),
-                                  ...(edu.major ? [{ label: t('edu.label.major'), value: localize(lang, edu.major, edu.major_zh), icon: BookOpen }] : []),
-                                  { label: t('edu.label.gpa'), value: edu.gpa || '', icon: Star },
-                                  { label: t('edu.label.focus'), value: localize(lang, edu.focus, edu.focus_zh), icon: BookOpen },
-                                  { label: t('edu.label.location'), value: isCurrent ? 'Providence, RI' : 'Newark, Delaware', icon: MapPin },
-                                ]
-                            ).map((item) => (
-                              <div key={item.label} className="flex items-center py-0.5">
-                                <item.icon size={13} className="text-[#007aff] flex-shrink-0 w-4" />
-                                <span className="text-xs text-[#636366] w-16 flex-shrink-0 ml-2">{item.label}</span>
-                                <span className="text-sm text-[#1c1c1e] font-medium">{item.value}</span>
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* Overview */}
-                          <p className={`text-sm text-[#48484a] leading-relaxed ${edu.activities && edu.activities.length > 0 ? 'mb-4' : ''}`}>
-                            {localize(lang, edu.description, edu.description_zh)}
-                          </p>
-
-                          {/* Activities */}
-                          {edu.activities && edu.activities.length > 0 && (
-                            <div className="space-y-2">
-                              <h4 className="text-[11px] font-semibold text-[#636366] tracking-wider uppercase flex items-center gap-1.5">
-                                <BookOpen size={12} className="text-[#007aff]" />
-                                {t('edu.label.activities')}
-                              </h4>
-                              {localizeArray(lang, edu.activities, edu.activities_zh).map((activity, i) => (
-                                <div key={i} className="flex items-center gap-2 py-1">
-                                  <div className="w-1.5 h-1.5 bg-purple-500 rounded-full flex-shrink-0" />
-                                  <span className="text-xs text-[#1c1c1e]">{activity}</span>
-                                </div>
-                              ))}
+                    {/* Activities */}
+                    {edu.activities && edu.activities.length > 0 && (
+                      <div className="mb-8">
+                        <h4 className="text-[11px] font-semibold text-[#636366] tracking-wider uppercase flex items-center gap-1.5 mb-3">
+                          <BookOpen size={12} className="text-[#007aff]" />
+                          {t('edu.label.activities')}
+                        </h4>
+                        <div className="space-y-2">
+                          {localizeArray(lang, edu.activities, edu.activities_zh).map((activity, i) => (
+                            <div key={i} className="flex items-start gap-2">
+                              <div className="w-1.5 h-1.5 bg-[#007aff] rounded-full flex-shrink-0 mt-1.5" />
+                              <span className="text-sm text-[#48484a]">{activity}</span>
                             </div>
-                          )}
+                          ))}
                         </div>
-                      </motion.div>
-                    );
-                  }
-
-                  // Award entry
-                  return (
-                    <motion.div
-                      key={`award-${index}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.05 }}
-                      className={`relative flex flex-col ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'} items-start gap-6 mb-10`}
-                    >
-                      {/* Dot */}
-                      <div className="absolute left-6 md:left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)] z-10" />
-
-                      {/* Card */}
-                      <div className="ml-14 md:ml-0 md:w-[calc(50%-2rem)] liquid-glass-card p-5">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-amber-600 liquid-glass-pill px-2 py-0.5">
-                            <Award size={10} />
-                            {t('edu.award')}
-                          </span>
-                          <span className="text-xs text-[#8e8e93] font-mono">{entry.year}</span>
-                        </div>
-                        <p className="text-sm font-medium text-[#1c1c1e]">{localize(lang, entry.title, entry.title_zh)}</p>
                       </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+                    )}
+
+                    {/* Awards */}
+                    {edu.awards && edu.awards.length > 0 && (
+                      <div>
+                        <h4 className="text-[11px] font-semibold text-[#636366] tracking-wider uppercase flex items-center gap-1.5 mb-3">
+                          <Award size={12} className="text-amber-500" />
+                          {t('edu.awards')}
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {edu.awards.map((award, i) => (
+                            <span key={i} className="inline-flex items-center gap-1.5 text-xs font-mono text-[#636366] liquid-glass-pill px-3 py-1.5">
+                              <span className="text-amber-500">{award.year}</span>
+                              {localize(lang, award.title, award.title_zh)}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+
+                  {/* Gradient divider between schools */}
+                  {index < eduEntries.length - 1 && (
+                    <div className="h-px" style={{ background: 'linear-gradient(to right, transparent, #c6c6c8, transparent)' }} />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </section>

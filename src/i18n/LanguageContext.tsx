@@ -67,9 +67,9 @@ const translations: Record<Lang, Record<string, string>> = {
     'home.education.viewAll': 'View all',
 
     // Education page
-    'edu.badge': 'Academic Journey',
+    'edu.badge': 'Academic Background',
     'edu.title': 'Education',
-    'edu.subtitle': 'A journey through Computer Science — from cybersecurity foundations at Delaware to AI and systems research at Brown.',
+    'edu.subtitle': 'Computer Science — from cybersecurity at Delaware to AI, security, and systems at Brown.',
     'edu.label.degree': 'Degree',
     'edu.label.major': 'Major',
     'edu.label.gpa': 'GPA',
@@ -150,9 +150,9 @@ const translations: Record<Lang, Record<string, string>> = {
     'home.education.viewAll': '查看全部',
 
     // Education page
-    'edu.badge': '学术历程',
+    'edu.badge': '学术背景',
     'edu.title': '教育经历',
-    'edu.subtitle': '从特拉华大学的网络安全基础到布朗大学的 AI 与系统研究。',
+    'edu.subtitle': '从特拉华大学的网络安全到布朗大学的 AI、安全与系统方向。',
     'edu.label.degree': '学位',
     'edu.label.major': '专业',
     'edu.label.gpa': 'GPA',

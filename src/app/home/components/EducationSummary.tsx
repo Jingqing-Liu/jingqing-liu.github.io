@@ -21,7 +21,7 @@ const EducationSummary = () => {
                 <GraduationCap size={16} className="text-[#007aff]" />
                 <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">{t('home.education.tag')}</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight">
+              <h2 className="text-[1.44rem] md:text-[2.3rem] font-bold text-[#1c1c1e] tracking-tight">
                 {t('home.education.title')}
               </h2>
             </div>
@@ -44,8 +44,8 @@ const EducationSummary = () => {
                   {graduate.status ? localize(lang, graduate.status, graduate.status_zh) : ''}
                 </span>
               </div>
-              <h3 className="text-xl font-semibold text-[#1c1c1e] mb-2">{localize(lang, graduate.degree, graduate.degree_zh)}</h3>
-              <p className="text-base text-[#007aff] font-medium mb-3">{localize(lang, graduate.institution, graduate.institution_zh)}</p>
+              <h3 className="text-[1.44rem] font-semibold text-[#1c1c1e] mb-2">{localize(lang, graduate.degree, graduate.degree_zh)}</h3>
+              <p className="text-sm text-[#007aff] font-medium mb-3">{localize(lang, graduate.institution, graduate.institution_zh)}</p>
               <div className="space-y-1">
                 <p className="text-sm text-[#48484a] mb-0">{localize(lang, 'Computer Science', '计算机科学')}</p>
                 <p className="text-xs text-[#8e8e93] mb-0">{localize(lang, graduate.focus, graduate.focus_zh)}</p>
@@ -65,8 +65,8 @@ const EducationSummary = () => {
                   {undergraduate.status ? localize(lang, undergraduate.status, undergraduate.status_zh) : ''}
                 </span>
               </div>
-              <h3 className="text-xl font-semibold text-[#1c1c1e] mb-2">{localize(lang, undergraduate.degree, undergraduate.degree_zh)}</h3>
-              <p className="text-base text-[#007aff] font-medium mb-3">{localize(lang, undergraduate.institution, undergraduate.institution_zh)}</p>
+              <h3 className="text-[1.44rem] font-semibold text-[#1c1c1e] mb-2">{localize(lang, undergraduate.degree, undergraduate.degree_zh)}</h3>
+              <p className="text-sm text-[#007aff] font-medium mb-3">{localize(lang, undergraduate.institution, undergraduate.institution_zh)}</p>
               <div className="space-y-1">
                 <p className="text-sm text-[#48484a] mb-0">{localize(lang, 'Computer and Information Science', '计算机与信息科学')}</p>
                 <p className="text-xs text-[#8e8e93] mb-0">GPA: {undergraduate.gpa} &bull; {localize(lang, 'Graduated 2024', '2024 年毕业')}</p>

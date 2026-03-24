@@ -75,7 +75,7 @@ export default function Research() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-5xl md:text-7xl font-bold text-[#1c1c1e] tracking-tight leading-tight mb-6"
+              className="text-[2.3rem] md:text-[3.75rem] font-bold text-[#1c1c1e] tracking-tight leading-tight mb-6"
             >
               {t('research.title')}
             </motion.h1>
@@ -84,7 +84,7 @@ export default function Research() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-lg text-[#48484a] leading-relaxed mx-auto text-center"
+              className="text-sm text-[#48484a] leading-relaxed mx-auto text-center"
             >
               {t('research.subtitle')}
             </motion.p>
@@ -135,7 +135,7 @@ export default function Research() {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-lg font-semibold text-[#1c1c1e] mb-3 leading-snug">
+                        <h3 className="text-[1.44rem] font-semibold text-[#1c1c1e] mb-3 leading-snug">
                           {localize(lang, project.title, project.title_zh)}
                         </h3>
 

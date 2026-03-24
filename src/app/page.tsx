@@ -47,7 +47,7 @@ const ExperienceHighlights = () => {
                 <Briefcase size={16} className="text-[#007aff]" />
                 <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">{t('home.experience.tag')}</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight">
+              <h2 className="text-[1.44rem] md:text-[2.3rem] font-bold text-[#1c1c1e] tracking-tight">
                 {t('home.experience.title')}
               </h2>
             </div>
@@ -113,7 +113,7 @@ const ResearchHighlights = () => {
                 <BookOpen size={16} className="text-[#007aff]" />
                 <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">{t('home.research.tag')}</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight">
+              <h2 className="text-[1.44rem] md:text-[2.3rem] font-bold text-[#1c1c1e] tracking-tight">
                 {t('home.research.title')}
               </h2>
             </div>
@@ -122,7 +122,7 @@ const ResearchHighlights = () => {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-4">
             {topResearch.map((project, index) => (
               <motion.div
                 key={project.id}
@@ -133,22 +133,23 @@ const ResearchHighlights = () => {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
                 <Link href={project.detailsLink} className="no-underline">
-                  <div className="liquid-glass-card p-6 h-full group cursor-pointer">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Shield size={16} className="text-[#007aff]" />
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-[#8e8e93]">
-                        {localize(lang, project.advisor, project.advisor_zh).split('(').shift()?.split('（').shift()?.trim()}
-                      </span>
-                    </div>
-                    <h3 className="text-[#1c1c1e] font-semibold text-sm mb-3 leading-snug group-hover:text-[#007aff] transition-colors">
-                      {localize(lang, project.title, project.title_zh)}
-                    </h3>
-                    <p className="text-xs text-[#8e8e93] leading-relaxed mb-4 line-clamp-3">
-                      {lang === 'zh' && project.keyPoints_zh ? project.keyPoints_zh[0] : project.keyPoints[0]}
-                    </p>
-                    <div className="flex items-center gap-1 text-xs text-[#007aff]">
-                      <span>{t('home.research.readMore')}</span>
-                      <ExternalLink size={10} />
+                  <div className="liquid-glass-card p-6 group cursor-pointer">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Shield size={14} className="text-[#007aff]" />
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-[#8e8e93]">
+                            {localize(lang, project.advisor, project.advisor_zh).split('(').shift()?.split('（').shift()?.trim()}
+                          </span>
+                        </div>
+                        <h3 className="text-[#1c1c1e] font-semibold text-sm leading-snug group-hover:text-[#007aff] transition-colors mb-2">
+                          {localize(lang, project.title, project.title_zh)}
+                        </h3>
+                        <p className="text-xs text-[#8e8e93] leading-relaxed line-clamp-2">
+                          {lang === 'zh' && project.keyPoints_zh ? project.keyPoints_zh[0] : project.keyPoints[0]}
+                        </p>
+                      </div>
+                      <ExternalLink size={14} className="text-[#aeaeb2] group-hover:text-[#007aff] transition-colors flex-shrink-0" />
                     </div>
                   </div>
                 </Link>

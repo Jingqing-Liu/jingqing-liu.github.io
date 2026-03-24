@@ -55,7 +55,7 @@ export default function ResearchDetailClient({ detail }: ResearchDetailClientPro
                 {t('research.title')}
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight leading-tight mb-4">
+            <h1 className="text-[1.44rem] md:text-[2.3rem] font-bold text-[#1c1c1e] tracking-tight leading-tight mb-4">
               {localize(lang, detail.title, detail.title_zh)}
             </h1>
             {detail.advisor && (

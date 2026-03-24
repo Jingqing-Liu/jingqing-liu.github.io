@@ -83,8 +83,8 @@ export default function ExperienceDetailClient({ exp }: { exp: Experience }) {
               </span>
               <span className="text-xs text-[#8e8e93] font-mono">{exp.period}</span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-[#1c1c1e] tracking-tight mb-2">{localize(lang, exp.title, exp.title_zh)}</h1>
-            <p className="text-lg text-[#007aff] font-medium">{localize(lang, exp.company, exp.company_zh)}</p>
+            <h1 className="text-[1.44rem] md:text-[2.3rem] font-bold text-[#1c1c1e] tracking-tight mb-2">{localize(lang, exp.title, exp.title_zh)}</h1>
+            <p className="text-sm text-[#007aff] font-medium">{localize(lang, exp.company, exp.company_zh)}</p>
             {exp.supervisor && (
               <p className="text-sm text-[#636366] mt-2">{t('exp.supervisor')}: {localize(lang, exp.supervisor, exp.supervisor_zh)}</p>
             )}

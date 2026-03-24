@@ -18,9 +18,9 @@ const TerminalSnippet = () => (
       <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
       <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
       <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
-      <span className="ml-2 text-[10px] text-[#8e8e93] font-mono">~/security-research</span>
+      <span className="ml-2 text-[0.625rem] text-[#8e8e93] font-mono">~/security-research</span>
     </div>
-    <div className="p-4 font-mono text-[11px] leading-relaxed space-y-1">
+    <div className="p-4 font-mono text-[0.625rem] leading-relaxed space-y-1">
       <div><span className="text-[#007aff]">$</span> <span className="text-[#48484a]">nmap -sV --script vuln target.local</span></div>
       <div className="text-[#8e8e93]">Starting vulnerability scan...</div>
       <div className="text-[#8e8e93]">Discovered 3 open ports on distributed nodes</div>
@@ -59,13 +59,13 @@ const HeroSection = () => {
             </span>
           </motion.div>
 
-          {/* Name — bigger */}
+          {/* Name — H1: 6rem */}
           <div className="mb-10">
             <motion.h1
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-              className="text-7xl md:text-[9rem] lg:text-[10rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85] mb-2"
+              className="text-[3.75rem] md:text-[6rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85] mb-2"
             >
               {personalInfo.name.split(' ')[0]}
             </motion.h1>
@@ -73,7 +73,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
-              className="text-7xl md:text-[9rem] lg:text-[10rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85]"
+              className="text-[3.75rem] md:text-[6rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85]"
             >
               {personalInfo.name.split(' ')[1]}
             </motion.h1>
@@ -83,14 +83,14 @@ const HeroSection = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-20">
             {/* Left: tagline + CTA */}
             <div>
-              {/* Tagline — lighter, more contrast with name */}
+              {/* Tagline — Body: 0.875rem */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.7 }}
                 className="mb-8"
               >
-                <p className="text-lg md:text-xl text-[#636366] font-light leading-relaxed">
+                <p className="text-sm text-[#636366] font-light leading-relaxed">
                   {t('hero.tagline')}
                 </p>
                 <div className="mt-4 flex items-center gap-3 text-xs text-[#aeaeb2]">
@@ -100,7 +100,7 @@ const HeroSection = () => {
                 </div>
               </motion.div>
 
-              {/* Proof line — concrete past work */}
+              {/* Proof line */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

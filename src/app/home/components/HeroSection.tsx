@@ -32,7 +32,7 @@ const TerminalSnippet = () => (
 );
 
 const HeroSection = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   const highlights = [
     { icon: Shield, label: t('hero.highlight.security'), desc: t('hero.highlight.security.desc') },
@@ -61,22 +61,35 @@ const HeroSection = () => {
 
           {/* Name — H1: 6rem */}
           <div className="mb-10">
-            <motion.h1
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-              className="text-[4.25rem] md:text-[6.875rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85] mb-2"
-            >
-              {personalInfo.name.split(' ')[0]}
-            </motion.h1>
-            <motion.h1
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
-              className="text-[4.25rem] md:text-[6.875rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85]"
-            >
-              {personalInfo.name.split(' ')[1]}
-            </motion.h1>
+            {lang === 'zh' ? (
+              <motion.h1
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+                className="text-[4.25rem] md:text-[6.875rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85]"
+              >
+                {personalInfo.name_zh}
+              </motion.h1>
+            ) : (
+              <>
+                <motion.h1
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+                  className="text-[4.25rem] md:text-[6.875rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85] mb-2"
+                >
+                  {personalInfo.name.split(' ')[0]}
+                </motion.h1>
+                <motion.h1
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+                  className="text-[4.25rem] md:text-[6.875rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85]"
+                >
+                  {personalInfo.name.split(' ')[1]}
+                </motion.h1>
+              </>
+            )}
           </div>
 
           {/* Two-column: tagline + terminal */}

@@ -4,7 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { Mail, Github, Linkedin } from 'lucide-react';
 import { personalInfo } from '../data';
-import { useLanguage } from '../i18n/LanguageContext';
+import { educationData } from '../data';
+import { useLanguage, localize } from '../i18n/LanguageContext';
 
 const navKeys = [
   { key: 'nav.home', href: '/' },
@@ -15,7 +16,8 @@ const navKeys = [
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const displayName = localize(lang, personalInfo.name, personalInfo.name_zh);
 
   const socialLinks = [
     { name: 'Email', href: `mailto:${personalInfo.email}`, icon: Mail },
@@ -29,9 +31,12 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-10 mb-8">
           {/* Personal info */}
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-[#1c1c1e]">{personalInfo.name}</h3>
-            <p className="text-xs text-[#8e8e93]">{personalInfo.title}</p>
-            <p className="text-xs text-[#8e8e93]">{personalInfo.address.institution}</p>
+            <h3 className="text-sm font-semibold text-[#1c1c1e]">{displayName}</h3>
+            {educationData.map((edu) => (
+              <p key={edu.id} className="text-xs text-[#8e8e93]">
+                {localize(lang, edu.institution, edu.institution_zh)}{lang === 'zh' ? '' : ', '}{localize(lang, edu.degreeType || edu.degree, edu.degreeType_zh || edu.degree_zh)}
+              </p>
+            ))}
           </div>
 
           {/* Navigation */}
@@ -63,7 +68,7 @@ const Footer = () => {
 
         {/* Bottom */}
         <div className="pt-6 border-t border-black/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <span className="text-[11px] text-[#aeaeb2]">&copy; {currentYear} {personalInfo.name}. {t('footer.rights')}</span>
+          <span className="text-[11px] text-[#aeaeb2]">&copy; {currentYear} {displayName}. {t('footer.rights')}</span>
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
             <span className="text-[11px] text-[#aeaeb2]">{t('footer.available')}</span>

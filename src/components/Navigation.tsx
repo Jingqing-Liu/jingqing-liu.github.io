@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { personalInfo } from '../data';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useLanguage, localize } from '../i18n/LanguageContext';
 
 const navKeys = [
   { key: 'nav.home', href: '/' },
@@ -39,7 +39,7 @@ const Navigation = () => {
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="font-semibold text-lg no-underline">
               <motion.span whileHover={{ scale: 1.05 }} className="text-[#1c1c1e]">
-                {personalInfo.name}
+                {localize(lang, personalInfo.name, personalInfo.name_zh)}
               </motion.span>
             </Link>
 

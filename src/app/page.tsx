@@ -139,7 +139,7 @@ const ResearchHighlights = () => {
                         <div className="flex items-center gap-2 mb-2">
                           <Shield size={14} className="text-[#007aff]" />
                           <span className="text-[10px] font-mono uppercase tracking-wider text-[#8e8e93]">
-                            {localize(lang, project.advisor, project.advisor_zh).split('(').shift()?.split('（').shift()?.trim()}
+                            {t('research.advisor')}: {localize(lang, project.advisor, project.advisor_zh)}
                           </span>
                         </div>
                         <h3 className="text-[#1c1c1e] font-semibold text-base leading-snug group-hover:text-[#007aff] transition-colors mb-2">

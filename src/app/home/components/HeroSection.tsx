@@ -128,6 +128,7 @@ const HeroSection = () => {
                   {t('hero.cta.research')}
                   <ArrowRight size={14} />
                 </Link>
+{/* Resume button hidden until PDF is ready
                 <Link
                   href="/resume.pdf"
                   target="_blank"
@@ -136,6 +137,7 @@ const HeroSection = () => {
                 >
                   {t('hero.cta.resume')}
                 </Link>
+*/}
               </motion.div>
             </div>
 

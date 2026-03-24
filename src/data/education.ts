@@ -59,8 +59,8 @@ export const educationData: Education[] = [
     gpa: '3.95/4.00',
     status: 'Magna Cum Laude',
     status_zh: '优等毕业',
-    focus: 'Cybersecurity',
-    focus_zh: '网络安全',
+    focus: 'Cybersecurity, Systems',
+    focus_zh: '网络安全、系统',
     description: 'Completed a comprehensive Computer Science program with exceptional academic performance. Focused on cybersecurity research and participated in various research projects under distinguished faculty mentorship. Demonstrated leadership in academic and extracurricular activities.',
     description_zh: '以优异成绩完成计算机科学课程体系。专注于网络安全研究，在多位杰出教授指导下参与多项科研项目。在学术和课外活动中展现出卓越的领导力。',
     awards: [

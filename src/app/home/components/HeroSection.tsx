@@ -65,7 +65,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-              className="text-[3.75rem] md:text-[6rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85] mb-2"
+              className="text-[4.25rem] md:text-[6.875rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85] mb-2"
             >
               {personalInfo.name.split(' ')[0]}
             </motion.h1>
@@ -73,7 +73,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
-              className="text-[3.75rem] md:text-[6rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85]"
+              className="text-[4.25rem] md:text-[6.875rem] font-bold text-[#1c1c1e] tracking-tighter leading-[0.85]"
             >
               {personalInfo.name.split(' ')[1]}
             </motion.h1>
@@ -90,10 +90,10 @@ const HeroSection = () => {
                 transition={{ duration: 0.6, delay: 0.7 }}
                 className="mb-8"
               >
-                <p className="text-sm text-[#636366] font-light leading-relaxed">
+                <p className="text-base text-[#636366] font-light leading-relaxed">
                   {t('hero.tagline')}
                 </p>
-                <div className="mt-4 flex items-center gap-3 text-xs text-[#aeaeb2]">
+                <div className="mt-4 flex items-center gap-3 text-sm text-[#aeaeb2]">
                   <span className="font-mono">{t('hero.subtitle')}</span>
                   <span className="w-1 h-1 bg-[#aeaeb2] rounded-full" />
                   <span className="font-mono">{personalInfo.address.institution}</span>
@@ -105,7 +105,7 @@ const HeroSection = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.85 }}
-                className="mb-8 flex items-start gap-3 text-xs text-[#8e8e93]"
+                className="mb-8 flex items-start gap-3 text-sm text-[#8e8e93]"
               >
                 <span className="font-mono text-[#aeaeb2] flex-shrink-0 mt-px">{t('hero.proof.label')}</span>
                 <span className="text-[#48484a]">
@@ -122,7 +122,7 @@ const HeroSection = () => {
               >
                 <Link
                   href="/research"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-[#007aff] liquid-glass-pill hover:text-[#0056b3] transition-colors no-underline"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-base font-medium text-[#007aff] liquid-glass-pill hover:text-[#0056b3] transition-colors no-underline"
                   style={{ borderRadius: '99em' }}
                 >
                   {t('hero.cta.research')}
@@ -131,7 +131,7 @@ const HeroSection = () => {
                 <Link
                   href="/resume.pdf"
                   target="_blank"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-[#636366] liquid-glass-pill hover:text-[#007aff] transition-colors no-underline"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-base font-medium text-[#636366] liquid-glass-pill hover:text-[#007aff] transition-colors no-underline"
                   style={{ borderRadius: '99em' }}
                 >
                   {t('hero.cta.resume')}
@@ -156,7 +156,7 @@ const HeroSection = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4, delay: 1.3 + index * 0.1 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#636366] liquid-glass-pill cursor-default"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-[#636366] liquid-glass-pill cursor-default"
               >
                 <item.icon size={12} className="text-[#007aff]" />
                 {item.label}

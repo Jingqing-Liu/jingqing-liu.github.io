@@ -47,7 +47,7 @@ const ExperienceHighlights = () => {
                 <Briefcase size={16} className="text-[#007aff]" />
                 <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">{t('home.experience.tag')}</span>
               </div>
-              <h2 className="text-[1.44rem] md:text-[2.3rem] font-bold text-[#1c1c1e] tracking-tight">
+              <h2 className="text-[1.625rem] md:text-[2.625rem] font-bold text-[#1c1c1e] tracking-tight">
                 {t('home.experience.title')}
               </h2>
             </div>
@@ -79,11 +79,11 @@ const ExperienceHighlights = () => {
                         {t(`exp.type.${exp.type}`)}
                       </span>
                     </div>
-                    <h3 className="text-[#1c1c1e] font-semibold text-sm mb-2 leading-snug group-hover:text-[#007aff] transition-colors">
+                    <h3 className="text-[#1c1c1e] font-semibold text-base mb-2 leading-snug group-hover:text-[#007aff] transition-colors">
                       {localize(lang, exp.title, exp.title_zh)}
                     </h3>
-                    <p className="text-xs text-[#8e8e93] mb-3">{localize(lang, exp.company, exp.company_zh)}</p>
-                    <span className="text-[10px] text-[#aeaeb2] font-mono">{exp.period}</span>
+                    <p className="text-sm text-[#8e8e93] mb-3">{localize(lang, exp.company, exp.company_zh)}</p>
+                    <span className="text-xs text-[#aeaeb2] font-mono">{exp.period}</span>
                   </div>
                 </Link>
               </motion.div>
@@ -113,7 +113,7 @@ const ResearchHighlights = () => {
                 <BookOpen size={16} className="text-[#007aff]" />
                 <span className="text-xs font-mono tracking-wider uppercase text-[#8e8e93]">{t('home.research.tag')}</span>
               </div>
-              <h2 className="text-[1.44rem] md:text-[2.3rem] font-bold text-[#1c1c1e] tracking-tight">
+              <h2 className="text-[1.625rem] md:text-[2.625rem] font-bold text-[#1c1c1e] tracking-tight">
                 {t('home.research.title')}
               </h2>
             </div>
@@ -142,10 +142,10 @@ const ResearchHighlights = () => {
                             {localize(lang, project.advisor, project.advisor_zh).split('(').shift()?.split('（').shift()?.trim()}
                           </span>
                         </div>
-                        <h3 className="text-[#1c1c1e] font-semibold text-sm leading-snug group-hover:text-[#007aff] transition-colors mb-2">
+                        <h3 className="text-[#1c1c1e] font-semibold text-base leading-snug group-hover:text-[#007aff] transition-colors mb-2">
                           {localize(lang, project.title, project.title_zh)}
                         </h3>
-                        <p className="text-xs text-[#8e8e93] leading-relaxed line-clamp-2">
+                        <p className="text-sm text-[#8e8e93] leading-relaxed line-clamp-2">
                           {lang === 'zh' && project.keyPoints_zh ? project.keyPoints_zh[0] : project.keyPoints[0]}
                         </p>
                       </div>

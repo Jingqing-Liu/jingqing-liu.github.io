@@ -89,7 +89,7 @@ export default function ExperiencePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-[2.3rem] md:text-[3.75rem] font-bold text-[#1c1c1e] tracking-tight leading-tight mb-6"
+              className="text-[2.625rem] md:text-[4.25rem] font-bold text-[#1c1c1e] tracking-tight leading-tight mb-6"
             >
               {t('exp.title')}
             </motion.h1>
@@ -98,7 +98,7 @@ export default function ExperiencePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-sm text-[#48484a] leading-relaxed mx-auto text-center"
+              className="text-base text-[#48484a] leading-relaxed mx-auto text-center"
             >
               {t('exp.subtitle')}
             </motion.p>

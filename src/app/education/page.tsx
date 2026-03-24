@@ -75,7 +75,7 @@ export default function Education() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-[2.3rem] md:text-[3.75rem] font-bold text-[#1c1c1e] tracking-tight leading-tight mb-6"
+              className="text-[2.625rem] md:text-[4.25rem] font-bold text-[#1c1c1e] tracking-tight leading-tight mb-6"
             >
               {t('edu.title')}
             </motion.h1>
@@ -84,7 +84,7 @@ export default function Education() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-sm text-[#48484a] leading-relaxed mx-auto"
+              className="text-base text-[#48484a] leading-relaxed mx-auto"
               style={{ textAlign: 'center' }}
             >
               {t('edu.subtitle')}
@@ -130,7 +130,7 @@ export default function Education() {
                             )}
                             <span className="text-xs text-[#8e8e93] font-mono">{edu.period}</span>
                           </div>
-                          <h3 className="text-[1.44rem] font-semibold text-[#1c1c1e] mb-3">{localize(lang, edu.institution, edu.institution_zh)}</h3>
+                          <h3 className="text-[1.625rem] font-semibold text-[#1c1c1e] mb-3">{localize(lang, edu.institution, edu.institution_zh)}</h3>
 
                           {/* Program Details */}
                           <div className="space-y-2 mb-4">
@@ -151,7 +151,7 @@ export default function Education() {
                           </div>
 
                           {/* Overview */}
-                          <p className={`text-xs text-[#48484a] leading-relaxed ${edu.activities && edu.activities.length > 0 ? 'mb-4' : ''}`}>
+                          <p className={`text-sm text-[#48484a] leading-relaxed ${edu.activities && edu.activities.length > 0 ? 'mb-4' : ''}`}>
                             {localize(lang, edu.description, edu.description_zh)}
                           </p>
 

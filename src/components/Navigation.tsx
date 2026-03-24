@@ -12,6 +12,7 @@ const navKeys = [
   { key: 'nav.education', href: '/education' },
   { key: 'nav.research', href: '/research' },
   { key: 'nav.experience', href: '/experience' },
+  { key: 'nav.snowball', href: '/snowball' },
 ];
 
 const Navigation = () => {

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+  zoom: 1.2;
+}
+
 /* iOS 26 Liquid Glass Design System */
 :root {
   --background: #f2f2f7;

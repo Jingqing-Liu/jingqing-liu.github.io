@@ -1,0 +1,26 @@
+export const research = {
+  en: {
+    'research.badge': 'Research Portfolio',
+    'research.title': 'Research',
+    'research.subtitle': 'Exploring cybersecurity, network security, and distributed systems — from platform vulnerabilities to blockchain protocol design.',
+    'research.search': 'Search projects, advisors, keywords...',
+    'research.advisor': 'Advisor',
+    'research.viewDetails': 'View Details & Poster',
+    'research.learnMore': 'Learn More',
+    'research.back': 'Back to Research',
+    'research.backAll': 'Back to All Research',
+    'research.poster': 'Research Poster',
+  },
+  zh: {
+    'research.badge': '研究成果',
+    'research.title': '研究',
+    'research.subtitle': '探索网络安全、分布式系统——从平台漏洞到区块链协议设计。',
+    'research.search': '搜索项目、导师、关键词...',
+    'research.advisor': '导师',
+    'research.viewDetails': '查看详情与海报',
+    'research.learnMore': '了解更多',
+    'research.back': '返回研究',
+    'research.backAll': '返回全部研究',
+    'research.poster': '研究海报',
+  },
+};

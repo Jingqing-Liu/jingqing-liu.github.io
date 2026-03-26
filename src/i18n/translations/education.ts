@@ -1,0 +1,26 @@
+export const education = {
+  en: {
+    'edu.badge': 'Academic Background',
+    'edu.title': 'Education',
+    'edu.subtitle': 'Computer Science — from cybersecurity at Delaware to AI, security, and systems at Brown.',
+    'edu.label.degree': 'Degree',
+    'edu.label.major': 'Major',
+    'edu.label.gpa': 'GPA',
+    'edu.label.focus': 'Focus',
+    'edu.label.location': 'Location',
+    'edu.label.activities': 'Activities',
+    'edu.award': 'Award',
+  },
+  zh: {
+    'edu.badge': '学术背景',
+    'edu.title': '教育经历',
+    'edu.subtitle': '从特拉华大学的网络安全到布朗大学的 AI、安全与系统方向。',
+    'edu.label.degree': '学位',
+    'edu.label.major': '专业',
+    'edu.label.gpa': 'GPA',
+    'edu.label.focus': '方向',
+    'edu.label.location': '地点',
+    'edu.label.activities': '活动',
+    'edu.award': '荣誉',
+  },
+};

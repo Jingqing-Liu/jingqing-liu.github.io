@@ -4,3 +4,4 @@ export * from './education';
 export * from './research';
 export * from './experience';
 export * from './navigation';
+export * from './reading';

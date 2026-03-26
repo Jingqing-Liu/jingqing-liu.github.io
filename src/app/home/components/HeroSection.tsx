@@ -41,7 +41,7 @@ const HeroSection = () => {
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
+    <section className="relative min-h-[80vh] flex items-center overflow-hidden">
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-6 md:px-8 py-20">

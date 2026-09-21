@@ -1,7 +1,3 @@
-import type { Book } from '../reading';
-import { ddia } from './ddia';
+import { computerNetworking } from './computer-networking';
 
-// Add new books here — one import, one array entry
-export const books: Book[] = [
-  ddia,
-];
+export const books = [computerNetworking];

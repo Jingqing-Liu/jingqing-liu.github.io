@@ -1,0 +1,33 @@
+/* Scoped, unlayered rules override the site's global heading defaults. */
+.page h1 {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+.page h2 {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.page aside h2,
+.page h3,
+.page h5 {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.page p {
+  margin-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .page h1 {
+    font-size: 18px;
+  }
+}

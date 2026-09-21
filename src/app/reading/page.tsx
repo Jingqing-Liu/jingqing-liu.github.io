@@ -1,6 +1,9 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { BookOpen, ArrowUpRight } from 'lucide-react';
 import { books } from '../../data/reading';
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default function ReadingPage() {
   return (

@@ -1,4 +1,3 @@
-import { books } from '../data/reading';
 import type { MetadataRoute } from 'next';
 import { researchProjects } from '../data/research';
 import { experienceData } from '../data/experience';
@@ -9,7 +8,6 @@ const BASE_URL = 'https://jingqing-liu.github.io';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages: MetadataRoute.Sitemap = [
-    { url: `${BASE_URL}/books/`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${BASE_URL}/`, lastModified: new Date(), changeFrequency: 'monthly', priority: 1.0 },
     { url: `${BASE_URL}/education/`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.8 },
     { url: `${BASE_URL}/research/`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.9 },
@@ -30,5 +28,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...books.map((book) => ({ url: `${BASE_URL}/books/${book.id}/`, lastModified: new Date() })), ...researchPages, ...experiencePages];
+  return [...staticPages, ...researchPages, ...experiencePages];
 }

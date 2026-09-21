@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Jingqing Liu · Personal website
 
-## Getting Started
-
-First, run the development server:
+Next.js 15 / React 19，静态导出到 GitHub Pages。
 
 ```bash
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 一起学 · Study together
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+预览入口：`/studyshare/`。Books 与一起学的公开导航入口暂时隐藏，相关页面设置为不被搜索引擎收录。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **学习总览**：多书籍 / 多项目书架、每个人的完成率、小组平均、共同完成与章节路线。
+- **多人打卡**：每本书单独选择成员，每人独立填写，可筛选比较对象，退出后历史保留。
+- **学习日历**：按学习分钟或首次完成包数显示固定档位热力图，查看当天实际内容。
+- **习题与笔记**：答案与笔记自动保存、核对线索折叠、添加实际原书题、学习完成与互检分别记录。
+- **学习时间**：同一包可分多天多次完成；专注计时跨午夜拆分，手动补录及修改 / 撤销。
+- **备份与共享**：本机 JSON 导出 / 恢复；云端使用负责人预建的邮箱与密码账号，按书授权、离线待同步和版本冲突提示。
 
-## Learn More
+已导入《计算机网络：自顶向下方法》第八版的 8 章、60 个基础包、132 道自拟题与核对线索。没有虚构个人进度；原书题按实际材料添加。完成基础包不等于完成原书全部习题。
 
-To learn more about Next.js, take a look at the following resources:
+配置位置在 [.env.example](.env.example)，需要的值保持留白。负责人参考 [Supabase 接入与账号准备](docs/study-setup.md) 配置；学习网页只呈现登录与学习功能，不提供数据库教程。没有配置时，记录仅保存在当前浏览器，本机身份切换用于体验。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+多人版的计算与边界规则见 [设计说明](docs/study-next-design.md)。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 验证
 
-## Deploy on Vercel
+```bash
+npm run test:study
+npx tsc --noEmit
+npm run lint
+npm run build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+测试命令建议使用 Node.js 24 或更新版本，覆盖学习计划完整性、个人完成与互检、成员隔离、跨日计时、备份迁移、撤销记录、同步竞态和 Supabase HTTP 适配器。数据库权限回归见 [SQL 测试](supabase/study-security-test.sql)，应在安装 schema 的开发数据库执行。
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+生产构建输出到 `out/`；开发预览与生产构建应分别运行，避免缓存互相覆盖。网站使用原有系统字体栈，无需联网下载字体。
+
+## 学习计划维护
+
+默认计划数据位于 `src/data/study/networking.ts`。若需要从原交接包重新生成：
+
+```bash
+python3 scripts/import-study-plan.py /path/to/CODEX_自顶向下第8版_完整学习交接包.md
+```
+
+此脚本只生成课程数据，不导入个人完成记录。一般添加新书或习题可直接使用页面中的表单。

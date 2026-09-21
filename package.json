@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:study": "node scripts/test-study.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.23.12",

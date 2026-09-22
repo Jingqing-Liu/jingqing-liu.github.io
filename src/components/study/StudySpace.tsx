@@ -7,6 +7,7 @@ import { useStudyStore } from '../../lib/use-study-store';
 import * as cloud from '../../lib/study-cloud';
 import StudyCalendar from './StudyCalendar';
 import StudyDesk from './StudyDesk';
+import StudyRoomOverview from './StudyRoomOverview';
 import s from './StudySpace.module.css';
 
 export const statusNames = { unrecorded: '未登记', studying: '进行中', submitted: '已完成', revision: '待订正', passed: '互检通过' };
@@ -44,8 +45,11 @@ type SessionTarget = { actor: string; project: StudyProject; pack: StudyPack; ch
 type ReviewTarget = { projectId: string; packId: string; learnerId: string; reviewerId: string; submissionUpdatedAt: string; questionsSnapshot: string };
 export default function StudySpace() {
   const store = useStudyStore();
+  const contentRef = useRef<HTMLDivElement>(null);
   const { state, actor, ready, room } = store;
   const [projectId, setProjectId] = useState('computer-networking');
+  const [inRoom, setInRoom] = useState(true);
+  const [projectActor, setProjectActor] = useState('');
   const [tab, setTab] = useState<Tab>('overview');
   const [chapterFilter, setChapterFilter] = useState('all');
   const [packId, setPackId] = useState('1-01');
@@ -59,6 +63,8 @@ export default function StudySpace() {
   const [showFormer, setShowFormer] = useState(false);
   const visibleProjects = state.projects.filter(p => isProjectMember(state, p.id, actor));
   const project = visibleProjects.find(p => p.id === projectId) || visibleProjects[0];
+  const showRoom = inRoom || !project || projectActor !== actor;
+  const headerMembers = showRoom ? state.learners : getProjectLearners(state, project.id);
   const packs = project?.chapters.flatMap(c => c.packs) || [];
   const pack = packs.find(p => p.id === packId) || packs[0];
   const chapter = project?.chapters.find(c => c.packs.some(p => p.id === pack?.id)) || project?.chapters[0];
@@ -80,9 +86,12 @@ export default function StudySpace() {
   const hasCompleted = (packId: string, learnerId: string) => !!project && isPackCompleted(state, project.id, packId, learnerId);
   const nextPack = packs.find(p => p.base && !hasCompleted(p.id, actor));
   const openPack = (p: StudyPack, learnerId = actor) => { setPackId(p.id); setViewLearner(learnerId); setTab('work'); };
-  const changeProject = (id: string) => { const p = state.projects.find(item => item.id === id)!; setProjectId(id); setPackId(p.chapters[0]?.packs[0]?.id || ''); setChapterFilter('all'); setViewLearner(actor); setCompareIds(null); setShowFormer(false); };
+  const focusContent = () => window.requestAnimationFrame(() => { contentRef.current?.focus({ preventScroll: true }); contentRef.current?.scrollIntoView({ block: 'start' }); });
+  const showOverview = () => { setInRoom(true); focusContent(); };
+  const changeProject = (id: string) => { const p = visibleProjects.find(item => item.id === id); if (!p) return; setProjectActor(actor); setInRoom(false); setTab('overview'); setProjectId(id); setPackId(p.chapters[0]?.packs[0]?.id || ''); setChapterFilter('all'); setViewLearner(actor); setCompareIds(null); setShowFormer(false); focusContent(); };
   const notify = (message: string) => { setNotice(message); window.setTimeout(() => setNotice(''), 3500); };
   const openReview = (learnerId: string) => {
+    if (!project || !pack) return;
     const submission = state.progress.find(item => item.id === progressKey(project.id, pack.id, learnerId));
     if (!project || learnerId === actor || !submission || submission.status !== 'submitted' || !isProjectMember(state, project.id, learnerId) || !isProjectMember(state, project.id, actor)) {
       notify('伙伴尚未提交可验收的完整记录。'); return;
@@ -97,31 +106,39 @@ export default function StudySpace() {
   if (!ready) return <div className={s.loading}>正在打开学习空间…</div>;
   if (cloud.cloudConfigured && !store.user) return <LoginPage store={store} />;
   if (cloud.cloudConfigured && !room) return <LoginPage store={store} waiting />;
-  if (!project) return <EmptySpace store={store} exportBackup={exportBackup} notify={notify} />;
+  const addTemplate = () => {
+    const p = structuredClone(networkingStudyProject);
+    p.id = `networking-${crypto.randomUUID()}`;
+    p.ownerId = actor; p.memberIds = [actor]; p.formerMemberIds = []; p.timeZone = 'Asia/Shanghai'; p.revision = 0;
+    if (store.save('project', p)) { setProjectId(p.id); setPackId(p.chapters[0].packs[0].id); setTab('overview'); setProjectActor(actor); setInRoom(false); focusContent(); notify('学习计划已加入书架'); }
+  };
 
 
   return <div className={s.page} lang="zh-CN"><div className={s.shell}>
     <header className={s.header}>
       <div><div className={s.eyebrow}><span className={s.brandMark}><BookOpen size={14} /></span> STUDY TOGETHER <span className={s.eyebrowLine} /></div><h1>一起学<span className={s.titleDot}>.</span></h1><p>各自前进，也一起走远。让每一次专注，都有迹可循。</p></div>
-      <div className={s.headerRight}><div className={s.people}>{members.slice(0, 4).map(l => <Avatar key={l.id} learner={l} />)}{members.length > 4 && <span className={s.avatarPlaceholder}>+{members.length - 4}</span>}<div><strong>{room?.name || '我们的学习空间'}</strong><span>{members.length} 位本书学习伙伴</span></div></div><button className={s.iconButton} aria-label="空间设置" onClick={() => setModal('settings')}><Settings2 size={19} /></button></div>
+      <div className={s.headerRight}><div className={s.people}>{headerMembers.slice(0, 4).map(l => <Avatar key={l.id} learner={l} />)}{headerMembers.length > 4 && <span className={s.avatarPlaceholder}>+{headerMembers.length - 4}</span>}<div><strong>{room?.name || '我们的学习空间'}</strong><span>{headerMembers.length} 位{showRoom ? '空间成员' : '本书学习伙伴'}</span></div></div><button className={s.iconButton} aria-label="空间设置" onClick={() => setModal('settings')}><Settings2 size={19} /></button></div>
     </header>
 
     <div className={s.layout}>
       <aside className={s.sidebar}><div className={s.sidebarLabel}>学习书架 <span>{visibleProjects.length.toString().padStart(2, '0')}</span></div>
-        <div className={s.projectNav}>{visibleProjects.map(p => <button key={p.id} onClick={() => changeProject(p.id)} className={`${s.projectButton} ${project.id === p.id ? s.projectActive : ''}`}><span className={s.projectIcon} style={{ color: p.color }}>{p.kind === 'book' ? <BookOpen size={18} /> : <GraduationCap size={18} />}</span><span><strong>{p.title}</strong><small>{p.subtitle || `${p.chapters.length} 个章节`}</small></span>{project.id === p.id && <span className={s.activeDot} />}</button>)}</div>
+        <nav className={s.projectNav} aria-label="空间导航"><button className={`${s.projectButton} ${showRoom ? s.projectActive : ''}`} aria-current={showRoom ? 'page' : undefined} onClick={showOverview}><span className={s.projectIcon}><LayoutGrid size={18} /></span><span><strong>空间总览</strong><small>所有书籍 · 成员进度</small></span>{showRoom && <span className={s.activeDot} />}</button>{visibleProjects.map(p => <button key={p.id} aria-current={!showRoom && project.id === p.id ? 'page' : undefined} onClick={() => changeProject(p.id)} className={`${s.projectButton} ${!showRoom && project.id === p.id ? s.projectActive : ''}`}><span className={s.projectIcon} style={{ color: p.color }}>{p.kind === 'book' ? <BookOpen size={18} /> : <GraduationCap size={18} />}</span><span><strong>{p.title}</strong><small>{p.subtitle || `${p.chapters.length} 个章节`}</small></span>{!showRoom && project.id === p.id && <span className={s.activeDot} />}</button>)}</nav>
         <button className={s.addProject} onClick={() => setModal('project')}><Plus size={15} /> 添加书籍 / 项目</button>
-        <div className={s.sidebarBottom}><div className={s.smallLabel}>当前记录人</div>{room ? <div className={s.currentPerson}><Avatar learner={me} small /><strong>{me.name}</strong></div> : <label className={s.actorSelect}><Avatar learner={me} small /><select aria-label="切换本机记录人" value={actor} onChange={e => { store.selectActor(e.target.value); setViewLearner(e.target.value); setCompareIds(null); setChapterFilter('all'); }}>{state.learners.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}</select><ChevronDown size={13} /></label>}
+        <div className={s.sidebarBottom}><div className={s.smallLabel}>当前记录人</div>{room ? <div className={s.currentPerson}><Avatar learner={me} small /><strong>{me.name}</strong></div> : <label className={s.actorSelect}><Avatar learner={me} small /><select aria-label="切换本机记录人" value={actor} onChange={e => { store.selectActor(e.target.value); setInRoom(true); setViewLearner(e.target.value); setCompareIds(null); setChapterFilter('all'); }}>{state.learners.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}</select><ChevronDown size={13} /></label>}
         <button className={s.connection} onClick={() => setModal('settings')}><span className={room ? s.onlineDot : s.localDot} />{room ? store.syncing ? '正在同步' : store.pending ? `${store.pending} 条待同步` : '共享空间 · 自动同步' : '本机模式 · 已开启保存'}<ArrowUpRight size={12} /></button>
         {!room && <p className={s.localNote}>记录仅保存在当前浏览器。连接共享空间后，可与伙伴跨设备同步。</p>}
         <button className={s.subtleButton} onClick={exportBackup}><Download size={14} /> 导出学习备份</button></div>
       </aside>
 
-      <div className={s.content}>
-        <nav className={s.tabs} aria-label="学习空间视图">{([{ id: 'overview', label: '学习总览', icon: LayoutGrid }, { id: 'checkins', label: '学习打卡', icon: ListChecks }, { id: 'calendar', label: '学习日历', icon: CalendarDays }, { id: 'work', label: '习题与笔记', icon: BookOpen }] as const).map(item => <button key={item.id} className={tab === item.id ? s.tabActive : ''} onClick={() => { setTab(item.id); setViewLearner(actor); }} aria-current={tab === item.id ? 'page' : undefined}><item.icon size={15} />{item.label}</button>)}</nav>
-        <div className={s.memberToolbar}><span>{project.title} · {members.length} 人参与</span><div>{(tab === 'overview' || tab === 'checkins') && <details className={s.comparePicker}><summary><Users size={13} /> 对比成员 {displayed.length}</summary><div><label className={s.checkLabel}><input type="checkbox" checked={showFormer} onChange={e => { setShowFormer(e.target.checked); setCompareIds(null); }} />包含已退出成员</label>{comparable.map(l => <label key={l.id} className={s.checkLabel}><input type="checkbox" checked={displayed.some(p => p.id === l.id)} disabled={!displayed.some(p => p.id === l.id) && displayed.length >= 6} onChange={e => setCompareIds(e.target.checked ? [...displayed.map(p => p.id), l.id] : displayed.filter(p => p.id !== l.id).map(p => p.id))} /><Avatar learner={l} small />{l.name}{!isProjectMember(state, project.id, l.id) ? ' · 已退出' : ''}</label>)}<small>一次最多对比 6 人，可随时切换。</small></div></details>}<button className={s.subtleButton} onClick={() => setModal('members')}><Plus size={13} />管理成员</button></div></div>
+      <div className={s.content} ref={contentRef} tabIndex={-1}>
         {store.editMessage && <p className={s.error} role="status">{store.editMessage}</p>}
         {store.error && <div role="alert" className={s.error}>{store.error}<button onClick={() => void store.sync()}>重试同步</button></div>}
         <ConflictPanel store={store} />
+        {showRoom ? <StudyRoomOverview key={actor} state={state} actor={actor} onOpenProject={changeProject} onAddProject={() => setModal('project')} onAddTemplate={addTemplate} /> : <>
+        <div className={s.roomBreadcrumb}><button onClick={showOverview}><LayoutGrid size={13} />空间总览</button><span aria-hidden="true">/</span><span>{project.title}</span></div>
+        <nav className={s.tabs} aria-label="学习空间视图">{([{ id: 'overview', label: '本书总览', icon: LayoutGrid }, { id: 'checkins', label: '学习打卡', icon: ListChecks }, { id: 'calendar', label: '学习日历', icon: CalendarDays }, { id: 'work', label: '习题与笔记', icon: BookOpen }] as const).map(item => <button key={item.id} className={tab === item.id ? s.tabActive : ''} onClick={() => { setTab(item.id); setViewLearner(actor); }} aria-current={tab === item.id ? 'page' : undefined}><item.icon size={15} />{item.label}</button>)}</nav>
+        <div className={s.memberToolbar}><span>{project.title} · {members.length} 人参与</span><div>{(tab === 'overview' || tab === 'checkins') && <details className={s.comparePicker}><summary><Users size={13} /> 对比成员 {displayed.length}</summary><div><label className={s.checkLabel}><input type="checkbox" checked={showFormer} onChange={e => { setShowFormer(e.target.checked); setCompareIds(null); }} />包含已退出成员</label>{comparable.map(l => <label key={l.id} className={s.checkLabel}><input type="checkbox" checked={displayed.some(p => p.id === l.id)} disabled={!displayed.some(p => p.id === l.id) && displayed.length >= 6} onChange={e => setCompareIds(e.target.checked ? [...displayed.map(p => p.id), l.id] : displayed.filter(p => p.id !== l.id).map(p => p.id))} /><Avatar learner={l} small />{l.name}{!isProjectMember(state, project.id, l.id) ? ' · 已退出' : ''}</label>)}<small>一次最多对比 6 人，可随时切换。</small></div></details>}<button className={s.subtleButton} onClick={() => setModal('members')}><Plus size={13} />管理成员</button></div></div>
+
         {tab === 'overview' && <>
           <div className={s.stats}><div><span><Clock3 size={14} /> 累计一起投入</span><strong>{Math.floor(totalMinutes / 60)}<small>小时</small>{totalMinutes % 60}<small>分钟</small></strong><p>当前项目 · {members.length} 人合计</p></div><div><span><CalendarDays size={14} /> 本周学习足迹</span><strong>{weekDays}<small>天 / 本周</small></strong><p>{weekSessions.length ? `留下了 ${weekSessions.length} 次专注记录` : '从今天的一次专注开始'}</p></div><div><span><CheckCheck size={14} /> 小组平均进度</span><strong>{average}<small>%</small></strong><p>当前 {members.length} 人 · 共同完成 {joint} 包</p></div></div>
           <section className={s.featured}><div className={s.bookArt} aria-hidden="true"><span>LEARN<br />CONNECT<br />GROW.</span><div className={s.orbitOne} /><div className={s.orbitTwo} /><div className={s.orbitThree} /><small>{project.kind === 'book' ? 'READING TOGETHER' : 'BUILDING TOGETHER'}</small></div><div className={s.featuredBody}><div className={s.cardEyebrow}><span className={s.blueDot} /> 正在一起学习 <span>{project.kind === 'book' ? '书籍' : '项目'}</span></div><h2>{project.title}</h2><p>{project.subtitle}</p><div className={s.bookMeta}><span>{project.chapters.length} 个章节</span><span>{packs.filter(p => p.base).length} 个基础学习包</span><span>{packs.reduce((n, p) => n + p.questions.length, 0)} 道练习</span></div><div className={s.progressList}>{displayed.map(l => { const stats = getProjectStats(state, project.id, l.id); return <div key={l.id} className={s.progressRow}><Avatar learner={l} small /><span>{l.name}</span><div className={s.progressTrack}><i style={{ width: `${stats.percent}%`, background: l.color }} /></div><strong>{stats.percent}%</strong><small title={`已完成 ${stats.completed} / ${stats.total}，互检通过 ${stats.verified}`}>{stats.completed}/{stats.total} · 互检 {stats.verified}</small></div>; })}</div><div className={s.featuredFoot}><span><Users size={13} /> {members.length} 位成员 · 按自己的节奏前进</span><button onClick={() => setTab('checkins')}>查看进度 <ArrowRight size={14} /></button></div></div></section>
@@ -137,10 +154,11 @@ export default function StudySpace() {
         </>}
         {tab === 'calendar' && <><div className={s.viewHeading}><div><h2>学习日历</h2><p>把时间留在这里，看见彼此的坚持。</p></div><label className={s.checkLabel}><input type="checkbox" checked={allCalendar} onChange={e => setAllCalendar(e.target.checked)} />全部项目</label></div><StudyCalendar actor={actor} state={calendarState} projectId={allCalendar ? undefined : project.id} /></>}
         {tab === 'work' && pack && <StudyDesk key={`${project.id}:${actor}`} state={state} actor={actor} project={project} pack={pack} chapter={chapter} viewLearner={viewLearner || actor} onViewLearner={setViewLearner} onSelectPack={p => setPackId(p.id)} save={store.save} notify={notify} onRecord={() => { setSessionTarget({ actor, project, pack, chapter, learner: me }); setModal('session'); }} onReview={openReview} />}
+        </>}
       </div>
     </div><footer className={s.spaceFooter}><span>STUDY TOGETHER</span><span>不必每天满分，只要继续向前。</span><button onClick={() => setModal('settings')}><MoreHorizontal size={18} /><span className={s.srOnly}>空间设置</span></button></footer>
     {notice && <div role="status" className={s.toast}><Check size={15} />{notice}</div>}
-    {modal === 'project' && <Modal error={store.error} title="开启一段新的学习" onClose={() => setModal(null)}><ProjectForm learners={state.learners} actor={actor} onSave={p => { if (store.save('project', p)) { setProjectId(p.id); setPackId(p.chapters[0].packs[0].id); setChapterFilter('all'); setViewLearner(actor); setModal(null); notify('新项目已加入书架'); } }} /></Modal>}
+    {modal === 'project' && <Modal error={store.error} title="开启一段新的学习" onClose={() => setModal(null)}><ProjectForm learners={state.learners} actor={actor} onSave={p => { if (store.save('project', p)) { setProjectId(p.id); setPackId(p.chapters[0].packs[0].id); setChapterFilter('all'); setViewLearner(actor); setCompareIds(null); setShowFormer(false); setTab('overview'); setProjectActor(actor); setInRoom(false); setModal(null); focusContent(); notify('新项目已加入书架'); } }} /></Modal>}
     {modal === 'session' && sessionTarget && <Modal error={store.error} title="记录这次专注" onClose={() => setModal(null)}><SessionForm project={sessionTarget.project} pack={sessionTarget.pack} learner={sessionTarget.learner} onSave={(date, minutes, note) => {
       const target = sessionTarget;
       if (actor !== target.actor || !isProjectMember(state, target.project.id, actor)) { notify('账号或本书成员资格已经变化。此记录尚未保存，请核对后重新打开。'); return; }
@@ -158,7 +176,7 @@ export default function StudySpace() {
       if (!note.trim()) { notify('请填写实际核查内容或订正建议。'); return; }
       if (store.save('review', { id: `${actor}:${target.projectId}:${target.packId}:${target.learnerId}`, projectId: target.projectId, packId: target.packId, learnerId: actor, targetLearnerId: target.learnerId, outcome, note: note.trim(), submissionUpdatedAt: target.submissionUpdatedAt, updatedAt: new Date().toISOString() })) { setModal(null); notify(outcome === 'passed' ? '已记录你的互检反馈' : '已留下订正建议'); }
     }} /></Modal>}
-    {modal === 'members' && <Modal error={store.error} title={`${project.title} · 学习成员`} onClose={() => setModal(null)}><MembersPanel project={project} store={store} onSaved={() => { setModal(null); setCompareIds(null); notify('本书成员已更新'); }} /></Modal>}
+    {modal === 'members' && project && <Modal error={store.error} title={`${project.title} · 学习成员`} onClose={() => setModal(null)}><MembersPanel project={project} store={store} onSaved={() => { setModal(null); setCompareIds(null); notify('本书成员已更新'); }} /></Modal>}
     {modal === 'settings' && <Modal error={store.error} title="我们的学习空间" onClose={() => setModal(null)}><SettingsPanel store={store} exportBackup={exportBackup} notify={notify} /></Modal>}
   </div></div>;
 }
@@ -192,17 +210,6 @@ function LoginPage({ store, waiting = false }: { store: ReturnType<typeof useStu
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   return <div className={s.page} lang="zh-CN"><main className={s.loginCard}><div className={s.eyebrow}><BookOpen size={16} /> STUDY TOGETHER</div><h1>一起学<span className={s.titleDot}>.</span></h1><p>用自己的账号，继续和朋友的学习旅程。</p>{waiting ? <><p className={s.settingsMessage}>账号尚未加入学习空间，请联系空间负责人。</p><button className={s.secondaryButton} onClick={() => { void cloud.signOut().then(() => store.connect()).catch(e => setMessage(e.message)); }}>退出账号</button><button className={s.subtleButton} onClick={() => { void store.connect().catch(e => setMessage(e.message)); }}>重新连接</button></> : <form className={s.form} onSubmit={e => { e.preventDefault(); const data = new FormData(e.currentTarget); setBusy(true); setMessage(''); void cloud.signInWithPassword(String(data.get('email')).trim(), String(data.get('password'))).then(() => store.connect()).catch(e => setMessage(e instanceof Error ? e.message : '暂时无法登录，请重试。')).finally(() => setBusy(false)); }}><label>邮箱<input name="email" type="email" autoComplete="username" required maxLength={254} /></label><label>密码<input name="password" type="password" autoComplete="current-password" required maxLength={200} /></label><button disabled={busy} className={s.primaryButton}>{busy ? '正在登录…' : '登录学习空间'}<ArrowRight size={15} /></button><small>账号由空间负责人提供。</small></form>}{(message || store.error) && <p className={s.settingsMessage} role="alert">{message || store.error}</p>}</main></div>;
-}
-
-function EmptySpace({ store, exportBackup, notify }: { store: ReturnType<typeof useStudyStore>; exportBackup: () => void; notify: (message: string) => void }) {
-  const [panel, setPanel] = useState<'project' | 'settings' | null>(null);
-  const addTemplate = () => {
-    const p = structuredClone(networkingStudyProject);
-    p.id = `networking-${crypto.randomUUID()}`;
-    p.ownerId = store.actor; p.memberIds = [store.actor]; p.formerMemberIds = []; p.timeZone = 'Asia/Shanghai'; p.revision = 0;
-    store.save('project', p);
-  };
-  return <div className={s.page} lang="zh-CN"><main className={s.emptySpace}><div className={s.eyebrow}><BookOpen size={16} /> STUDY TOGETHER</div><h1>新的旅程，从一本书开始。</h1><p>这里会显示你参与的书籍和项目。也可以请朋友把你加入正在学习的书。</p>{store.editMessage && <p className={s.error} role="status">{store.editMessage}</p>}<div className={s.emptyActions}><button className={s.primaryButton} onClick={() => setPanel('project')}><Plus size={15} />添加书籍 / 项目</button><button className={s.secondaryButton} onClick={addTemplate}>使用《计算机网络》学习计划</button></div><button className={s.subtleButton} onClick={() => setPanel('settings')}><Settings2 size={14} />账号与记录</button>{store.error && <p className={s.error} role="alert">{store.error}</p>}<ConflictPanel store={store} />{panel === 'project' && <Modal error={store.error} title="开启一段新的学习" onClose={() => setPanel(null)}><ProjectForm learners={store.state.learners} actor={store.actor} onSave={p => { if (store.save('project', p)) setPanel(null); }} /></Modal>}{panel === 'settings' && <Modal error={store.error} title="账号与记录" onClose={() => setPanel(null)}><SettingsPanel store={store} exportBackup={exportBackup} notify={notify} /></Modal>}</main></div>;
 }
 
 function MembersPanel({ project, store, onSaved }: { project: StudyProject; store: ReturnType<typeof useStudyStore>; onSaved: () => void }) {

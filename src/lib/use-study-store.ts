@@ -65,6 +65,13 @@ function remoteState(room: NonNullable<Room>, records: cloud.CloudRecord[], user
     if (record.room_id !== room.id || !isEntry(entry) || entry.item.id !== record.id) throw new Error('云端记录格式异常，未覆盖本机数据。');
     if (visible.has((entry.item as Progress).projectId)) next = put(next, entry.kind, entry.item);
   }
+  const learnerIds = new Set(next.learners.map(learner => learner.id));
+  const referencesMissingMember = next.projects.some(project =>
+    [project.ownerId, ...(Array.isArray(project.memberIds) ? project.memberIds : []), ...(Array.isArray(project.formerMemberIds) ? project.formerMemberIds : [])]
+      .some(id => typeof id === 'string' && !learnerIds.has(id)))
+    || [...next.progress, ...next.answers, ...next.sessions, ...next.reviews]
+      .some(item => !learnerIds.has(item.learnerId) || ('targetLearnerId' in item && !learnerIds.has(item.targetLearnerId)));
+  if (referencesMissingMember) throw new Error('书籍仍关联已从空间目录删除的成员账号。重新创建同邮箱账号会产生新的身份，请由空间负责人修复成员关联后重试；现有记录和待同步内容已保留。');
   const migrated = migrateStudyState(next as unknown);
   if (!migrated) throw new Error('共享空间的数据不完整，原始记录与待同步内容均已保留。');
   return migrated;

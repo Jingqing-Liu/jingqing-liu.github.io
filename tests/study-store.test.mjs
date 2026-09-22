@@ -413,3 +413,30 @@ test('a browser editor lock makes a second page read-only and releases on unmoun
   afterClose.hooks.unmount();
   Object.defineProperty(globalThis, 'navigator', { configurable: true, value: {} });
 });
+
+
+test('recreated accounts surface missing membership without changing records or pending work', async () => {
+  const pendingKey = 'studyshare.outbox.room-user-one.user-one';
+  const pending = JSON.stringify({ ['progress:' + progressFor('user-one').id]: { kind: 'progress', item: progressFor('user-one'), expectedRevision: 0 } });
+  const h = await setup({ [pendingKey]: pending });
+  h.cloud.session = { user: { id: 'user-one' } };
+  h.cloud.room = roomFor('user-one');
+  h.cloud.room.members.push({ id: 'friend-new', name: '学习伙伴', color: '#9675ce' });
+  const project = cloudProject('user-one');
+  project.payload.memberIds.push('friend-deleted');
+  h.cloud.records = [project];
+  const snapshot = JSON.stringify(h.cloud.records);
+  await assert.rejects(h.hooks.store.connect(), /重新创建同邮箱账号会产生新的身份/);
+  assert.equal(JSON.stringify(h.cloud.records), snapshot);
+  assert.equal(h.storage.get(pendingKey), pending);
+  // Only an explicit administrator repair of the reference restores a valid room.
+  project.payload.memberIds = ['user-one', 'friend-new'];
+  project.revision += 1;
+  await h.hooks.store.connect();
+  const store = h.hooks.render();
+  assert.equal(store.actor, 'user-one');
+  assert.deepEqual(store.state.projects[0].memberIds, ['user-one', 'friend-new']);
+  assert.equal(store.state.progress[0].note, '第一版');
+  assert.equal(h.storage.get(pendingKey), pending);
+  h.hooks.unmount();
+});

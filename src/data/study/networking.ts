@@ -2,8 +2,10 @@
 // Source SHA-256: fffda5c1af4a2cd485351263bc2557bc52263f2bdf23fc80f32eb6a7fd663356
 // 8 chapters · 60 base packs · 132 self-authored questions and hints. No personal progress.
 import type { StudyProject } from "../../lib/study-model";
+import { networkingChapterOne } from "./networking-chapter-one";
+import { networkingWiresharkPacks } from "./networking-wireshark";
 
-export const networkingStudyProject: StudyProject = {
+export const legacyNetworkingStudyProject: StudyProject = {
   "id": "computer-networking",
   "title": "计算机网络：自顶向下方法",
   "subtitle": "第 8 版 · 从原理到实践",
@@ -1424,4 +1426,15 @@ export const networkingStudyProject: StudyProject = {
       ]
     }
   ]
+};
+
+// The photographed first-chapter exercises supersede the original handoff placeholders.
+// Keep the original template available to recognize and preserve existing study records.
+export const networkingStudyProject: StudyProject = {
+  ...legacyNetworkingStudyProject,
+  description: "按学习包推进阅读、作答、订正与伙伴互检。第一章已按教材题页整理 R1–R28、P1–P34、章末整合与三阶段 Wireshark 实验；其余章节保留原学习计划。每个包都可以分多天学习。",
+  chapters: [
+    { ...networkingChapterOne, packs: [...networkingChapterOne.packs, ...networkingWiresharkPacks].map(pack => ({ ...pack, id: pack.id.replace(/^1-/, 'ch1-') })) },
+    ...legacyNetworkingStudyProject.chapters.slice(1),
+  ],
 };

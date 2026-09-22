@@ -14,3 +14,4 @@ await import('../tests/study-store.test.mjs');
 await import('../tests/study-cloud.test.mjs');
 await import('../tests/study-timer.test.ts');
 await import('../tests/study-room.test.ts');
+await import('../tests/study-template-update.test.ts');

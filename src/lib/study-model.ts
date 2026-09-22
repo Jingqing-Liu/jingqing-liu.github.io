@@ -24,6 +24,7 @@ export interface StudyPack {
   bookPractice: string;
   questions: StudyQuestion[];
   base: boolean;
+  archived?: boolean;
 }
 
 export interface StudyChapter {
@@ -337,7 +338,7 @@ export function validateStudyState(input: unknown): input is StudyState {
         if (!record(pack) || !id(pack.id) || packs.has(pack.id) || !nonempty(pack.title, 500) ||
           !["reading", "review", "practice", "lab"].includes(String(pack.kind)) || !text(pack.reading) ||
           !text(pack.minutes, 200) || !text(pack.output) || !text(pack.bookPractice) ||
-          typeof pack.base !== "boolean" || !array(pack.questions, 1000)) return false;
+          (pack.archived !== undefined && typeof pack.archived !== "boolean") || typeof pack.base !== "boolean" || !array(pack.questions, 1000)) return false;
         const questionIds = new Set<string>();
         for (const question of pack.questions) {
           if (++questionCount > 100_000) return false;

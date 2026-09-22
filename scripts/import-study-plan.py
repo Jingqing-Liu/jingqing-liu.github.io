@@ -96,10 +96,15 @@ def main() -> None:
         f"// Source SHA-256: {hashlib.sha256(raw).hexdigest()}\n"
         "// 8 chapters · 60 base packs · 132 self-authored questions and hints. No personal progress.\n"
         'import type { StudyProject } from "../../lib/study-model";\n\n'
-        "export const networkingStudyProject: StudyProject = "
+        'import { networkingChapterOne } from "./networking-chapter-one";\n'
+        'import { networkingWiresharkPacks } from "./networking-wireshark";\n\n'
+        "export const legacyNetworkingStudyProject: StudyProject = "
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(header + json.dumps(project, ensure_ascii=False, indent=2) + ";\n", encoding="utf-8")
+    # Keep the separately maintained photographed exercises when regenerating the handoff.
+    current = (Path(__file__).resolve().parents[1] / "src/data/study/networking.ts").read_text(encoding="utf-8")
+    overlay = current[current.index("// The photographed first-chapter exercises"): ]
+    args.output.write_text(header + json.dumps(project, ensure_ascii=False, indent=2) + ";\n\n" + overlay, encoding="utf-8")
     print(f"Imported 8 chapters, 60 packs and 132 questions into {args.output}")
 
 

@@ -63,7 +63,7 @@ function deferred() {
 const localKey = 'studyshare.local.v1';
 const projectId = 'computer-networking';
 const roomFor = id => ({ id: `room-${id}`, name: '学习空间', inviteCode: 'CODE', members: [{ id, name: id, color: '#007aff' }] });
-const progressFor = id => ({ id: `${id}:${projectId}:1-01`, projectId, packId: '1-01', learnerId: id, status: 'studying', note: '第一版', evidence: '', updatedAt: '2026-09-21T10:00:00Z' });
+const progressFor = id => ({ id: `${id}:${projectId}:ch1-01`, projectId, packId: 'ch1-01', learnerId: id, status: 'studying', note: '第一版', evidence: '', updatedAt: '2026-09-21T10:00:00Z' });
 const cloudProject = id => ({ id: projectId, room_id: `room-${id}`, kind: 'project', owner_id: id, revision: 1, updated_at: '2026-09-21T10:00:00Z', payload: { ...createInitialState().projects[0], ownerId: id, memberIds: [id], formerMemberIds: [], revision: 1 } });
 
 async function setup(initial = {}, locks) {
@@ -269,7 +269,7 @@ test('first personal completion date survives revision, editing, and later resub
   const h = await setup();
   let store = h.hooks.store;
   for (const question of store.state.projects[0].chapters[0].packs[0].questions) {
-    assert.equal(store.save('answer', { id: `A:${projectId}:1-01:${question.id}`, learnerId: 'A', projectId, packId: '1-01', questionId: question.id, text: '已独立作答', updatedAt: '2026-09-21T15:00:00Z' }), true);
+    assert.equal(store.save('answer', { id: `A:${projectId}:ch1-01:${question.id}`, learnerId: 'A', projectId, packId: 'ch1-01', questionId: question.id, text: '已独立作答', updatedAt: '2026-09-21T15:00:00Z' }), true);
   }
   const submitted = { ...progressFor('A'), status: 'submitted', evidence: '上方作答', updatedAt: '2026-09-21T15:30:00Z' };
   assert.equal(store.save('progress', submitted), true);
@@ -285,7 +285,7 @@ test('first personal completion date survives revision, editing, and later resub
 
 test('session correction replaces its ID and a tombstone cannot be resurrected by an old edit', async () => {
   const h = await setup();
-  const session = { id: 'A:session', learnerId: 'A', projectId, packId: '1-01', chapterId: '1', date: '2026-09-21', minutes: 30.5, note: '', createdAt: '2026-09-21T10:00:00Z' };
+  const session = { id: 'A:session', learnerId: 'A', projectId, packId: 'ch1-01', chapterId: '1', date: '2026-09-21', minutes: 30.5, note: '', createdAt: '2026-09-21T10:00:00Z' };
   assert.equal(h.hooks.store.save('session', session), true);
   assert.equal(h.hooks.store.save('session', { ...session, minutes: 20 }), true);
   let store = h.hooks.render();
@@ -354,12 +354,12 @@ test('answers upload before a submitted progress record even when progress enter
   const h = await setup(); await h.connect('user-one');
   const store = h.hooks.store;
   store.save('progress', progressFor('user-one'));
-  for (const question of store.state.projects[0].chapters[0].packs[0].questions) store.save('answer', { id: `user-one:${projectId}:1-01:${question.id}`, learnerId: 'user-one', projectId, packId: '1-01', questionId: question.id, text: '完成作答', updatedAt: '2026-09-21T10:00:00Z' });
+  for (const question of store.state.projects[0].chapters[0].packs[0].questions) store.save('answer', { id: `user-one:${projectId}:ch1-01:${question.id}`, learnerId: 'user-one', projectId, packId: 'ch1-01', questionId: question.id, text: '完成作答', updatedAt: '2026-09-21T10:00:00Z' });
   assert.equal(store.save('progress', { ...progressFor('user-one'), status: 'submitted', evidence: '上方作答', updatedAt: '2026-09-21T11:00:00Z' }), true);
   const order = []; const saveRecord = h.cloud.saveRecord.bind(h.cloud);
   h.cloud.saveRecord = async (...args) => { order.push(args[1]); return saveRecord(...args); };
   await store.sync();
-  assert.deepEqual(order, ['answer', 'answer', 'answer', 'progress']);
+  assert.deepEqual(order, [...store.state.projects[0].chapters[0].packs[0].questions.map(() => 'answer'), 'progress']);
   assert.equal(h.hooks.render().pending, 0);
   h.hooks.unmount();
 });
@@ -370,10 +370,10 @@ test('a project CAS conflict pauses its dependent new answers without blocking a
   const project = structuredClone(store.state.projects[0]);
   project.chapters[0].packs[0].questions.push({ id: 'new-question', prompt: '新题目' });
   assert.equal(store.save('project', project), true);
-  assert.equal(store.save('answer', { id: `user-one:${projectId}:1-01:new-question`, learnerId: 'user-one', projectId, packId: '1-01', questionId: 'new-question', text: '作答', updatedAt: '2026-09-21T10:00:00Z' }), true);
+  assert.equal(store.save('answer', { id: `user-one:${projectId}:ch1-01:new-question`, learnerId: 'user-one', projectId, packId: 'ch1-01', questionId: 'new-question', text: '作答', updatedAt: '2026-09-21T10:00:00Z' }), true);
   const second = { ...createInitialState().projects[0], id: 'second-book', ownerId: 'user-one', memberIds: ['user-one'], revision: 0 };
   assert.equal(store.save('project', second), true);
-  assert.equal(store.save('session', { id: 'user-one:second-session', learnerId: 'user-one', projectId: 'second-book', packId: '1-01', chapterId: '1', date: '2026-09-21', minutes: 20, note: '', createdAt: '2026-09-21T10:00:00Z' }), true);
+  assert.equal(store.save('session', { id: 'user-one:second-session', learnerId: 'user-one', projectId: 'second-book', packId: 'ch1-01', chapterId: '1', date: '2026-09-21', minutes: 20, note: '', createdAt: '2026-09-21T10:00:00Z' }), true);
   h.cloud.records[0].revision = 2;
   await store.sync(); store = h.hooks.render();
   assert.equal(store.conflicts.length, 1);

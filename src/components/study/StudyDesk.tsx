@@ -7,6 +7,7 @@ import type { useStudyStore } from '../../lib/use-study-store';
 import { allocateTimerMinutes, freezeTimer, timerSeconds, type StudyTimer as Timer } from '../../lib/study-timer';
 import { Avatar, kindNames } from './StudySpace';
 import StudyQuestionManager from './StudyQuestionManager';
+import RichAnswerEditor from './RichAnswerEditor';
 import s from './StudySpace.module.css';
 
 const duration = (minutes: number) => `${Number(minutes.toFixed(2))} 分钟`;
@@ -158,7 +159,8 @@ function QuestionEditor({ question, index, value, canEdit, busy, onSave }: { que
   const [draft, setDraft] = useState(value); const [saved, setSaved] = useState(true);
   const active = useRef(false);
   useEffect(() => { if (!active.current) setDraft(value); }, [value]);
-  return <article id={`study-question-${question.id}`} tabIndex={-1} className={s.question}><div className={s.questionTitle}><span>{String(index + 1).padStart(2, '0')}</span><h3><StudyText text={question.prompt} /></h3></div><textarea aria-label={`第 ${index + 1} 题的作答`} placeholder={canEdit ? '先用自己的话试着回答，思路也值得记录…' : '伙伴还没有填写答案。'} rows={4} readOnly={!canEdit || busy} value={draft} maxLength={20000} onFocus={() => { active.current = true; }} onBlur={() => { active.current = false; }} onChange={e => { setDraft(e.target.value); setSaved(onSave(e.target.value)); }} /><div className={s.questionFoot}><span>{canEdit ? saved ? <><Check size={12} />{value ? '已保存到本机' : '输入后自动保存'}</> : '保存失败，请复制答案备份' : '伙伴的独立作答'}</span></div></article>;
+  const tooLong = draft.length > 20000;
+  return <article id={`study-question-${question.id}`} tabIndex={-1} className={s.question}><div className={s.questionTitle}><span>{String(index + 1).padStart(2, '0')}</span><h3><StudyText text={question.prompt} /></h3></div><RichAnswerEditor value={draft} editable={canEdit && !busy} label={`第 ${index + 1} 题的作答`} placeholder={canEdit ? '先用自己的话试着回答，思路也值得记录…' : '伙伴还没有填写答案。'} onActive={next => { active.current = next; }} onChange={next => { setDraft(next); setSaved(next.length > 20000 ? false : onSave(next)); }} /><div className={s.questionFoot}><span>{canEdit ? tooLong ? '内容超过 2 万字，已暂停保存，请精简后再继续' : saved ? <><Check size={12} />{value ? '已保存到本机' : '输入后自动保存'}</> : '保存失败，请复制答案备份' : '伙伴的独立作答'}</span></div></article>;
 }
 function RecordEditor({ progress, canEdit, answered, total, completed, reviewStatus, onSave }: { progress?: Progress; canEdit: boolean; answered: number; total: number; completed: boolean; reviewStatus: ReturnType<typeof getReviewStatus>; onSave: (note: string, evidence: string, submit: boolean) => boolean }) {
   const [note, setNote] = useState(progress?.note || ''); const [evidence, setEvidence] = useState(progress?.evidence || '');

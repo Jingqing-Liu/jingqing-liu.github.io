@@ -126,7 +126,9 @@ set local request.jwt.claim.sub='10000000-0000-4000-8000-000000000002';
 select public.study_save_record(current_setting('study.test_room')::uuid,'review','10000000-0000-4000-8000-000000000002:book-one:pack:10000000-0000-4000-8000-000000000001',
  '{"updatedAt":"2026-01-01T00:00:00Z","createdAt":"2026-01-01T00:00:00Z","note":"","evidence":"Summary","projectId":"book-one","packId":"pack","targetLearnerId":"10000000-0000-4000-8000-000000000001","outcome":"passed","submissionUpdatedAt":"2026-01-01T00:00:00Z"}',0);
 
--- Malformed shared content must never poison the group state.
+-- Members cannot edit curriculum; malformed owner edits must also be rejected.
+select pg_temp.expect_error($q$select public.study_save_record(current_setting('study.test_room')::uuid,'project','book-one',(select jsonb_set(payload,'{chapters,0,packs,0,questions,0,prompt}','"member edit"') from public.study_records where id='book-one'),5)$q$,'42501');
+set local request.jwt.claim.sub='10000000-0000-4000-8000-000000000001';
 select pg_temp.expect_error($q$select public.study_save_record(current_setting('study.test_room')::uuid,'project','book-one',(select jsonb_set(payload,'{chapters}','[]') from public.study_records where id='book-one'),5)$q$,'22023');
 select pg_temp.expect_error($q$select public.study_save_record(current_setting('study.test_room')::uuid,'project','book-one',(select payload-'subtitle' from public.study_records where id='book-one'),5)$q$,'22023');
 select pg_temp.expect_error($q$select public.study_save_record(current_setting('study.test_room')::uuid,'project','book-one',(select jsonb_set(payload,'{chapters,0,packs}','[]') from public.study_records where id='book-one'),5)$q$,'22023');
@@ -134,6 +136,7 @@ select pg_temp.expect_error($q$select public.study_save_record(current_setting('
 select pg_temp.expect_error($q$select public.study_save_record(current_setting('study.test_room')::uuid,'project','book-one',(select jsonb_set(payload,'{chapters,0,packs,0,base}','"yes"') from public.study_records where id='book-one'),5)$q$,'22023');
 select pg_temp.expect_error($q$select public.study_save_record(current_setting('study.test_room')::uuid,'project','book-one',(select jsonb_set(payload,'{chapters,0,packs,0,questions,0,prompt}','null') from public.study_records where id='book-one'),5)$q$,'22023');
 select pg_temp.expect_error($q$select public.study_save_record(current_setting('study.test_room')::uuid,'project','book-one',(select payload || '{"timeZone":"Invented/Zone"}'::jsonb from public.study_records where id='book-one'),5)$q$,'22023');
+set local request.jwt.claim.sub='10000000-0000-4000-8000-000000000002';
 select pg_temp.expect_error($q$select public.study_save_record(current_setting('study.test_room')::uuid,'answer','10000000-0000-4000-8000-000000000002:book-one:pack:q1','{"projectId":"book-one","packId":"missing","questionId":"q1","text":"valid","updatedAt":"2026-01-01T00:00:00Z"}'::jsonb,2)$q$,'22023');
 select pg_temp.expect_error($q$select public.study_save_record(current_setting('study.test_room')::uuid,'answer','10000000-0000-4000-8000-000000000002:book-one:pack:q1','{"projectId":"book-one","packId":"pack","questionId":"missing","text":"valid","updatedAt":"2026-01-01T00:00:00Z"}'::jsonb,2)$q$,'22023');
 select pg_temp.expect_error($q$select public.study_save_record(current_setting('study.test_room')::uuid,'answer','10000000-0000-4000-8000-000000000002:book-one:pack:q1','{"projectId":"book-one","packId":"pack","questionId":"q1","text":"valid","updatedAt":"2026-02-30T00:00:00Z"}'::jsonb,2)$q$,'22023');
@@ -157,6 +160,22 @@ select public.study_save_record(current_setting('study.test_room')::uuid,'answer
 set local request.jwt.claim.sub='10000000-0000-4000-8000-000000000002';
 select pg_temp.expect_error($q$select public.study_save_record(current_setting('study.test_room')::uuid,'review','10000000-0000-4000-8000-000000000002:book-one:pack:10000000-0000-4000-8000-000000000001','{"projectId":"book-one","packId":"pack","targetLearnerId":"10000000-0000-4000-8000-000000000001","outcome":"passed","note":"","updatedAt":"2026-01-01T00:00:00Z","submissionUpdatedAt":"2026-01-01T00:00:00Z"}'::jsonb,1)$q$,'22023');
 select pg_temp.assert_true((select revision=1 from public.study_records where kind='review'),'invalid review leaves prior revision untouched');
+
+-- Curriculum administration preserves question identity on edits and deletes all authors' answers.
+select pg_temp.expect_error($q$select public.study_delete_question(current_setting('study.test_room')::uuid,'book-one','pack','q1',5)$q$,'42501');
+set local request.jwt.claim.sub='10000000-0000-4000-8000-000000000001';
+select public.study_save_record(current_setting('study.test_room')::uuid,'project','book-one',
+ (select jsonb_set(payload,'{chapters,0,packs,0,questions}','[{"id":"q1","prompt":"Edited question"},{"id":"q2","prompt":"Added question"}]') from public.study_records where id='book-one'),5);
+select pg_temp.assert_true((select count(*)=2 from public.study_records where kind='answer' and project_id='book-one'),'editing retains both learners answers');
+select pg_temp.expect_error($q$select public.study_delete_question(current_setting('study.test_room')::uuid,'book-one','pack','q1',5)$q$,'P0001');
+select public.study_delete_question(current_setting('study.test_room')::uuid,'book-one','pack','q1',6);
+select pg_temp.assert_true((select count(*)=0 from public.study_records where kind='answer' and project_id='book-one'),'question deletion removes all answers');
+select pg_temp.assert_true((select count(*)>0 from public.study_records where kind='session' and project_id='book-one'),'question deletion retains study time');
+select pg_temp.assert_true((select jsonb_array_length(payload#>'{chapters,0,packs,0,questions}')=1 from public.study_records where id='book-one'),'only selected question removed');
+select pg_temp.expect_error($q$select public.study_save_record(current_setting('study.test_room')::uuid,'project','book-one',(select jsonb_set(payload,'{chapters,0,packs,0,questions}','[{"id":"q1","prompt":"Resurrection"},{"id":"q2","prompt":"Added question"}]') from public.study_records where id='book-one'),7)$q$,'22023');
+select pg_temp.expect_error($q$select public.study_save_record(current_setting('study.test_room')::uuid,'project','book-one',(select payload-'deletedQuestionIds' from public.study_records where id='book-one'),7)$q$,'22023');
+select public.study_delete_question(current_setting('study.test_room')::uuid,'book-one','pack','q1',7);
+select pg_temp.assert_true((select revision=7 from public.study_records where id='book-one'),'repeat deletion is idempotent');
 
 reset role;
 set local role anon;

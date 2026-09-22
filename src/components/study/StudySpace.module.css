@@ -306,10 +306,6 @@
 .projectButton:focus-visible,.roomBreadcrumb button:focus-visible { outline:2px solid var(--blue); outline-offset:3px; }
 @media(max-width:760px) { .roomBreadcrumb { margin-top:19px; }.roomBreadcrumb+.tabs { margin-top:0; } }
 
-.templateUpdate { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:17px 19px; margin-bottom:22px; background:#f0f5fb; border:1px solid #dbe5f1; border-radius:11px; }
-.templateUpdate strong { color:#425e7d; font-size:12px; font-weight:600; }
-.templateUpdate p { color:#75849a; font-size:10px; line-height:1.9; margin:6px 0 0; }
-.templateUpdate button { flex-shrink:0; }
 .questionTitle h3,.hint p { white-space:pre-line; overflow-wrap:anywhere; }
 .question { scroll-margin-top:24px; }
 .question:focus { outline:2px solid #94b6df; outline-offset:4px; }
@@ -317,16 +313,102 @@
 .questionNav { display:flex; flex-wrap:wrap; gap:7px; margin:0 0 17px; }
 .questionNav button { min-width:38px; display:flex; align-items:center; justify-content:center; gap:4px; padding:6px 9px; border:1px solid #dfe5ee; border-radius:6px; background:#fff; color:#8090a4; font-size:10px; }
 .questionNav button[data-answered="true"] { color:#498571; background:#eef7f2; border-color:#d4e8de; }
-@media(max-width:600px) { .templateUpdate { flex-direction:column; align-items:flex-start; gap:12px; padding:15px; }.templateUpdate button { align-self:flex-start; } }
 
-.studyHistory { border-top:1px solid #e1e6ee; margin-top:28px; padding-top:14px; }
-.studyHistory summary { color:#7c8a9e; cursor:pointer; font-size:11px; }
-.studyHistory p,.chapterReview>p { color:#8591a2; font-size:10px; line-height:1.9; margin:12px 0; }
-.studyHistory>div { display:grid; gap:8px; }
-.studyHistory button { border:0; background:#ffffff80; color:#6e7e94; border-radius:7px; padding:11px; text-align:left; display:flex; align-items:center; gap:8px; font-size:10px; }
+.chapterReview>p { color:#8591a2; font-size:10px; line-height:1.9; margin:12px 0; }
 .chapterReview { margin:24px 0; }
 .chapterReview>div:last-child { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
 .chapterReview button { display:flex; flex-wrap:wrap; gap:7px; align-items:center; padding:13px; background:#ffffffb3; border:1px solid #dfe6ef; border-radius:8px; text-align:left; color:#5d708b; font-size:11px; }
 .chapterReview button span { flex:1; min-width:80%; line-height:1.7; }
 .chapterReview button small { flex:1; font-size:9px; color:#8a98ab; }
 @media(max-width:600px) { .chapterReview>div:last-child { grid-template-columns:minmax(0,1fr); } }
+
+/* Curriculum management stays separate from the reading and answering surface. */
+.exerciseHeading { display:flex; align-items:center; justify-content:space-between; gap:16px; margin:26px 0 18px; }
+.exerciseHeading h2 { font-size:15px; font-weight:600; color:#364153; }
+.exerciseHeading p { font-size:10px; color:#7d8899; margin-top:7px; }
+.exerciseHeading p span { color:#a0a8b5; margin-left:12px; }
+.manageQuestionsButton { display:inline-flex; align-items:center; justify-content:center; gap:7px; border:1px solid #dae1eb; border-radius:8px; background:#ffffffa6; color:#61718a; padding:9px 12px; font-size:11px!important; white-space:nowrap; min-height:36px; }
+.manageQuestionsButton:hover { background:#fff; border-color:#b6c8df; color:#336aa9; }
+.modalWide { max-width:660px; padding:28px; background:#fcfcfe; }
+.modalWide .modalTitle { margin-bottom:13px; }
+.questionManager { color:#48566a; }
+.managerContext { display:flex; align-items:center; justify-content:space-between; gap:14px; padding-bottom:21px; border-bottom:1px solid #e6eaf0; }
+.managerContext>span { display:flex; align-items:center; gap:7px; min-width:0; font-size:11px; color:#8893a3; }
+.managerContext svg { flex-shrink:0; }
+.managerContext>small { flex-shrink:0; font-size:9px; color:#7489a3; background:#eef2f8; border-radius:5px; padding:4px 7px; }
+.managerToolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:22px 0 18px; }
+.managerToolbar strong { font-size:23px; font-weight:550; color:#344256; font-variant-numeric:tabular-nums; }
+.managerToolbar strong span { font-size:11px; font-weight:400; color:#8894a5; }
+.managerToolbar p { color:#94a0af; font-size:10px; margin-top:4px; }
+.managerSearch { display:flex; align-items:center; gap:9px; border:1px solid #e1e6ee; border-radius:8px; padding:0 12px; background:#f6f8fb; color:#93a1b3; margin-bottom:12px; }
+.managerSearch input { flex:1; min-width:0; border:0; background:transparent; padding:11px 0; color:#435269; outline:none; font-size:12px; }
+.managerSearch:focus-within { border-color:#8db5e6; box-shadow:0 0 0 3px #007aff0b; }
+.managerSearch input::placeholder { color:#9ca7b6; }
+.managerList { border:1px solid #e3e8ef; background:#fff; border-radius:10px; max-height: min(430px,48dvh); overflow-y:auto; overscroll-behavior:contain; }
+.managerRow { display:grid; grid-template-columns:25px minmax(0,1fr) auto; align-items:start; gap:10px; padding:17px 15px; }
+.managerRow+.managerRow { border-top:1px solid #eef0f4; }
+.managerNumber { font-family:var(--font-mono); font-size:10px; color:#99a9bc; padding-top:4px; }
+.managerQuestion { min-width:0; }
+.managerQuestion h3 { font-size:12px; font-weight:550; color:#46556b; line-height:1.7; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
+.managerQuestion p { font-size:11px; color:#8b95a4; margin-top:5px; line-height:1.8; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
+.managerQuestion small { display:flex; gap:4px; align-items:center; font-size:9px; color:#9aa7b7; margin-top:9px; }
+.managerRowActions { display:flex; gap:3px; }
+.managerRowActions button { display:flex; align-items:center; justify-content:center; gap:5px; min-width:32px; min-height:32px; padding:6px 7px; border:0; background:transparent; color:#8c9aad; border-radius:6px; font-size:10px; }
+.managerRowActions button:hover { background:#f0f5fc; color:#4179b9; }
+.managerRowActions button:last-child:hover { background:#fbefee; color:#b86761; }
+.managerFootnote { display:flex; gap:6px; align-items:flex-start; font-size:10px; color:#8e9aaa; line-height:1.8; padding-top:17px; }
+.managerFootnote svg { flex-shrink:0; margin-top:3px; color:#779987; }
+.managerEmpty { padding:40px 20px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px; color:#9baabd; }
+.managerEmpty strong { font-size:13px; font-weight:500; color:#677a94; }
+.managerEmpty p { font-size:11px; line-height:1.9; }
+.managerBack { display:flex; align-items:center; gap:6px; color:#8493a6; background:none; border:0; padding:18px 0; font-size:11px!important; min-height:44px; }
+.managerBack:hover { color:#3c77b6; }
+.managerEditor>div:first-child { margin:3px 0 22px; }
+.managerEditor h3,.managerDelete h3 { font-size:18px; font-weight:550; color:#38475d; }
+.managerEditor p { font-size:11px; color:#8a97a8; line-height:1.8; margin-top:9px; }
+.managerEditor label { display:flex; justify-content:space-between; gap:10px; font-size:11px; color:#61748e; margin-bottom:9px; }
+.managerEditor label span { font-size:10px; color:#a0aaba; }
+.managerEditor textarea { display:block; width:100%; padding:16px; border:1px solid #dce4ee; border-radius:9px; background:#fff; font-size:13px; line-height:1.95; color:#465970; resize:vertical; min-height:230px; max-height:42dvh; }
+.managerEditor textarea::placeholder { color:#a7b1bf; }
+.managerEditor textarea:focus { outline:none; border-color:#8db5e6; box-shadow:0 0 0 3px #007aff0b; }
+.managerFormActions { display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:20px; padding-top:18px; border-top:1px solid #e8ecf2; }
+.managerFormActions small { margin-right:auto; color:#a3adbb; font-size:10px; }
+.managerDelete { text-align:center; padding-top:5px; }
+.deleteSymbol { display:inline-flex; align-items:center; justify-content:center; width:47px; height:47px; border-radius:14px; color:#b47970; background:#f9eeec; margin-bottom:15px; }
+.managerDelete>p { color:#8c96a5; font-size:12px; line-height:1.9; margin-top:12px; }
+.managerDelete blockquote { margin:22px 0 0; padding:15px 17px; text-align:left; white-space:pre-line; color:#64748a; font-size:12px; line-height:1.9; max-height:190px; overflow:auto; overflow-wrap:anywhere; background:#f4f6f9; border:1px solid #e6eaf0; border-radius:8px; }
+.dangerButton { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:36px; padding:9px 15px; border:1px solid #ba6c64; border-radius:7px; background:#ba6c64; color:#fff; font-size:11px!important; }
+.dangerButton:hover { background:#a95c55; }
+.managerError { font-size:11px; line-height:1.8; color:#ad6356; background:#fcf0ec; border:1px solid #f0ddd6; padding:12px; border-radius:7px; margin-top:16px!important; }
+.curriculumNotice { background:#ffffff73; border:1px solid #e0e6ef; border-radius:10px; margin-bottom:22px; }
+.curriculumNotice summary { display:flex; align-items:center; gap:12px; padding:14px 16px; cursor:pointer; list-style:none; }
+.curriculumNotice summary::-webkit-details-marker { display:none; }
+.curriculumNoticeIcon { display:grid; place-items:center; flex-shrink:0; width:32px; height:32px; border-radius:9px; color:#7192b8; background:#eaf0f8; }
+.curriculumNotice strong { display:block; font-size:11px; font-weight:550; color:#5d718a; }
+.curriculumNotice small { display:block; font-size:9px; color:#99a4b3; margin-top:4px; }
+.curriculumNoticeAction { margin-left:auto; display:flex; align-items:center; gap:5px; color:#8f9db0; font-size:10px; flex-shrink:0; }
+.curriculumNotice[open] .curriculumNoticeAction svg { transform:rotate(180deg); }
+.curriculumNotice>div { padding:0 16px 16px 60px; }
+.curriculumNotice p { font-size:11px; line-height:1.9; color:#8995a7; margin-bottom:13px; }
+.manageQuestionsButton:focus-visible,.managerRowActions button:focus-visible,.managerBack:focus-visible,.dangerButton:focus-visible { outline:2px solid #83afe3; outline-offset:3px; }
+@media(max-width:600px) {
+  .modalWide { padding:21px 18px; max-height:90dvh; }
+  .managerContext { padding-bottom:16px; }
+  .managerToolbar { padding:18px 0 15px; }
+  .managerRow { grid-template-columns:21px minmax(0,1fr) auto; gap:6px; padding:15px 10px; }
+  .managerRowActions { flex-direction:column; gap:3px; }
+  .managerRowActions button { min-height:38px; min-width:40px; }
+  .managerRowActions button span { display:none; }
+  .managerQuestion h3 { font-size:12px; }
+  .managerQuestion p { font-size:11px; }
+  .managerList { max-height:45dvh; }
+  .managerSearch input,.managerEditor textarea { font-size:16px; }
+  .managerEditor textarea { min-height:200px; padding:12px; }
+  .managerEditor label { flex-direction:column; gap:5px; }
+  .managerEditor .managerFormActions { flex-wrap:wrap; }
+  .managerFormActions button { min-height:40px; }
+  .exerciseHeading { gap:10px; }
+  .exerciseHeading p span { display:block; margin:4px 0 0; }
+  .manageQuestionsButton { min-height:40px; font-size:10px!important; padding:9px 10px; }
+  .curriculumNotice>div { padding-left:16px; }
+}

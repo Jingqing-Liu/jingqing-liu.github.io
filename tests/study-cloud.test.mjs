@@ -160,3 +160,14 @@ test('CAS conflicts are identifiable and do not retry a stale write', async () =
   assert.equal(JSON.parse(h.calls[0].options.body).p_expected_revision, 3);
   await assert.rejects(h.api.saveRecord('room','project','book',{},undefined), /同步最新记录/);
 });
+
+test('curriculum deletion calls the versioned authenticated RPC and reports missing installation', async()=>{
+  const row={id:'book',kind:'project',room_id:'room',revision:3,payload:{id:'book'}};
+  const h=harness({initial:session(),fetcher:()=>json(row)});
+  await h.api.deleteQuestion('room','book','pack','q',2);
+  assert.ok(h.calls[0].url.endsWith('/rest/v1/rpc/study_delete_question'));
+  assert.deepEqual(JSON.parse(h.calls[0].options.body),{p_room_id:'room',p_project_id:'book',p_pack_id:'pack',p_question_id:'q',p_expected_revision:2});
+  const missing=harness({initial:session(),fetcher:()=>json({code:'PGRST202',message:'missing'},404)});
+  await assert.rejects(()=>missing.api.deleteQuestion('room','book','pack','q',2),/尚未启用/);
+  await assert.rejects(()=>h.api.deleteQuestion('room','book','pack','q',-1));
+});

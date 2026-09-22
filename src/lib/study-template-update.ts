@@ -1,62 +1,63 @@
 import { legacyNetworkingStudyProject, networkingStudyProject } from '../data/study/networking';
-import type { StudyProject } from './study-model';
+import type { StudyProject, StudyState } from './study-model';
 
 export interface NetworkingChapterOneUpdate {
   project: StudyProject;
+  removedPackIds: string[];
   addedPacks: number;
-  addedQuestions: number;
-  retainedQuestions: number;
-  archivedPacks: number;
 }
 
-/** Recognize both the original seed and copies created by “添加学习计划”. */
-function isNetworkingTemplate(project: StudyProject): boolean {
+/** Prepare either a first replacement or cleanup of the previously archived version. */
+export function getNetworkingChapterOneUpdate(project: StudyProject): NetworkingChapterOneUpdate | null {
   if (project.kind !== 'book' || !(project.id === legacyNetworkingStudyProject.id ||
-    /^networking-[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(project.id))) return false;
-
-  // A title or one matching pack is insufficient: custom books can use either.
-  // Added custom chapters/packs and renamed template titles remain eligible.
-  return legacyNetworkingStudyProject.chapters.every(original => {
+    /^networking-[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(project.id))) return null;
+  if (!legacyNetworkingStudyProject.chapters.slice(1).every(original => {
     const current = project.chapters.find(chapter => chapter.id === original.id);
     return current && original.packs.every(pack => current.packs.some(item => item.id === pack.id));
-  });
-}
-
-/**
- * Replace active Chapter 1 exercises, retaining the former packs as history.
- * The caller saves the returned project through the normal revision/conflict flow.
- * No learner records, revisions, memberships, or existing question objects change.
- * Keeping every question in its original pack also satisfies the deployed SQL's
- * identity guard and keeps historical answers available after synchronization.
- */
-export function getNetworkingChapterOneUpdate(project: StudyProject): NetworkingChapterOneUpdate | null {
-  if (!isNetworkingTemplate(project)) return null;
-
-  const baseline = legacyNetworkingStudyProject.chapters[0];
+  })) return null;
+  const current = project.chapters.find(chapter => chapter.id === '1');
+  if (!current) return null;
   const template = networkingStudyProject.chapters[0];
-  const current = project.chapters.find(chapter => chapter.id === baseline.id)!;
-  const usedPackIds = new Set(project.chapters.flatMap(chapter => chapter.packs.map(pack => pack.id)));
-  // This also makes updates idempotent. If a custom pack has claimed a new ID,
-  // do not create a partial replacement or move it from its original chapter.
-  if (template.packs.some(pack => usedPackIds.has(pack.id))) return null;
-
-  const packs = [
-    ...structuredClone(template.packs),
-    ...current.packs.map(pack => ({ ...pack, base: false, archived: true })),
-  ];
-
-  const title = current.title === baseline.title ? template.title : current.title;
-  const description = project.description === legacyNetworkingStudyProject.description
-    ? networkingStudyProject.description : project.description;
+  const templateIds = new Set(template.packs.map(pack => pack.id));
+  const oldIds = new Set(legacyNetworkingStudyProject.chapters[0].packs.map(pack => pack.id));
+  const alreadyUpdated = template.packs.every(pack => current.packs.some(item => item.id === pack.id && !item.archived));
+  if (!alreadyUpdated && (!legacyNetworkingStudyProject.chapters[0].packs.every(pack => current.packs.some(item => item.id === pack.id)) ||
+    project.chapters.some(chapter => chapter.packs.some(pack => templateIds.has(pack.id))))) return null;
+  const removedPackIds = current.packs.filter(pack => alreadyUpdated ? pack.archived || oldIds.has(pack.id) : true).map(pack => pack.id);
+  if (!removedPackIds.length) return null;
+  const removed = new Set(removedPackIds);
+  const packs = alreadyUpdated ? current.packs.filter(pack => !removed.has(pack.id)) : structuredClone(template.packs);
   return {
     project: {
       ...project,
-      description,
-      chapters: project.chapters.map(chapter => chapter === current ? { ...chapter, title, packs } : chapter),
+      description: project.description === legacyNetworkingStudyProject.description ? networkingStudyProject.description : project.description,
+      // IDs only: prevent stale devices from re-uploading deleted content. No old content is retained.
+      deletedPackIds: [...new Set([...(project.deletedPackIds ?? []), ...removedPackIds])].sort(),
+      chapters: project.chapters.map(chapter => chapter === current ? { ...chapter, packs } : chapter),
     },
-    addedPacks: template.packs.length,
-    addedQuestions: template.packs.reduce((count, pack) => count + pack.questions.length, 0),
-    retainedQuestions: current.packs.reduce((count, pack) => count + pack.questions.length, 0),
-    archivedPacks: current.packs.filter(pack => !pack.archived).length,
+    removedPackIds,
+    addedPacks: alreadyUpdated ? 0 : template.packs.length,
+  };
+}
+
+/** Delete related records for every member, and keep all unrelated/new-version data intact. */
+export function applyChapterOneReplacement(state: StudyState, project: StudyProject): StudyState {
+  const removed = new Set(project.deletedPackIds ?? []);
+  const keep = (item: { projectId: string; packId: string }) => item.projectId !== project.id || !removed.has(item.packId);
+  return {
+    ...state,
+    projects: state.projects.map(item => item.id === project.id ? project : item),
+    answers: state.answers.filter(item => keep(item) && (item.projectId !== project.id || !project.deletedQuestionIds?.[item.packId]?.includes(item.questionId))), progress: state.progress.filter(keep),
+    sessions: state.sessions.filter(keep), reviews: state.reviews.filter(keep),
+  };
+}
+
+export function getQuestionDeletion(project: StudyProject, packId: string, questionId: string): StudyProject | null {
+  const pack = project.chapters.flatMap(chapter => chapter.packs).find(item => item.id === packId);
+  if (!pack || !pack.questions.some(question => question.id === questionId)) return null;
+  return {
+    ...project,
+    deletedQuestionIds: { ...project.deletedQuestionIds, [packId]: [...new Set([...(project.deletedQuestionIds?.[packId] ?? []), questionId])].sort() },
+    chapters: project.chapters.map(chapter => ({ ...chapter, packs: chapter.packs.map(item => item.id === packId ? { ...item, questions: item.questions.filter(question => question.id !== questionId) } : item) })),
   };
 }

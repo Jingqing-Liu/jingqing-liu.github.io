@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { BookOpen, Check, CheckCheck, ChevronRight, Clock3, Eye, FileText, Pause, Play, Plus, RotateCcw, Save } from 'lucide-react';
+import { BookOpen, Check, CheckCheck, ChevronRight, Clock3, Eye, FileText, Pause, Play, Settings2, RotateCcw, Save } from 'lucide-react';
 import { dateInTimeZone, getActiveSessions, getPackStatus, getProjectLearners, getReviewStatus, isPackCompleted, isProjectMember, progressKey, type StudyState, type StudyProject, type StudyPack, type StudyChapter, type StudyQuestion, type StudySession, type Progress } from '../../lib/study-model';
 import type { useStudyStore } from '../../lib/use-study-store';
 import { allocateTimerMinutes, freezeTimer, timerSeconds, type StudyTimer as Timer } from '../../lib/study-timer';
 import { Avatar, kindNames } from './StudySpace';
+import StudyQuestionManager from './StudyQuestionManager';
 import s from './StudySpace.module.css';
 
 const duration = (minutes: number) => `${Number(minutes.toFixed(2))} 分钟`;
@@ -17,8 +18,9 @@ const sessionSnapshot = (session: StudySession) => JSON.stringify([
   session.timerSegments?.map(segment => [segment.start, segment.end]),
 ]);
 
-export default function StudyDesk({ state, actor, project, pack, chapter, viewLearner, onViewLearner, onSelectPack, save, notify, onRecord, onReview }: {
+export default function StudyDesk({ state, actor, project, pack, chapter, viewLearner, onViewLearner, onSelectPack, save, notify, onRecord, onReview, onDeleteQuestion, busy, managementError }: {
   state: StudyState; actor: string; project: StudyProject; pack: StudyPack; chapter: StudyChapter; viewLearner: string; onViewLearner: (id: string) => void; onSelectPack: (p: StudyPack) => void;
+  onDeleteQuestion: (id: string) => Promise<boolean>; busy: boolean; managementError?: string;
   save: ReturnType<typeof useStudyStore>['save']; notify: (message: string) => void; onRecord: () => void; onReview: (learnerId: string) => void;
 }) {
   const members = getProjectLearners(state, project.id, true);
@@ -38,8 +40,10 @@ export default function StudyDesk({ state, actor, project, pack, chapter, viewLe
   const currentQuestions = pack.questions;
   const renderQuestion = (question: StudyQuestion) => {
     const answer = state.answers.find(item => item.projectId === project.id && item.packId === pack.id && item.questionId === question.id && item.learnerId === viewing);
-    return <QuestionEditor key={`${key}:${question.id}`} question={question} index={pack.questions.indexOf(question)} value={answer?.text || ''} canEdit={canEdit} onSave={value => saveAnswer(question.id, value)} />;
+    return <QuestionEditor key={`${key}:${question.id}`} question={question} index={pack.questions.indexOf(question)} value={answer?.text || ''} canEdit={canEdit} busy={busy} onSave={value => saveAnswer(question.id, value)} />;
   };
+  const [managingPack, setManagingPack] = useState<string | null>(null);
+  const canManage = project.ownerId === actor && actorIsMember && !pack.archived;
   const [timer, setTimer] = useState<Timer | null>(null);
   const [now, setNow] = useState(Date.now());
   const timerKey = `studyshare.timer.v2.${actor}`;
@@ -120,7 +124,7 @@ export default function StudyDesk({ state, actor, project, pack, chapter, viewLe
       const answeredCount = item.questions.filter(question => state.answers.some(answer => answer.projectId === project.id && answer.packId === item.id && answer.questionId === question.id && answer.learnerId === viewing && answer.text.trim())).length;
       return <button key={item.id} type="button" onClick={() => onSelectPack(item)}><span>{item.title}</span><small>{answeredCount} / {item.questions.length} 已作答</small><ChevronRight size={14} /></button>;
     })}</div></section>}
-    <div className={s.sectionTitle}><h2>动手练习</h2><span>{answered} / {pack.questions.length} 已作答 · 输入后自动保存</span></div>
+    <div className={s.exerciseHeading}><div><h2>动手练习</h2><p>{answered} / {pack.questions.length} 已作答<span>输入后自动保存</span></p></div>{canManage && <button className={s.manageQuestionsButton} disabled={busy} onClick={() => setManagingPack(pack.id)}><Settings2 size={14} />管理习题</button>}</div>
     {currentQuestions.length > 4 && <nav className={s.questionNav} aria-label="跳转到练习">{currentQuestions.map(question => {
       const done = state.answers.some(answer => answer.projectId === project.id && answer.packId === pack.id && answer.questionId === question.id && answer.learnerId === viewing && answer.text.trim());
       const label = question.prompt.match(/\b[RP]\d+\b/)?.[0] || String(pack.questions.indexOf(question) + 1).padStart(2, '0');
@@ -129,7 +133,7 @@ export default function StudyDesk({ state, actor, project, pack, chapter, viewLe
     <div className={s.questions}>{currentQuestions.map(renderQuestion)}</div>
 
     {!pack.questions.length && pack.id !== 'ch1-R' && pack.id !== 'ch1-05' && <div className={s.emptyQuestions}><FileText size={24} /><h3>给真实的练习，留一个位置</h3><p>把原书题目或你自己的练习添加到这个包里。<br />没有题页时，我们不会虚构原书题号和答案。</p></div>}
-    {canEdit && <AddQuestion project={project} pack={pack} onSave={p => { const saved = save('project', p); if (saved) notify('练习已添加，项目成员都可以独立作答'); return saved; }} />}
+    {canManage && managingPack === pack.id && <StudyQuestionManager key={pack.id} project={project} pack={pack} state={state} busy={busy} errorMessage={managementError} onClose={() => setManagingPack(null)} onDelete={onDeleteQuestion} onSave={p => { const saved = save('project', p); if (saved) notify('题目已更新，已有作答保留'); return saved; }} />}
     <RecordEditor key={`${key}:record`} progress={progress} canEdit={canEdit} answered={answered} total={pack.questions.length} completed={completed} reviewStatus={reviewStatus} onSave={(note, evidence, submit) => {
       if (!canEdit) return false;
       if (submit && (!evidence.trim() || answered < pack.questions.length)) { notify('请先完成本包练习，并留下产物或笔记位置。'); return false; }
@@ -150,11 +154,11 @@ function StudyText({ text }: { text: string }) {
   return <>{text.split(/(https?:\/\/[^\s<>"，。；）)]+)/g).map((part, index) => /^https?:\/\//.test(part) ? <a key={index} href={part} target="_blank" rel="noopener noreferrer">{part}</a> : part)}</>;
 }
 
-function QuestionEditor({ question, index, value, canEdit, onSave }: { question: StudyQuestion; index: number; value: string; canEdit: boolean; onSave: (value: string) => boolean }) {
+function QuestionEditor({ question, index, value, canEdit, busy, onSave }: { question: StudyQuestion; index: number; value: string; canEdit: boolean; busy: boolean; onSave: (value: string) => boolean }) {
   const [draft, setDraft] = useState(value); const [saved, setSaved] = useState(true);
   const active = useRef(false);
   useEffect(() => { if (!active.current) setDraft(value); }, [value]);
-  return <article id={`study-question-${question.id}`} tabIndex={-1} className={s.question}><div className={s.questionTitle}><span>{String(index + 1).padStart(2, '0')}</span><h3><StudyText text={question.prompt} /></h3></div><textarea aria-label={`第 ${index + 1} 题的作答`} placeholder={canEdit ? '先用自己的话试着回答，思路也值得记录…' : '伙伴还没有填写答案。'} rows={4} readOnly={!canEdit} value={draft} maxLength={20000} onFocus={() => { active.current = true; }} onBlur={() => { active.current = false; }} onChange={e => { setDraft(e.target.value); setSaved(onSave(e.target.value)); }} /><div className={s.questionFoot}><span>{canEdit ? saved ? <><Check size={12} />已保存到本机{value ? '' : ' · 等你动笔'}</> : '保存失败，请复制答案备份' : '伙伴的独立作答'}</span></div></article>;
+  return <article id={`study-question-${question.id}`} tabIndex={-1} className={s.question}><div className={s.questionTitle}><span>{String(index + 1).padStart(2, '0')}</span><h3><StudyText text={question.prompt} /></h3></div><textarea aria-label={`第 ${index + 1} 题的作答`} placeholder={canEdit ? '先用自己的话试着回答，思路也值得记录…' : '伙伴还没有填写答案。'} rows={4} readOnly={!canEdit || busy} value={draft} maxLength={20000} onFocus={() => { active.current = true; }} onBlur={() => { active.current = false; }} onChange={e => { setDraft(e.target.value); setSaved(onSave(e.target.value)); }} /><div className={s.questionFoot}><span>{canEdit ? saved ? <><Check size={12} />{value ? '已保存到本机' : '输入后自动保存'}</> : '保存失败，请复制答案备份' : '伙伴的独立作答'}</span></div></article>;
 }
 function RecordEditor({ progress, canEdit, answered, total, completed, reviewStatus, onSave }: { progress?: Progress; canEdit: boolean; answered: number; total: number; completed: boolean; reviewStatus: ReturnType<typeof getReviewStatus>; onSave: (note: string, evidence: string, submit: boolean) => boolean }) {
   const [note, setNote] = useState(progress?.note || ''); const [evidence, setEvidence] = useState(progress?.evidence || '');
@@ -169,11 +173,6 @@ function RecordEditor({ progress, canEdit, answered, total, completed, reviewSta
     if (success) dirty.current = false;
   };
   return <section className={s.record}><div className={s.sectionTitle}><h2>笔记与打卡</h2><span>留下一点理解，也留下下次的起点</span></div><label>笔记 / 卡点 / 实际完成的原书题号<textarea rows={4} maxLength={20000} value={note} readOnly={!canEdit} placeholder="原书题请填写真实题号、页码和完成情况。还没解决的问题，也可以写在这里。" onChange={e => { setNote(e.target.value); handleSave(false, e.target.value, evidence); }} onBlur={() => { if (canEdit && dirty.current) handleSave(false); }} /></label><label>本次产物或笔记位置<textarea rows={2} maxLength={4000} value={evidence} readOnly={!canEdit} placeholder="例如：上方三道题的作答；家庭网络图在个人笔记第 3 页。" onChange={e => { setEvidence(e.target.value); handleSave(false, note, e.target.value); }} onBlur={() => { if (canEdit && dirty.current) handleSave(false); }} /></label>{canEdit && <><p className={s.formHint} role="status">{saved ? '输入后自动保存到本机。' : '保存失败，草稿仍在当前页面。请复制备份，或点击保存笔记重试。'}</p><div className={s.recordActions}><button className={s.secondaryButton} onClick={() => handleSave(false)}><Save size={14} />保存笔记</button><button className={s.primaryButton} disabled={!saved || !evidence.trim() || answered < total || reviewStatus === 'pending' || reviewStatus === 'passed'} onClick={() => handleSave(true)}><Check size={14} />{reviewStatus === 'passed' ? '互检已通过' : reviewStatus === 'pending' ? '已完成 · 等待互检' : completed ? '提交最新作答互检' : '完成本包学习'}</button></div></>}<p className={s.formHint}>完成需要当前练习作答及学习产物。个人完成与互检分别记录；修改、订正或补记时间不会改变首次完成日期。</p></section>;
-}
-function AddQuestion({ project, pack, onSave }: { project: StudyProject; pack: StudyPack; onSave: (p: StudyProject) => boolean }) {
-  const [open, setOpen] = useState(false);
-  const submit = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const d = new FormData(e.currentTarget); const prompt = String(d.get('prompt')).trim(); if (!prompt) return; const label = String(d.get('label')).trim(); const q: StudyQuestion = { id: `custom-${crypto.randomUUID()}`, prompt: label ? `${label} · ${prompt}` : prompt }; if (onSave({ ...project, chapters: project.chapters.map(c => ({ ...c, packs: c.packs.map(p => p.id === pack.id ? { ...p, questions: [...p.questions, q] } : p) })) })) { setOpen(false); e.currentTarget.reset(); } };
-  return <details className={s.addPack} open={open} onToggle={e => setOpen(e.currentTarget.open)}><summary><Plus size={14} />添加一道练习 / 原书题</summary><form className={s.form} onSubmit={submit}><label>实际题号或位置<input name="label" maxLength={120} placeholder="例如：第 1 章，p.44，第 2 题（可选）" /></label><label>题目<textarea name="prompt" required rows={3} maxLength={12000} /></label><button className={s.secondaryButton}>添加练习</button></form></details>;
 }
 
 function SessionRecord({ session, canEdit, timeZone, onSave }: { session: StudySession; canEdit: boolean; timeZone: string; onSave: (session: StudySession) => boolean }) {

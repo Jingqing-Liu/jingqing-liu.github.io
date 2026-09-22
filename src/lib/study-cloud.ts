@@ -218,3 +218,33 @@ export async function saveRecord(roomId: string, kind: CloudRecordKind, id: stri
   if (!record) throw new Error('云端没有确认保存，请重试。');
   return record;
 }
+
+export async function replaceChapterOne(roomId: string, projectId: string, chapter: object, expectedRevision: number): Promise<CloudRecord> {
+  if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) throw new Error('请先同步最新记录后再更新。');
+  try {
+    const data = await authorized<CloudRecord | CloudRecord[]>('/rest/v1/rpc/study_replace_chapter_one', {
+      p_room_id: roomId, p_project_id: projectId, p_chapter: chapter, p_expected_revision: expectedRevision,
+    });
+    const record = Array.isArray(data) ? data[0] : data;
+    if (!record || record.kind !== 'project' || record.id !== projectId || record.room_id !== roomId) throw new Error('云端没有确认更新，请刷新后检查。');
+    return record;
+  } catch (error) {
+    if (error instanceof CloudError && ['PGRST202', '42883'].includes(error.code || '')) throw new Error('旧学习包删除功能尚未启用，请联系空间负责人完成更新。');
+    throw error;
+  }
+}
+
+export async function deleteQuestion(roomId: string, projectId: string, packId: string, questionId: string, expectedRevision: number): Promise<CloudRecord> {
+  if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) throw new Error('请先同步最新记录后再删除题目。');
+  try {
+    const data = await authorized<CloudRecord | CloudRecord[]>('/rest/v1/rpc/study_delete_question', {
+      p_room_id: roomId, p_project_id: projectId, p_pack_id: packId, p_question_id: questionId, p_expected_revision: expectedRevision,
+    });
+    const record = Array.isArray(data) ? data[0] : data;
+    if (!record || record.kind !== 'project' || record.id !== projectId || record.room_id !== roomId) throw new Error('云端没有确认删除，请刷新后检查。');
+    return record;
+  } catch (error) {
+    if (error instanceof CloudError && ['PGRST202', '42883'].includes(error.code || '')) throw new Error('题目删除功能尚未启用，请联系空间负责人完成更新。');
+    throw error;
+  }
+}

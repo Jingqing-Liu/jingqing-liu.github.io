@@ -15,7 +15,7 @@ export const statusNames = { unrecorded: '未登记', studying: '进行中', sub
 export const kindNames = { reading: '阅读', review: '复习题', practice: '习题', lab: '实验' };
 export function duration(minutes: number) { const value = Math.round(minutes * 10) / 10; const remainder = Math.round(value % 60 * 10) / 10; return value >= 60 ? `${Math.floor(value / 60)} 小时${remainder ? ` ${remainder} 分` : ''}` : `${value} 分钟`; }
 export function Avatar({ learner, small = false }: { learner: Learner; small?: boolean }) { return <span className={`${s.avatar} ${small ? s.avatarSmall : ''}`} style={{ '--person': learner.color } as React.CSSProperties}>{learner.name.slice(0, 1)}</span>; }
-export function Modal({ title, children, onClose, error }: { title: string; children: ReactNode; onClose: () => void; error?: string }) {
+export function Modal({ title, children, onClose, error, wide = false }: { wide?: boolean; title: string; children: ReactNode; onClose: () => void; error?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
   useEffect(() => { closeRef.current = onClose; }, [onClose]);
@@ -38,7 +38,7 @@ export function Modal({ title, children, onClose, error }: { title: string; chil
     document.addEventListener('focusin', keepFocus);
     return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', key); document.removeEventListener('focusin', keepFocus); if (previous?.isConnected) previous.focus(); };
   }, []);
-  return <div className={s.backdrop} onClick={e => { if (e.target === e.currentTarget) onClose(); }}><div ref={ref} className={s.modal} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}><div className={s.modalTitle}><h2>{title}</h2><button className={s.iconButton} onClick={onClose} aria-label="关闭弹窗"><X size={18} /></button></div>{children}{error && <p className={s.error} role="alert">{error}</p>}</div></div>;
+  return <div className={s.backdrop} onClick={e => { if (e.target === e.currentTarget) onClose(); }}><div ref={ref} className={`${s.modal} ${wide ? s.modalWide : ''}`} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}><div className={s.modalTitle}><h2>{title}</h2><button className={s.iconButton} onClick={onClose} aria-label="关闭弹窗"><X size={18} /></button></div>{children}{error && <p className={s.error} role="alert">{error}</p>}</div></div>;
 }
 
 type Tab = 'overview' | 'checkins' | 'calendar' | 'work';
@@ -68,7 +68,6 @@ export default function StudySpace() {
   const headerMembers = showRoom ? state.learners : getProjectLearners(state, project.id);
   const allPacks = project?.chapters.flatMap(c => c.packs) || [];
   const packs = allPacks.filter(p => !p.archived);
-  const archivedPacks = allPacks.filter(p => p.archived);
   const templateUpdate = project ? getNetworkingChapterOneUpdate(project) : null;
   const pack = allPacks.find(p => p.id === packId) || packs[0];
   const chapter = project?.chapters.find(c => c.packs.some(p => p.id === pack?.id)) || project?.chapters[0];
@@ -143,11 +142,11 @@ export default function StudySpace() {
         <nav className={s.tabs} aria-label="学习空间视图">{([{ id: 'overview', label: '本书总览', icon: LayoutGrid }, { id: 'checkins', label: '学习打卡', icon: ListChecks }, { id: 'calendar', label: '学习日历', icon: CalendarDays }, { id: 'work', label: '习题与笔记', icon: BookOpen }] as const).map(item => <button key={item.id} className={tab === item.id ? s.tabActive : ''} onClick={() => { setTab(item.id); setViewLearner(actor); }} aria-current={tab === item.id ? 'page' : undefined}><item.icon size={15} />{item.label}</button>)}</nav>
         <div className={s.memberToolbar}><span>{project.title} · {members.length} 人参与</span><div>{(tab === 'overview' || tab === 'checkins') && <details className={s.comparePicker}><summary><Users size={13} /> 对比成员 {displayed.length}</summary><div><label className={s.checkLabel}><input type="checkbox" checked={showFormer} onChange={e => { setShowFormer(e.target.checked); setCompareIds(null); }} />包含已退出成员</label>{comparable.map(l => <label key={l.id} className={s.checkLabel}><input type="checkbox" checked={displayed.some(p => p.id === l.id)} disabled={!displayed.some(p => p.id === l.id) && displayed.length >= 6} onChange={e => setCompareIds(e.target.checked ? [...displayed.map(p => p.id), l.id] : displayed.filter(p => p.id !== l.id).map(p => p.id))} /><Avatar learner={l} small />{l.name}{!isProjectMember(state, project.id, l.id) ? ' · 已退出' : ''}</label>)}<small>一次最多对比 6 人，可随时切换。</small></div></details>}<button className={s.subtleButton} onClick={() => setModal('members')}><Plus size={13} />管理成员</button></div></div>
 
-        {templateUpdate && <section className={s.templateUpdate} aria-label="第一章习题更新"><div><strong>第一章 · 按教材题页更新</strong><p>R1–R28、P1–P34 与三个 Wireshark 实验阶段。旧题与原记录归入历史，新题单独作答并计算进度，已有学习时间保留。</p></div><button className={s.secondaryButton} onClick={() => {
-          const latest = store.state.projects.find(item => item.id === project.id);
-          const update = latest && getNetworkingChapterOneUpdate(latest);
-          if (update && store.save('project', update.project)) { setPackId(update.project.chapters[0].packs.find(item => !item.archived)?.id || ''); notify('第一章习题已更新，原作答可在历史记录中查看'); }
-        }}><RefreshCw size={14} />更新第一章习题</button></section>}
+        {templateUpdate && <details className={s.curriculumNotice}><summary><span className={s.curriculumNoticeIcon}><BookOpen size={15} /></span><span><strong>{templateUpdate.addedPacks ? '第一章 · 教材原题已就绪' : '第一章 · 整理旧版内容'}</strong><small>{templateUpdate.addedPacks ? '更新习题与 Wireshark 实验' : '只留下新版学习内容'}</small></span><span className={s.curriculumNoticeAction}>查看<ChevronDown size={14} /></span></summary><div><p>将永久删除 {templateUpdate.removedPackIds.length} 个旧学习包，以及所有成员对应的答案、打卡、互检和学习时间。新版记录及其他章节保留。</p>{project.ownerId === actor ? <button className={s.secondaryButton} disabled={store.replacingChapter} onClick={() => {
+          void store.replaceChapterOne(project.id).then(saved => {
+            if (saved) { setPackId('ch1-01'); notify('旧学习包及其记录已删除，只保留新版内容'); }
+          });
+        }}><RefreshCw size={13} />{store.replacingChapter ? '正在更新…' : templateUpdate.addedPacks ? '替换为新版习题' : '删除旧学习包'}</button> : <small>请由本书创建者完成整理。</small>}</div></details>}
 
         {tab === 'overview' && <>
           <div className={s.stats}><div><span><Clock3 size={14} /> 累计一起投入</span><strong>{Math.floor(totalMinutes / 60)}<small>小时</small>{totalMinutes % 60}<small>分钟</small></strong><p>当前项目 · {members.length} 人合计</p></div><div><span><CalendarDays size={14} /> 本周学习足迹</span><strong>{weekDays}<small>天 / 本周</small></strong><p>{weekSessions.length ? `留下了 ${weekSessions.length} 次专注记录` : '从今天的一次专注开始'}</p></div><div><span><CheckCheck size={14} /> 小组平均进度</span><strong>{average}<small>%</small></strong><p>当前 {members.length} 人 · 共同完成 {joint} 包</p></div></div>
@@ -160,11 +159,11 @@ export default function StudySpace() {
           <div className={s.viewHeading}><div><h2>学习打卡</h2><p>每一格，都记录着一个人的努力。</p></div><select aria-label="筛选章节" className={s.select} value={chapterFilter} onChange={e => setChapterFilter(e.target.value)}><option value="all">全部章节</option>{project.chapters.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select></div>
           <div className={s.tableScroll}><table className={s.checkinTable}><thead><tr><th>学习包 / 章节</th><th>预计用时</th>{displayed.map(l => <th key={l.id}><span className={s.tablePerson}><Avatar learner={l} small />{l.name}</span></th>)}</tr></thead><tbody>{project.chapters.filter(c => chapterFilter === 'all' || c.id === chapterFilter).map(c => <ChapterRows key={c.id} chapter={c} project={project} state={state} learners={displayed} openPack={openPack} />)}</tbody></table></div>
           <div className={s.legend}>{Object.entries(statusNames).map(([key, value]) => <span key={key}><i data-status={key} />{value}</span>)}</div><p className={s.footnote}>点击自己的状态，进入学习并打卡；点击伙伴的状态，查看作答与互检。同一学习包可分多天记录，完成只计算一次。</p>
-          <AddPack project={project} onAdd={p => { const saved = store.save('project', p); if (saved) notify('学习包已添加'); return saved; }} />
+          {project.ownerId === actor && <AddPack project={project} onAdd={p => { const saved = store.save('project', p); if (saved) notify('学习包已添加'); return saved; }} />}
         </>}
         {tab === 'calendar' && <><div className={s.viewHeading}><div><h2>学习日历</h2><p>把时间留在这里，看见彼此的坚持。</p></div><label className={s.checkLabel}><input type="checkbox" checked={allCalendar} onChange={e => setAllCalendar(e.target.checked)} />全部项目</label></div><StudyCalendar actor={actor} state={calendarState} projectId={allCalendar ? undefined : project.id} /></>}
-        {tab === 'work' && pack && <StudyDesk key={`${project.id}:${actor}`} state={state} actor={actor} project={project} pack={pack} chapter={chapter} viewLearner={viewLearner || actor} onViewLearner={setViewLearner} onSelectPack={p => { setPackId(p.id); focusContent(); }} save={store.save} notify={notify} onRecord={() => { setSessionTarget({ actor, project, pack, chapter, learner: me }); setModal('session'); }} onReview={openReview} />}
-        {!!archivedPacks.length && <details className={s.studyHistory}><summary>历史学习记录 · {archivedPacks.length} 个旧学习包</summary><p>旧题作答与完成日期保留在这里，学习时间仍计入本书和日历；旧包不计入新版习题进度。</p><div>{archivedPacks.map(item => <button key={item.id} type="button" onClick={() => { openPack(item); focusContent(); }}><BookOpen size={13} />{item.id} · {item.title}</button>)}</div></details>}
+        {tab === 'work' && pack && <StudyDesk key={`${project.id}:${actor}`} state={state} actor={actor} project={project} pack={pack} chapter={chapter} viewLearner={viewLearner || actor} onViewLearner={setViewLearner} onSelectPack={p => { setPackId(p.id); focusContent(); }} managementError={store.error} busy={store.replacingChapter} onDeleteQuestion={id => store.deleteQuestion(project.id, pack.id, id).then(saved => { if (saved) notify('题目及所有成员的对应作答已删除'); return saved; })} save={store.save} notify={notify} onRecord={() => { setSessionTarget({ actor, project, pack, chapter, learner: me }); setModal('session'); }} onReview={openReview} />}
+
 
         </>}
       </div>

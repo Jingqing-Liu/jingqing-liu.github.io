@@ -9,10 +9,11 @@ registerHooks({ resolve(specifier, context, nextResolve) {
 const { createInitialState } = await import('../src/lib/study-model.ts');
 const dataModule = source => `data:text/javascript,${encodeURIComponent(source)}`;
 const hooksModule = dataModule(['useState', 'useRef', 'useCallback', 'useEffect'].map(name => `export const ${name} = (...args) => globalThis.__studyStoreTest.hooks.${name}(...args);`).join('\n'));
-const cloudModule = dataModule(`export const cloudConfigured = true;\n${['getCloudSession', 'getMyRoom', 'listRecords', 'saveRecord', 'subscribeAuth'].map(name => `export const ${name} = (...args) => globalThis.__studyStoreTest.cloud.${name}(...args);`).join('\n')}`);
+const cloudModule = dataModule(`export const cloudConfigured = true;\n${['getCloudSession', 'getMyRoom', 'listRecords', 'saveRecord', 'subscribeAuth', 'replaceChapterOne', 'deleteQuestion'].map(name => `export const ${name} = (...args) => globalThis.__studyStoreTest.cloud.${name}(...args);`).join('\n')}`);
 const source = stripTypeScriptTypes(readFileSync(new URL('../src/lib/use-study-store.ts', import.meta.url), 'utf8'))
   .replace("from 'react'", `from '${hooksModule}'`)
-  .replace("from './study-model'", `from '${new URL('../src/lib/study-model.ts', import.meta.url).href}'`)
+  .replaceAll("from './study-model'", `from '${new URL('../src/lib/study-model.ts', import.meta.url).href}'`)
+  .replace("from './study-template-update'", `from '${new URL('../src/lib/study-template-update.ts', import.meta.url).href}'`)
   .replace("from './study-cloud'", `from '${cloudModule}'`);
 const { useStudyStore } = await import(dataModule(source));
 
@@ -438,5 +439,100 @@ test('recreated accounts surface missing membership without changing records or 
   assert.deepEqual(store.state.projects[0].memberIds, ['user-one', 'friend-new']);
   assert.equal(store.state.progress[0].note, '第一版');
   assert.equal(h.storage.get(pendingKey), pending);
+  h.hooks.unmount();
+});
+
+test('owner can delete a question locally while a regular member cannot edit curriculum', async()=>{
+  const h=await setup(); let store=h.hooks.render();const pack=store.state.projects[0].chapters[0].packs[0];
+  assert.equal(await store.deleteQuestion(projectId,pack.id,pack.questions[0].id),true);
+  store=h.hooks.render();assert.equal(store.state.projects[0].chapters[0].packs[0].questions.length,pack.questions.length-1);
+  store.selectActor('B');store=h.hooks.render();
+  assert.equal(await store.deleteQuestion(projectId,pack.id,pack.questions[1].id),false);
+  const project=structuredClone(store.state.projects[0]);project.chapters[0].packs[0].questions[0].prompt='unauthorized';
+  assert.equal(store.save('project',project),false);h.hooks.unmount();
+});
+test('deletion RPC failure retains questions and resets busy state',async()=>{
+  const h=await setup();await h.connect('user-one');const before=structuredClone(h.hooks.store.state.projects[0]);
+  h.cloud.deleteQuestion=async()=>{throw new Error('endpoint missing');};
+  const pack=before.chapters[0].packs[0];assert.equal(await h.hooks.store.deleteQuestion(projectId,pack.id,pack.questions[0].id),false);
+  const store=h.hooks.render();assert.deepEqual(store.state.projects[0],before);assert.equal(store.replacingChapter,false);assert.match(store.error,/endpoint missing/);h.hooks.unmount();
+});
+test('reconnect discards deleted-question outbox answers and conflicts stale curriculum without blocking login',async()=>{
+  const h=await setup();await h.connect('user-one');const project=structuredClone(h.hooks.store.state.projects[0]);const pack=project.chapters[0].packs[0];const q=pack.questions[0];
+  const answer={id:`user-one:${projectId}:${pack.id}:${q.id}`,projectId,packId:pack.id,questionId:q.id,learnerId:'user-one',text:'offline',updatedAt:'2026-09-21T10:00:00Z'};
+  assert.equal(h.hooks.store.save('answer',answer),true);
+  project.chapters[0].packs[0].title='offline title';assert.equal(h.hooks.store.save('project',project),true);
+  const remote=h.cloud.records[0];remote.payload=structuredClone(remote.payload);remote.payload.chapters[0].packs[0].questions.shift();remote.payload.deletedQuestionIds={[pack.id]:[q.id]};remote.revision=2;
+  await h.hooks.store.connect();let store=h.hooks.render();assert.equal(store.error,'');assert.equal(store.pending,1);assert.equal(store.conflicts.length,1);assert.equal(store.state.answers.length,0);
+  await store.sync();store=h.hooks.render();assert.match(store.conflicts[0].message,/已删除/);assert.equal(store.state.projects[0].chapters[0].packs[0].questions.some(x=>x.id===q.id),false);h.hooks.unmount();
+});
+test('acknowledged cloud deletion removes corresponding answers and blocks saves while in flight',async()=>{
+  const h=await setup();await h.connect('user-one');const {getQuestionDeletion}=await import('../src/lib/study-template-update.ts');
+  const pack=h.hooks.store.state.projects[0].chapters[0].packs[0];const wait=deferred();
+  h.cloud.deleteQuestion=async(room,id,pid,qid,revision)=>{await wait.promise;const row=h.cloud.records[0];assert.equal(revision,row.revision);row.payload=getQuestionDeletion(row.payload,pid,qid);row.revision++;return row;};
+  const operation=h.hooks.store.deleteQuestion(projectId,pack.id,pack.questions[0].id);await h.settle();
+  assert.equal(h.hooks.store.save('progress',progressFor('user-one')),false);wait.resolve();assert.equal(await operation,true);
+  const store=h.hooks.render();assert.equal(store.state.projects[0].chapters[0].packs[0].questions.length,pack.questions.length-1);assert.equal(store.replacingChapter,false);h.hooks.unmount();
+});
+
+test('remote deletion quarantines answers to unsynced custom questions without preventing reconnect', async () => {
+  const h = await setup(); await h.connect('user-one');
+  const project = structuredClone(h.hooks.store.state.projects[0]);
+  const pack = project.chapters[0].packs[0];
+  const deletedQuestion = pack.questions[0];
+  pack.questions.push({ id: 'offline-question', prompt: '未同步的新题目' });
+  assert.equal(h.hooks.store.save('project', project), true);
+  const answer = { id: `user-one:${projectId}:${pack.id}:offline-question`, projectId, packId: pack.id, questionId: 'offline-question', learnerId: 'user-one', text: '保留这份新题草稿', updatedAt: '2026-09-21T10:00:00Z' };
+  assert.equal(h.hooks.store.save('answer', answer), true);
+  const remote = h.cloud.records[0];
+  remote.payload = structuredClone(remote.payload);
+  remote.payload.chapters[0].packs[0].questions.shift();
+  remote.payload.deletedQuestionIds = { [pack.id]: [deletedQuestion.id] };
+  remote.revision = 2;
+  await h.hooks.store.connect();
+  let store = h.hooks.render();
+  assert.equal(store.error, ''); assert.equal(store.pending, 2);
+  assert.equal(store.state.answers.length, 0);
+  assert.equal(JSON.parse(store.exportPending()).entries[`answer:${answer.id}`].item.text, answer.text);
+  assert.equal(await store.resolveConflict(`project:${projectId}`, 'remote'), true);
+  await h.hooks.store.sync(); store = h.hooks.render();
+  assert.equal(store.pending, 1);
+  assert.match(store.conflicts[0].message, /题目尚未保存在云端/);
+  assert.equal(JSON.parse(store.exportPending()).entries[`answer:${answer.id}`].item.text, answer.text);
+  h.hooks.unmount();
+});
+
+test('owner question edits preserve its ID and every saved answer', async () => {
+  const h = await setup();
+  const project = structuredClone(h.hooks.store.state.projects[0]);
+  const pack = project.chapters[0].packs[0];
+  const question = pack.questions[0];
+  const answer = { id: `A:${projectId}:${pack.id}:${question.id}`, projectId, packId: pack.id, questionId: question.id, learnerId: 'A', text: '已有作答', updatedAt: '2026-09-21T10:00:00Z' };
+  assert.equal(h.hooks.store.save('answer', answer), true);
+  question.prompt = '修订后的题干';
+  assert.equal(h.hooks.store.save('project', project), true);
+  const store = h.hooks.render();
+  assert.equal(store.state.projects[0].chapters[0].packs[0].questions[0].prompt, '修订后的题干');
+  assert.deepEqual(store.state.answers, [answer]);
+  h.hooks.unmount();
+});
+
+test('connecting with only the local editor lock never rewrites another cloud editor queue', async () => {
+  const locks = { request(name, options, callback) {
+    return Promise.resolve(callback(name.endsWith(localKey) ? { name } : null));
+  } };
+  const h = await setup({}, locks);
+  const remote = cloudProject('user-one');
+  const pack = remote.payload.chapters[0].packs[0]; const question = pack.questions.shift();
+  remote.payload.deletedQuestionIds = { [pack.id]: [question.id] };
+  const answer = { id: `user-one:${projectId}:${pack.id}:${question.id}`, learnerId: 'user-one', projectId, packId: pack.id, questionId: question.id, text: '尚未协调的旧草稿', updatedAt: '2026-09-21T10:00:00Z' };
+  const key = 'studyshare.outbox.room-user-one.user-one';
+  const pending = JSON.stringify({ [`answer:${answer.id}`]: { kind: 'answer', item: answer, expectedRevision: 0 } });
+  h.storage.set(key, pending);
+  h.cloud.session = { user: { id: 'user-one' } }; h.cloud.room = roomFor('user-one'); h.cloud.records = [remote];
+  await h.hooks.store.connect(); const store = h.hooks.render();
+  assert.equal(store.pending, 0);
+  assert.equal(h.storage.get(key), pending);
+  await h.settle(); assert.equal(h.hooks.store.editStatus, 'readonly');
   h.hooks.unmount();
 });

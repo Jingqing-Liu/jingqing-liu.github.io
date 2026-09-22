@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { createInitialState, dateInTimeZone, getProjectLearners, isProjectMember, migrateStudyState, validateStudyState, type StudyState, type StudyProject, type Progress, type Answer, type StudySession, type PeerReview, type Learner } from './study-model';
+import { createInitialState, dateInTimeZone, getProjectLearners, isProjectMember, migrateStudyState, networkingStudyProject, validateStudyState, type StudyState, type StudyProject, type Progress, type Answer, type StudySession, type PeerReview, type Learner } from './study-model';
+import { applyChapterOneReplacement, getNetworkingChapterOneUpdate, getQuestionDeletion } from './study-template-update';
 import * as cloud from './study-cloud';
 
 const LOCAL_KEY = 'studyshare.local.v1';
@@ -76,11 +77,35 @@ function remoteState(room: NonNullable<Room>, records: cloud.CloudRecord[], user
   if (!migrated) throw new Error('共享空间的数据不完整，原始记录与待同步内容均已保留。');
   return migrated;
 }
+function touchesDeletedPack(entry: Entry, remote: StudyState): boolean {
+  const project = remote.projects.find(item => item.id === projectIdOf(entry));
+  const deleted = new Set(project?.deletedPackIds ?? []);
+  if (entry.kind === 'project') return (entry.item as StudyProject).chapters.some(chapter => chapter.packs.some(pack => deleted.has(pack.id) || pack.questions.some(question => project?.deletedQuestionIds?.[pack.id]?.includes(question.id))));
+  const item = entry.item as Progress | Answer;
+  return deleted.has(item.packId) || (entry.kind === 'answer' && !!project?.deletedQuestionIds?.[item.packId]?.includes((item as Answer).questionId));
+}
+function reconcileDeletedPacks(remote: StudyState, pending: Outbox): Outbox {
+  const next: Outbox = {};
+  for (const [key, entry] of Object.entries(pending)) {
+    if (!touchesDeletedPack(entry, remote)) next[key] = entry;
+    else if (entry.kind === 'project') next[key] = { ...entry, conflict: '部分学习包或题目已删除，此前的书籍编辑不能恢复这些内容。请采用云端版本，其他自定义修改可从待同步备份中取回。' };
+  }
+  return next;
+}
 function canApply(entry: Entry, remote: StudyState, pending: Outbox, actor: string): boolean {
   const projectId = projectIdOf(entry);
-  if (isProjectMember(remote, projectId, actor)) return true;
-  const creation = pending[entryKey('project', projectId)];
-  return !remote.projects.some(project => project.id === projectId) && !!creation && creation.expectedRevision === 0 && (creation.item as StudyProject).ownerId === actor && ((creation.item as StudyProject).memberIds ?? []).includes(actor);
+  if (touchesDeletedPack(entry, remote)) return false;
+  const remoteProject = remote.projects.find(project => project.id === projectId);
+  const queuedProject = pending[entryKey('project', projectId)];
+  const canCreate = !remoteProject && !!queuedProject && queuedProject.expectedRevision === 0 && (queuedProject.item as StudyProject).ownerId === actor && ((queuedProject.item as StudyProject).memberIds ?? []).includes(actor);
+  if (!isProjectMember(remote, projectId, actor) && !canCreate) return false;
+  if (entry.kind === 'project') return true;
+  // A quarantined project may contain new, unsynced questions. Keep their answers
+  // in the outbox without applying dangling references to the visible cloud state.
+  const project = queuedProject && !touchesDeletedPack(queuedProject, remote) ? queuedProject.item as StudyProject : remoteProject;
+  const item = entry.item as Progress | Answer;
+  const pack = project?.chapters.flatMap(chapter => chapter.packs).find(pack => pack.id === item.packId);
+  return !!pack && (entry.kind !== 'answer' || pack.questions.some(question => question.id === (item as Answer).questionId));
 }
 function overlayPending(remote: StudyState, pending: Outbox, actor: string): StudyState {
   let next = remote;
@@ -105,6 +130,8 @@ export function useStudyStore() {
   const [room, setRoom] = useState<Room>(null);
   const [error, setError] = useState('');
   const [syncing, setSyncing] = useState(false);
+  const [replacingChapter, setReplacingChapter] = useState(false);
+  const replacing = useRef(false);
   const [pending, setPending] = useState(0);
   const [conflicts, setConflicts] = useState<StudyConflict[]>([]);
   const [editStatus, setEditStatus] = useState<StudyEditStatus>('acquiring');
@@ -116,9 +143,8 @@ export function useStudyStore() {
   const generation = useRef(0);
   const connectionReady = useRef(false);
   const localWritable = useRef(false);
-  const canEdit = useCallback(() => {
+  const canEdit = useCallback((context: Context = active.current) => {
     if (typeof navigator === 'undefined' || !navigator.locks) return true;
-    const context = active.current;
     const key = context.room && context.user ? `studyshare.editor.${context.room.id}.${context.user.id}` : `studyshare.editor.${LOCAL_KEY}`;
     return editorLock.current?.key === key;
   }, []);
@@ -163,15 +189,17 @@ export function useStudyStore() {
       const records = await cloud.listRecords(currentRoom.id);
       if (currentGeneration !== generation.current) return;
       if (!currentRoom.members.some(member => member.id === currentUser.id)) throw new Error('当前账号不在这个学习空间中。');
-      const nextOutbox = readOutbox(localStorage.getItem(storageKey(currentRoom.id, currentUser.id)), currentUser.id);
+      const savedOutbox = readOutbox(localStorage.getItem(storageKey(currentRoom.id, currentUser.id)), currentUser.id);
       const remote = remoteState(currentRoom, records, currentUser.id);
+      const nextOutbox = reconcileDeletedPacks(remote, savedOutbox);
       const next = overlayPending(remote, nextOutbox, currentUser.id);
+      if (canEdit({ user: currentUser, room: currentRoom }) && stable(nextOutbox) !== stable(savedOutbox)) localStorage.setItem(storageKey(currentRoom.id, currentUser.id), JSON.stringify(nextOutbox));
       active.current = { user: currentUser, room: currentRoom }; outbox.current = nextOutbox;
       revisions.current = Object.fromEntries(records.map(record => [entryKey(record.kind, record.id), record.revision]));
       setUser(currentUser); setRoom(currentRoom); changeActor(currentUser.id); showQueue();
       apply(next); setError(''); connectionReady.current = true;
     } catch (e) { if (currentGeneration === generation.current) throw e; }
-  }, [apply, changeActor, loadLocal, showQueue]);
+  }, [apply, changeActor, loadLocal, showQueue, canEdit]);
 
   useEffect(() => {
     let mounted = true;
@@ -229,6 +257,8 @@ export function useStudyStore() {
       const records = new Map(fetched.map(record => [entryKey(record.kind, record.id), record]));
       let remote = remoteState(currentRoom, [...records.values()], userId);
       revisions.current = Object.fromEntries([...records].map(([key, record]) => [key, record.revision]));
+      const reconciled = reconcileDeletedPacks(remote, outbox.current);
+      if (stable(reconciled) !== stable(outbox.current)) persistQueue(reconciled, queueKey);
       // Rebuild from the server, so revoked books cannot linger in an old state snapshot.
       apply(overlayPending(remote, outbox.current, userId));
       const entries = Object.entries(outbox.current).sort(([, a], [, b]) => uploadOrder[a.kind] - uploadOrder[b.kind]);
@@ -238,10 +268,13 @@ export function useStudyStore() {
         // A rejected or newly edited curriculum must sync before its dependent answers.
         if (entry.kind !== 'project' && outbox.current[entryKey('project', projectIdOf(entry))]) continue;
         if (entry.kind === 'progress' && Object.values(outbox.current).some(other => other.kind === 'answer' && (other.item as Answer).projectId === (entry.item as Progress).projectId && (other.item as Answer).packId === (entry.item as Progress).packId && (other.item as Answer).learnerId === (entry.item as Progress).learnerId)) continue;
-        if (!canApply(entry, remote, outbox.current, userId)) {
-          persistQueue({ ...outbox.current, [key]: { ...entry, conflict: '你已不在这本书的成员中。草稿已保留；可导出备份或放弃本机改动。' } }, queueKey); continue;
-        }
         if (entry.conflict) continue;
+        if (!canApply(entry, remote, outbox.current, userId)) {
+          const conflict = isProjectMember(remote, projectIdOf(entry), userId)
+            ? '对应的学习包或题目尚未保存在云端。草稿已保留，请先恢复学习内容，或导出备份后放弃此条改动。'
+            : '你已不在这本书的成员中。草稿已保留；可导出备份或放弃本机改动。';
+          persistQueue({ ...outbox.current, [key]: { ...entry, conflict } }, queueKey); continue;
+        }
         const currentRecord = records.get(key);
         if (entry.expectedRevision === undefined && currentRecord && !sameEntity(entry.item, currentRecord.payload)) {
           persistQueue({ ...outbox.current, [key]: { ...entry, conflict: '旧草稿缺少云端版本，请比较后选择保留哪一版。' } }, queueKey); continue;
@@ -291,14 +324,17 @@ export function useStudyStore() {
   const save = useCallback((kind: EntityKind, input: Entity) => {
     try {
       if (!canEdit()) throw new Error(READONLY_MESSAGE);
+      if (replacing.current) throw new Error('正在更新学习内容，请稍后再保存。');
       if (!connectionReady.current) throw new Error('空间连接尚未完成，请先重试连接。');
       const context = active.current;
       if (!context.room && !localWritable.current) throw new Error('请先恢复有效备份，避免覆盖无法读取的原记录。');
       const acting = context.user && context.room ? context.user.id : actorRef.current;
       let item = { ...input } as Entity;
+      if (touchesDeletedPack({ kind, item }, stateRef.current)) throw new Error('这个学习包或题目已经删除，请在当前题目继续记录。');
       const previous = stateRef.current[collection[kind]].find(record => record.id === item.id);
       if (kind === 'project') {
         const project = item as StudyProject; const old = previous as StudyProject | undefined;
+        if (old && old.ownerId !== acting && stable(old.chapters) !== stable(project.chapters)) throw new Error('只有本书创建者可以管理题目和学习包。');
         if (old && !isProjectMember(stateRef.current, old.id, acting)) throw new Error('你不是这本书的成员。');
         const memberIds = project.memberIds ?? old?.memberIds ?? [acting];
         const ownerId = old?.ownerId ?? acting;
@@ -350,6 +386,50 @@ export function useStudyStore() {
     } catch (e) { setError(`未能保存。${e instanceof Error ? e.message : ''}`); return false; }
   }, [apply, persistQueue, canEdit]);
 
+  const editCurriculum = useCallback(async (projectId: string, removal?: { packId: string; questionId: string }): Promise<boolean> => {
+    if (!canEdit()) { setError(READONLY_MESSAGE); return false; }
+    if (replacing.current || running.current === generation.current) { setError('正在同步，请稍后再更新学习内容。'); return false; }
+    if (!connectionReady.current) { setError('请先完成共享空间连接。'); return false; }
+    const currentGeneration = generation.current;
+    replacing.current = true; setReplacingChapter(true);
+    try {
+      const context = active.current;
+      if (!context.room && !localWritable.current) throw new Error('本机记录尚未正确读取，不能更新。');
+      if (context.room && context.user) {
+        await syncRef.current();
+        if (generation.current !== currentGeneration) return false;
+        if (Object.values(outbox.current).some(entry => projectIdOf(entry) === projectId)) throw new Error('请先完成本书待同步内容及冲突处理，再删除学习内容。');
+      }
+      const current = stateRef.current.projects.find(project => project.id === projectId);
+      const acting = context.room && context.user ? context.user.id : actorRef.current;
+      if (!current || current.ownerId !== acting || !isProjectMember(stateRef.current, projectId, acting)) throw new Error('只有本书创建者可以管理学习包和题目。');
+      const prepared = removal ? getQuestionDeletion(current, removal.packId, removal.questionId) : getNetworkingChapterOneUpdate(current)?.project;
+      if (!prepared) return false;
+      let project = { ...prepared, revision: (current.revision ?? 0) + 1 };
+      if (context.room && context.user) {
+        running.current = currentGeneration; setSyncing(true);
+        const record = removal
+          ? await cloud.deleteQuestion(context.room.id, projectId, removal.packId, removal.questionId, current.revision ?? 0)
+          : await cloud.replaceChapterOne(context.room.id, projectId, networkingStudyProject.chapters[0], current.revision ?? 0);
+        if (generation.current !== currentGeneration) return false;
+        project = { ...record.payload as StudyProject, revision: record.revision };
+        revisions.current[entryKey('project', projectId)] = record.revision;
+      }
+      const next = applyChapterOneReplacement(stateRef.current, project);
+      if (!validateStudyState(next)) throw new Error('云端内容需要重新读取，请重试同步。');
+      if (!context.room) localStorage.setItem(LOCAL_KEY, JSON.stringify(next));
+      apply(next); setError('');
+      return true;
+    } catch (e) {
+      if (generation.current === currentGeneration) setError(`学习内容更新未完成。${e instanceof Error ? e.message : ''}`);
+      return false;
+    } finally {
+      replacing.current = false; setReplacingChapter(false);
+      if (running.current === currentGeneration) running.current = null;
+      if (generation.current === currentGeneration) setSyncing(false);
+    }
+  }, [apply, canEdit]);
+
   const resolveConflict = useCallback(async (key: string, choice: 'remote' | 'local'): Promise<boolean> => {
     if (!canEdit()) { setError(READONLY_MESSAGE); return false; }
     const context = active.current; const entry = outbox.current[key];
@@ -363,6 +443,7 @@ export function useStudyStore() {
       const next = { ...outbox.current };
       if (choice === 'remote') delete next[key];
       else {
+        if (touchesDeletedPack(entry, remote)) throw new Error('部分学习内容已删除，不能恢复旧版本。请采用云端版本。');
         if (!canApply(entry, remote, outbox.current, context.user.id)) throw new Error('你已不在本书成员中，不能覆盖云端记录。');
         const revision = currentRecord?.revision ?? 0;
         next[key] = { kind: entry.kind, expectedRevision: revision, item: entry.kind === 'project' ? { ...entry.item, revision } : entry.item };
@@ -378,6 +459,7 @@ export function useStudyStore() {
   }, [apply, persistQueue, canEdit]);
   const replaceLocal = useCallback((input: StudyState) => {
     if (!canEdit()) throw new Error(READONLY_MESSAGE);
+    if (replacing.current) throw new Error('正在更新学习内容，请稍候。');
     if (!connectionReady.current) throw new Error('请先完成账号与空间连接，再恢复本机备份。');
     if (active.current.room) throw new Error('请退出共享空间后导入本机备份。');
     const next = migrateStudyState(input as unknown);
@@ -401,11 +483,12 @@ export function useStudyStore() {
   }, [replaceLocal]);
   const selectActor = (id: string) => {
     if (!canEdit()) { setError(READONLY_MESSAGE); return; }
+    if (replacing.current) return;
     if (!active.current.room && connectionReady.current && stateRef.current.learners.some(learner => learner.id === id)) {
       try { localStorage.setItem('studyshare.actor', id); changeActor(id); } catch { setError('无法保存当前身份。'); }
     }
   };
   const exportPending = () => JSON.stringify({ kind: 'studyshare-pending-drafts', version: 1, roomId: active.current.room?.id ?? null, learnerId: active.current.user?.id ?? actorRef.current, exportedAt: new Date().toISOString(), entries: outbox.current }, null, 2);
   const editMessage = editStatus === 'readonly' ? READONLY_MESSAGE : editStatus === 'acquiring' ? '正在取得本机编辑权限…' : editStatus === 'unsupported' ? '当前浏览器不支持多标签编辑保护，请仅在一个学习页面中修改记录。' : '';
-  return { state, ready, actor, selectActor, save, error, setError, room, user, syncing, pending, conflicts, resolveConflict, connect, sync, replaceLocal, addLearner, exportPending, editable: canEdit(), editStatus, editMessage };
+  return { state, ready, actor, selectActor, save, replaceChapterOne: (id: string) => editCurriculum(id), deleteQuestion: (id: string, packId: string, questionId: string) => editCurriculum(id, { packId, questionId }), replacingChapter, error, setError, room, user, syncing, pending, conflicts, resolveConflict, connect, sync, replaceLocal, addLearner, exportPending, editable: canEdit(), editStatus, editMessage };
 }

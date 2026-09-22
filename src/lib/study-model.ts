@@ -43,6 +43,8 @@ export interface StudyProject {
   chapters: StudyChapter[];
   memberIds?: string[];
   formerMemberIds?: string[];
+  deletedPackIds?: string[];
+  deletedQuestionIds?: Record<string, string[]>;
   ownerId?: string;
   revision?: number;
   timeZone?: string;
@@ -326,6 +328,8 @@ export function validateStudyState(input: unknown): input is StudyState {
     if (project.ownerId !== undefined && (!id(project.ownerId) || !learnerIds.has(project.ownerId) || (project.memberIds && !(project.memberIds as string[]).includes(project.ownerId)))) return false;
     if (project.revision !== undefined && (typeof project.revision !== 'number' || !Number.isSafeInteger(project.revision) || project.revision < 0)) return false;
     if (project.timeZone !== undefined && !validTimeZone(project.timeZone)) return false;
+    if (project.deletedPackIds !== undefined && (!array(project.deletedPackIds, 20000) || !project.deletedPackIds.every(id) || !unique(project.deletedPackIds as string[]))) return false;
+    if (project.deletedQuestionIds !== undefined && (!record(project.deletedQuestionIds) || Object.keys(project.deletedQuestionIds).length > 20000 || !Object.entries(project.deletedQuestionIds).every(([packId, ids]) => id(packId) && array(ids, 1000) && ids.every(id) && unique(ids as string[])))) return false;
     memberships.set(project.id, new Set([...(project.memberIds as string[] | undefined ?? learnerIds), ...(project.formerMemberIds as string[] | undefined ?? [])]));
     const packs = new Map<string, { chapterId: string; questionIds: Set<string> }>();
     const chapterIds = new Set<string>();
@@ -335,14 +339,14 @@ export function validateStudyState(input: unknown): input is StudyState {
       chapterIds.add(chapter.id);
       for (const pack of chapter.packs) {
         if (++packCount > 20_000) return false;
-        if (!record(pack) || !id(pack.id) || packs.has(pack.id) || !nonempty(pack.title, 500) ||
+        if (!record(pack) || !id(pack.id) || (project.deletedPackIds as string[] | undefined)?.includes(pack.id) || packs.has(pack.id) || !nonempty(pack.title, 500) ||
           !["reading", "review", "practice", "lab"].includes(String(pack.kind)) || !text(pack.reading) ||
           !text(pack.minutes, 200) || !text(pack.output) || !text(pack.bookPractice) ||
           (pack.archived !== undefined && typeof pack.archived !== "boolean") || typeof pack.base !== "boolean" || !array(pack.questions, 1000)) return false;
         const questionIds = new Set<string>();
         for (const question of pack.questions) {
           if (++questionCount > 100_000) return false;
-          if (!record(question) || !id(question.id) || questionIds.has(question.id) || !nonempty(question.prompt, 100_000) ||
+          if (!record(question) || !id(question.id) || (project.deletedQuestionIds as Record<string, string[]> | undefined)?.[pack.id]?.includes(question.id) || questionIds.has(question.id) || !nonempty(question.prompt, 100_000) ||
             (question.hint !== undefined && !text(question.hint))) return false;
           questionIds.add(question.id);
         }

@@ -7,9 +7,11 @@ import type { useStudyStore } from '../../lib/use-study-store';
 import { allocateTimerMinutes, freezeTimer, timerSeconds, type StudyTimer as Timer } from '../../lib/study-timer';
 import { Avatar, kindNames } from './StudySpace';
 import StudyQuestionManager from './StudyQuestionManager';
-import RichAnswerEditor from './RichAnswerEditor';
+import dynamic from 'next/dynamic';
+import { RICH_ANSWER_LIMIT } from '../../lib/rich-answer';
 import s from './StudySpace.module.css';
 
+const RichAnswerEditor = dynamic(() => import('./RichAnswerEditor'), { ssr: false });
 const duration = (minutes: number) => `${Number(minutes.toFixed(2))} 分钟`;
 const reviewNames = { unsubmitted: '尚未互检', pending: '等待互检', changes: '待订正', passed: '互检通过' };
 const sessionSnapshot = (session: StudySession) => JSON.stringify([
@@ -159,8 +161,8 @@ function QuestionEditor({ question, index, value, canEdit, busy, onSave }: { que
   const [draft, setDraft] = useState(value); const [saved, setSaved] = useState(true);
   const active = useRef(false);
   useEffect(() => { if (!active.current) setDraft(value); }, [value]);
-  const tooLong = draft.length > 20000;
-  return <article id={`study-question-${question.id}`} tabIndex={-1} className={s.question}><div className={s.questionTitle}><span>{String(index + 1).padStart(2, '0')}</span><h3><StudyText text={question.prompt} /></h3></div><RichAnswerEditor value={draft} editable={canEdit && !busy} label={`第 ${index + 1} 题的作答`} placeholder={canEdit ? '先用自己的话试着回答，思路也值得记录…' : '伙伴还没有填写答案。'} onActive={next => { active.current = next; }} onChange={next => { setDraft(next); setSaved(next.length > 20000 ? false : onSave(next)); }} /><div className={s.questionFoot}><span>{canEdit ? tooLong ? '内容超过 2 万字，已暂停保存，请精简后再继续' : saved ? <><Check size={12} />{value ? '已保存到本机' : '输入后自动保存'}</> : '保存失败，请复制答案备份' : '伙伴的独立作答'}</span></div></article>;
+  const tooLong = draft.length > RICH_ANSWER_LIMIT;
+  return <article id={`study-question-${question.id}`} tabIndex={-1} className={s.question}><div className={s.questionTitle}><span>{String(index + 1).padStart(2, '0')}</span><h3><StudyText text={question.prompt} /></h3></div><RichAnswerEditor value={draft} editable={canEdit && !busy} label={`第 ${index + 1} 题的作答`} placeholder={canEdit ? '先用自己的话试着回答，思路也值得记录…' : '伙伴还没有填写答案。'} onActive={next => { active.current = next; }} onChange={next => { setDraft(next); setSaved(next.length > RICH_ANSWER_LIMIT ? false : onSave(next)); }} /><div className={s.questionFoot}><span>{canEdit ? tooLong ? '内容与排版超出保存容量，已暂停保存，请精简后再继续' : saved ? <><Check size={12} />{value ? '已保存到本机' : '输入后自动保存'}</> : '保存失败，请复制答案备份' : '伙伴的独立作答'}</span></div></article>;
 }
 function RecordEditor({ progress, canEdit, answered, total, completed, reviewStatus, onSave }: { progress?: Progress; canEdit: boolean; answered: number; total: number; completed: boolean; reviewStatus: ReturnType<typeof getReviewStatus>; onSave: (note: string, evidence: string, submit: boolean) => boolean }) {
   const [note, setNote] = useState(progress?.note || ''); const [evidence, setEvidence] = useState(progress?.evidence || '');

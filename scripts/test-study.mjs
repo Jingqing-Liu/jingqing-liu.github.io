@@ -16,3 +16,6 @@ await import('../tests/study-timer.test.ts');
 await import('../tests/study-room.test.ts');
 await import('../tests/study-template-update.test.ts');
 await import('../tests/rich-text.test.ts');
+await import('../tests/rich-answer.test.ts');
+await import('../tests/rich-answer-sync.test.mjs');
+await import('../tests/rich-editor.test.ts');

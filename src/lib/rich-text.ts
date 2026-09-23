@@ -1,7 +1,6 @@
-// Answers stay plain text in storage: the editor writes a small Markdown subset
-// (bold, italic, strikethrough, inline code, two heading sizes, bullet and
-// numbered lists, quotes) so existing plain-text answers keep working and a
-// partner's answer is never injected into the page as raw markup.
+// Legacy plain-text and Markdown answers remain readable without rewriting them.
+// RichAnswerEditor imports this renderer only when no versioned rich document exists.
+// Raw HTML is escaped before rendering.
 
 export interface RichNode {
   nodeType: number;

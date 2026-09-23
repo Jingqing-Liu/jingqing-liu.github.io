@@ -59,6 +59,7 @@
 .table .projectColumn { min-width: 168px; max-width: 220px; border-left: 1px solid #f0f2f5; }
 .projectColumn > button:not(.cellButton) { display: flex; align-items: flex-start; gap: 6px; width: 100%; padding: 0; border: 0; background: none; text-align: left; color: #687b8e; font-size: 10px; line-height: 1.7; }
 .projectColumn > button > span { min-width: 0; }
+.projectColumn > button:not(.cellButton) > span { flex:1; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .projectColumn > button > i { flex: 0 0 auto; width: 5px; height: 5px; border-radius: 50%; margin-top: 6px; }
 .projectColumn > button > svg { flex: 0 0 auto; margin-top: 2px; margin-left: auto; color: #acb7c3; }
 .totalProgress, .cellNumbers { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }
@@ -95,7 +96,8 @@
 .status { margin-left: auto; color: #99a4b0; background: #f4f6f8; border-radius: 5px; padding: 4px 7px; font-size: 8px; }
 .status[data-status="in-progress"] { color: #6e8fa9; background: #edf3f8; }
 .status[data-status="completed"] { color: #689181; background: #eef6f1; }
-.bookTitle { display: flex; align-items: flex-start; justify-content: space-between; gap: 13px; border: 0; background: none; padding: 0; color: #435566; font-size: 16px !important; font-weight: 550 !important; line-height: 1.6; text-align: left; width: 100%; overflow-wrap: anywhere; }
+.bookTitle { display: flex; align-items: flex-start; justify-content: space-between; gap: 13px; border: 0; background: none; padding: 0; color: #435566; font-size: 16px !important; font-weight: 550 !important; line-height: 1.6; text-align: left; width: 100%; min-width:0; }
+.bookTitle > span { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .bookTitle:hover { color: #397bb2; }
 .bookTitle > svg { flex: 0 0 auto; margin-top: 4px; color: #a6b4c2; }
 .root .bookSubtitle { margin-top: 5px; min-height: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #a1a9b3; font-size: 9px; line-height: 1.8; }

@@ -536,3 +536,61 @@ test('connecting with only the local editor lock never rewrites another cloud ed
   await h.settle(); assert.equal(h.hooks.store.editStatus, 'readonly');
   h.hooks.unmount();
 });
+
+test('H3C checkins start, complete, resume and complete again across local saves and cloud reconnect', async () => {
+  const { h3cneStudyProject } = await import('../src/data/study/h3cne-rs-plus.ts');
+  const { getReadingCheckinStep, getProjectStats, getReviewStatus, isPackCompleted, validateStudyState } = await import('../src/lib/study-model.ts');
+  for (const shared of [false, true]) {
+    const h = await setup();
+    if (shared) await h.connect('user-one');
+    const actor = h.hooks.store.actor;
+    const project = { ...structuredClone(h3cneStudyProject), ownerId: actor, memberIds: [actor], formerMemberIds: [], revision: 0, timeZone: 'Asia/Shanghai' };
+    assert.equal(h.hooks.store.save('project', project), true);
+    h.hooks.render();
+    const pack = project.chapters[0].packs[1];
+    const start = getReadingCheckinStep();
+    assert.equal(start.label, '开始阅读');
+    assert.equal(h.hooks.store.save('progress', { id: `${actor}:${project.id}:${pack.id}`, projectId: project.id, packId: pack.id, learnerId: actor, status: start.nextStatus, note: '', evidence: '', updatedAt: '2026-10-08T04:00:00Z' }), true);
+    h.hooks.render();
+    if (shared) { await h.hooks.store.sync(); await h.hooks.store.connect(); h.hooks.render(); }
+    const startedState = shared ? h.hooks.store.state : JSON.parse(h.storage.get(localKey));
+    const started = startedState.progress.find(p => p.projectId === project.id);
+    assert.equal(started.status, 'studying');
+    assert.equal(started.completedDate, undefined);
+    assert.equal(getProjectStats(startedState, project.id, actor).completed, 0);
+    const finish = getReadingCheckinStep(started);
+    assert.equal(finish.label, '标记完成');
+    assert.equal(h.hooks.store.save('progress', { id: `${actor}:${project.id}:${pack.id}`, projectId: project.id, packId: pack.id, learnerId: actor, status: finish.nextStatus, note: '', evidence: `已阅读 ${pack.title}`, updatedAt: '2026-10-08T05:00:00Z' }), true);
+    h.hooks.render();
+    if (shared) { await h.hooks.store.sync(); h.hooks.render(); }
+    const state = shared ? h.hooks.store.state : JSON.parse(h.storage.get(localKey));
+    assert.ok(validateStudyState(state));
+    assert.equal(isPackCompleted(state, project.id, pack.id, actor), true);
+    assert.equal(getReviewStatus(state, project.id, pack.id, actor), 'unsubmitted');
+    assert.equal(getProjectStats(state, project.id, actor).completed, 1);
+    assert.equal(getProjectStats(state, project.id, actor).total, 82);
+    assert.equal(state.answers.length, 0);
+    assert.equal(state.reviews.length, 0);
+    const restored = state.projects.find(p => p.id === project.id);
+    assert.deepEqual(restored.chapters[0].packs[1].outline, pack.outline);
+    assert.equal(state.progress.find(p => p.projectId === project.id).completedDate, '2026-10-08');
+    const record = state.progress.find(p => p.projectId === project.id);
+    const resume = getReadingCheckinStep(record);
+    assert.equal(resume.label, '继续阅读');
+    assert.equal(h.hooks.store.save('progress', { ...record, status: resume.nextStatus, updatedAt: '2026-10-08T06:00:00Z' }), true);
+    h.hooks.render();
+    if (shared) { await h.hooks.store.sync(); await h.hooks.store.connect(); h.hooks.render(); }
+    const cancelled = shared ? h.hooks.store.state : JSON.parse(h.storage.get(localKey));
+    assert.equal(isPackCompleted(cancelled, project.id, pack.id, actor), false);
+    assert.equal(getProjectStats(cancelled, project.id, actor).completed, 0);
+    assert.equal(cancelled.progress.find(p => p.projectId === project.id).completedDate, '2026-10-08');
+    const finishAgain = getReadingCheckinStep(cancelled.progress.find(p => p.projectId === project.id));
+    assert.equal(finishAgain.label, '标记完成');
+    assert.equal(h.hooks.store.save('progress', { ...record, status: finishAgain.nextStatus, updatedAt: '2026-10-08T07:00:00Z' }), true);
+    h.hooks.render();
+    if (shared) { await h.hooks.store.sync(); h.hooks.render(); }
+    assert.equal(getProjectStats(h.hooks.store.state, project.id, actor).completed, 1);
+    assert.equal(h.hooks.store.state.progress.find(p => p.projectId === project.id).completedDate, '2026-10-08');
+    h.hooks.unmount();
+  }
+});

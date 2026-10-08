@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CalendarDays, Check, ChevronLeft, ChevronRight, Clock3 } from "lucide-react";
-import { dateInTimeZone, getActiveSessions, getProjectLearners, type StudyState } from "../../lib/study-model";
+import { dateInTimeZone, isPackCompleted, getActiveSessions, getProjectLearners, type StudyState } from "../../lib/study-model";
 import styles from "./StudyCalendar.module.css";
 
 type StudyCalendarProps = { state: StudyState; projectId?: string; actor?: string };
@@ -31,7 +31,7 @@ export default function StudyCalendar({ state, projectId, actor }: StudyCalendar
     const learners = state.learners.filter(learner => visible.has(learner.id));
     const hasFormer = projects.some(project => getProjectLearners(state, project.id, true).some(learner => !getProjectLearners(state, project.id).some(member => member.id === learner.id)));
     const sessions = getActiveSessions(state).filter(session => participants.get(session.projectId)?.has(session.learnerId) && session.date.startsWith(`${monthPrefix}-`));
-    const completions = state.progress.filter(progress => participants.get(progress.projectId)?.has(progress.learnerId) && progress.completedDate?.startsWith(`${monthPrefix}-`));
+    const completions = state.progress.filter(progress => participants.get(progress.projectId)?.has(progress.learnerId) && isPackCompleted(state, progress.projectId, progress.packId, progress.learnerId) && progress.completedDate?.startsWith(`${monthPrefix}-`));
     const days = new Map<string, Map<string, { minutes: number; completed: number }>>();
     const totals = new Map(learners.map(learner => [learner.id, { minutes: 0, completed: 0, days: new Set<string>() }]));
     const day = (date: string, learnerId: string) => {

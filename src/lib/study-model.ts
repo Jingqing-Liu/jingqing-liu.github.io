@@ -25,12 +25,14 @@ export interface StudyPack {
   questions: StudyQuestion[];
   base: boolean;
   archived?: boolean;
+  outline?: string[];
 }
 
 export interface StudyChapter {
   id: string;
   title: string;
   packs: StudyPack[];
+  unit?: string;
 }
 
 export interface StudyProject {
@@ -40,6 +42,7 @@ export interface StudyProject {
   kind: "book" | "project";
   description: string;
   color: string;
+  checkinOnly?: boolean;
   chapters: StudyChapter[];
   memberIds?: string[];
   formerMemberIds?: string[];
@@ -188,13 +191,23 @@ export function migrateStudyState(state: unknown): StudyState | null {
 
 export function isPackCompleted(state: StudyState, projectId: string, packId: string, learnerId: string): boolean {
   const progress = state.progress.find(item => item.projectId === projectId && item.packId === packId && item.learnerId === learnerId);
+  // Pure reading checkins can be undone; keep the historical first completion date.
+  if (state.projects.find(project => project.id === projectId)?.checkinOnly && progress?.status !== 'submitted') return false;
   return !!progress && (!!progress.completedAt || (progress.status === 'submitted' && !!progress.evidence.trim() && submissionHasAnswers(state, progress)));
+}
+
+/** The button describes its next action: start, finish, then resume reading. */
+export function getReadingCheckinStep(progress?: Progress): { label: string; nextStatus: Progress['status']; notice: string } {
+  if (!progress) return { label: '开始阅读', nextStatus: 'studying', notice: '已开始阅读' };
+  if (progress.status === 'submitted') return { label: '继续阅读', nextStatus: 'studying', notice: '已恢复为阅读中' };
+  return { label: '标记完成', nextStatus: 'submitted', notice: '章节已完成' };
 }
 
 export type ReviewStatus = 'unsubmitted' | 'pending' | 'changes' | 'passed';
 
 /** Current unresolved changes take precedence over approval by another member. */
 export function getReviewStatus(state: StudyState, projectId: string, packId: string, learnerId: string): ReviewStatus {
+  if (state.projects.find(project => project.id === projectId)?.checkinOnly) return 'unsubmitted';
   const progress = state.progress.find((item) => item.projectId === projectId && item.packId === packId && item.learnerId === learnerId);
   if (!progress || progress.status !== 'submitted') return 'unsubmitted';
   if (!submissionHasAnswers(state, progress)) return 'changes';
@@ -321,6 +334,7 @@ export function validateStudyState(input: unknown): input is StudyState {
     if (!record(project) || !id(project.id) || projects.has(project.id) || !nonempty(project.title, 500) ||
       !text(project.subtitle, 1000) || !["book", "project"].includes(String(project.kind)) ||
       !text(project.description) || !color(project.color) || !array(project.chapters, 500) || project.chapters.length < 1) return false;
+    if (project.checkinOnly !== undefined && typeof project.checkinOnly !== 'boolean') return false;
     for (const field of ['memberIds', 'formerMemberIds']) {
       if (project[field] !== undefined && (!array(project[field], 1000) || !(project[field] as unknown[]).every(member => typeof member === 'string' && learnerIds.has(member)) || !unique(project[field] as string[]))) return false;
     }
@@ -336,6 +350,7 @@ export function validateStudyState(input: unknown): input is StudyState {
     for (const chapter of project.chapters) {
       if (++chapterCount > 10_000) return false;
       if (!record(chapter) || !id(chapter.id) || chapterIds.has(chapter.id) || !nonempty(chapter.title, 500) || !array(chapter.packs, 2000) || chapter.packs.length < 1) return false;
+      if (chapter.unit !== undefined && !text(chapter.unit, 500)) return false;
       chapterIds.add(chapter.id);
       for (const pack of chapter.packs) {
         if (++packCount > 20_000) return false;
@@ -343,6 +358,8 @@ export function validateStudyState(input: unknown): input is StudyState {
           !["reading", "review", "practice", "lab"].includes(String(pack.kind)) || !text(pack.reading) ||
           !text(pack.minutes, 200) || !text(pack.output) || !text(pack.bookPractice) ||
           (pack.archived !== undefined && typeof pack.archived !== "boolean") || typeof pack.base !== "boolean" || !array(pack.questions, 1000)) return false;
+        if (pack.outline !== undefined && (!array(pack.outline, 1000) || !pack.outline.every(item => text(item, 1000)))) return false;
+        if (project.checkinOnly && (pack.kind !== 'reading' || pack.questions.length)) return false;
         const questionIds = new Set<string>();
         for (const question of pack.questions) {
           if (++questionCount > 100_000) return false;

@@ -6,6 +6,7 @@ import { dateInTimeZone, getActiveSessions, getPackStatus, getProjectLearners, g
 import type { useStudyStore } from '../../lib/use-study-store';
 import { allocateTimerMinutes, freezeTimer, timerSeconds, type StudyTimer as Timer } from '../../lib/study-timer';
 import { Avatar, kindNames } from './StudySpace';
+import StudyReadingDesk from './StudyReadingDesk';
 import StudyQuestionManager from './StudyQuestionManager';
 import dynamic from 'next/dynamic';
 import { RICH_ANSWER_LIMIT } from '../../lib/rich-answer';
@@ -116,6 +117,7 @@ export default function StudyDesk({ state, actor, project, pack, chapter, viewLe
       if (writeTimer(null)) notify(`${duration(timerSeconds(stopped) / 60)}已保存，按项目时区分配到 ${byDate.length} 天。`);
     } catch { notify('计时拆分未完成，原计时仍保留。请检查项目时区后重试。'); }
   };
+  if (project.checkinOnly) return <StudyReadingDesk state={state} actor={actor} project={project} pack={pack} chapter={chapter} viewLearner={viewing} onViewLearner={onViewLearner} onSelectPack={onSelectPack} save={save} notify={notify} />;
   const reviews = state.reviews.filter(review => review.projectId === project.id && review.packId === pack.id && review.targetLearnerId === viewing).sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
   return <div className={s.desk}>
     <div className={s.deskToolbar}><label>章节<select value={chapter.id} aria-label="选择学习章节" onChange={e => { const c = project.chapters.find(item => item.id === e.target.value); const next = c?.packs.find(p => !p.archived); if (next) onSelectPack(next); }}>{project.chapters.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select></label><label>学习包<select value={pack.id} aria-label="选择学习包" onChange={e => { const p = chapter.packs.find(p => p.id === e.target.value); if (p) onSelectPack(p); }}>{chapter.packs.filter(p => !p.archived || p.id === pack.id).map(p => <option key={p.id} value={p.id}>{p.archived ? '历史' : p.id.startsWith('extra-') ? '+' : p.id.replace(/^ch1-/, '1-')} · {p.title}</option>)}</select></label></div>

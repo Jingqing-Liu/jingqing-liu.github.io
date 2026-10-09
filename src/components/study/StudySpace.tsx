@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { ArrowUpRight, ArrowRight, BookOpen, CalendarDays, Check, CheckCheck, ChevronDown, Clock3, Cloud, Download, GraduationCap, LayoutGrid, ListChecks, MoreHorizontal, Plus, Settings2, Users, X, Upload, LogOut, RefreshCw, CircleHelp, Sparkles } from 'lucide-react';
 import { dateKey, getPackStatus, getProjectStats, getReviewStatus, getProjectLearners, isProjectMember, getActiveSessions, getSharedCompleted, getReadingCheckinStep, isPackCompleted, networkingStudyProject, progressKey, migrateStudyState, type StudyProject, type StudyPack, type StudyChapter, type StudyState, type Learner } from '../../lib/study-model';
+import { getH3cLowerCatalogUpdate } from '../../lib/h3c-reading-catalog';
 import { getNetworkingChapterOneUpdate } from '../../lib/study-template-update';
 import { h3cneStudyProject } from '../../data/study/h3cne-rs-plus';
+import { h3cneLowerStudyProject } from '../../data/study/h3cne-rs-plus-lower';
 import { useStudyStore } from '../../lib/use-study-store';
 import * as cloud from '../../lib/study-cloud';
 import StudyCalendar from './StudyCalendar';
@@ -65,12 +67,16 @@ export default function StudySpace() {
   const [showFormer, setShowFormer] = useState(false);
   const seededRooms = useRef(new Set<string>());
   useEffect(() => {
-    const scope = room?.id || 'local';
-    if (!ready || !store.editable || store.error || (cloud.cloudConfigured && (!store.user || !room)) ||
-      state.projects.some(p => p.id === h3cneStudyProject.id) || seededRooms.current.has(scope)) return;
-    seededRooms.current.add(scope);
-    if (!store.save('project', { ...structuredClone(h3cneStudyProject), ownerId: actor,
-      memberIds: state.learners.map(member => member.id), formerMemberIds: [], revision: 0, timeZone: 'Asia/Shanghai' })) seededRooms.current.delete(scope);
+    if (!ready || !store.editable || store.error || (cloud.cloudConfigured && (!store.user || !room))) return;
+    for (const template of [h3cneStudyProject, h3cneLowerStudyProject]) {
+      const existing = state.projects.find(p => p.id === template.id);
+      const update = existing?.ownerId === actor ? getH3cLowerCatalogUpdate(existing) : null;
+      const scope = `${room?.id || 'local'}:${template.id}${update ? ':complete-catalog' : ''}`;
+      if ((existing && !update) || seededRooms.current.has(scope)) continue;
+      seededRooms.current.add(scope);
+      if (!store.save('project', update || { ...structuredClone(template), ownerId: actor,
+        memberIds: state.learners.map(member => member.id), formerMemberIds: [], revision: 0, timeZone: 'Asia/Shanghai' })) { seededRooms.current.delete(scope); break; }
+    }
   }, [ready, room, actor, state.projects, state.learners, store]);
   const visibleProjects = state.projects.filter(p => isProjectMember(state, p.id, actor));
   const project = visibleProjects.find(p => p.id === projectId) || visibleProjects[0];

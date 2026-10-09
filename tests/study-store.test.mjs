@@ -539,12 +539,13 @@ test('connecting with only the local editor lock never rewrites another cloud ed
 
 test('H3C checkins start, complete, resume and complete again across local saves and cloud reconnect', async () => {
   const { h3cneStudyProject } = await import('../src/data/study/h3cne-rs-plus.ts');
+  const { h3cneLowerStudyProject } = await import('../src/data/study/h3cne-rs-plus-lower.ts');
   const { getReadingCheckinStep, getProjectStats, getReviewStatus, isPackCompleted, validateStudyState } = await import('../src/lib/study-model.ts');
-  for (const shared of [false, true]) {
+  for (const template of [h3cneStudyProject, h3cneLowerStudyProject]) for (const shared of [false, true]) {
     const h = await setup();
     if (shared) await h.connect('user-one');
     const actor = h.hooks.store.actor;
-    const project = { ...structuredClone(h3cneStudyProject), ownerId: actor, memberIds: [actor], formerMemberIds: [], revision: 0, timeZone: 'Asia/Shanghai' };
+    const project = { ...structuredClone(template), ownerId: actor, memberIds: [actor], formerMemberIds: [], revision: 0, timeZone: 'Asia/Shanghai' };
     assert.equal(h.hooks.store.save('project', project), true);
     h.hooks.render();
     const pack = project.chapters[0].packs[1];
@@ -568,7 +569,7 @@ test('H3C checkins start, complete, resume and complete again across local saves
     assert.equal(isPackCompleted(state, project.id, pack.id, actor), true);
     assert.equal(getReviewStatus(state, project.id, pack.id, actor), 'unsubmitted');
     assert.equal(getProjectStats(state, project.id, actor).completed, 1);
-    assert.equal(getProjectStats(state, project.id, actor).total, 82);
+    assert.equal(getProjectStats(state, project.id, actor).total, template.chapters.reduce((total, chapter) => total + chapter.packs.length, 0));
     assert.equal(state.answers.length, 0);
     assert.equal(state.reviews.length, 0);
     const restored = state.projects.find(p => p.id === project.id);
@@ -591,6 +592,48 @@ test('H3C checkins start, complete, resume and complete again across local saves
     if (shared) { await h.hooks.store.sync(); h.hooks.render(); }
     assert.equal(getProjectStats(h.hooks.store.state, project.id, actor).completed, 1);
     assert.equal(h.hooks.store.state.progress.find(p => p.projectId === project.id).completedDate, '2026-10-08');
+    h.hooks.unmount();
+  }
+});
+
+test('completing the lower-volume catalog preserves existing checkins and custom reading packs', async () => {
+  const { h3cneLowerStudyProject } = await import('../src/data/study/h3cne-rs-plus-lower.ts');
+  const { getH3cLowerCatalogUpdate } = await import('../src/lib/h3c-reading-catalog.ts');
+  const { getProjectStats } = await import('../src/lib/study-model.ts');
+  for (const shared of [false, true]) {
+    const h = await setup();
+    if (shared) await h.connect('user-one');
+    const actor = h.hooks.store.actor;
+    const old = { ...structuredClone(h3cneLowerStudyProject), ownerId: actor, memberIds: [actor], revision: 0 };
+    old.description = '目录第 VI 页待补充';
+    old.chapters = old.chapters.filter(chapter => !['h3c-lower-ch-28', 'h3c-lower-ch-29'].includes(chapter.id));
+    old.chapters.find(chapter => chapter.id === 'h3c-lower-ch-27').packs.splice(1);
+    const chapter = old.chapters.find(chapter => chapter.id === 'h3c-lower-ch-30');
+    chapter.title = '第 30 章（章名待补充）';
+    chapter.packs.shift();
+    chapter.packs[0].title = '30.2（节标题待补充）';
+    const custom = { ...structuredClone(chapter.packs[0]), id: 'extra-reading', title: '自己的阅读计划', base: false };
+    chapter.packs.push(custom);
+    assert.equal(h.hooks.store.save('project', old), true);
+    h.hooks.render();
+    assert.equal(h.hooks.store.save('progress', { id: `${actor}:${old.id}:30.2`, projectId: old.id, packId: '30.2', learnerId: actor, status: 'submitted', note: '保留我的记录', evidence: '已阅读', updatedAt: '2026-10-09T01:00:00Z' }), true);
+    h.hooks.render();
+    const records = structuredClone(h.hooks.store.state.progress);
+    const current = h.hooks.store.state.projects.find(project => project.id === old.id);
+    const update = getH3cLowerCatalogUpdate(current);
+    assert.equal(h.hooks.store.save('project', update), true);
+    h.hooks.render();
+    if (shared) { await h.hooks.store.sync(); await h.hooks.store.connect(); h.hooks.render(); }
+    const state = shared ? h.hooks.store.state : JSON.parse(h.storage.get(localKey));
+    const project = state.projects.find(project => project.id === old.id);
+    assert.equal(project.chapters.length, 19);
+    assert.equal(getProjectStats(state, old.id, actor).total, 118);
+    assert.equal(getProjectStats(state, old.id, actor).completed, 1);
+    assert.deepEqual(state.progress, records);
+    assert.deepEqual(project.chapters.find(chapter => chapter.id === 'h3c-lower-ch-30').packs.find(pack => pack.id === custom.id), custom);
+    assert.equal(project.chapters.find(chapter => chapter.id === 'h3c-lower-ch-30').title, '第 30 章 SR 技术基础');
+    assert.equal(project.chapters.flatMap(chapter => chapter.packs).find(pack => pack.id === '30.2').title, '30.2 SR 技术产生的背景');
+    assert.equal(getH3cLowerCatalogUpdate(project), null);
     h.hooks.unmount();
   }
 });

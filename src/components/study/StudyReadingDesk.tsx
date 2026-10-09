@@ -24,7 +24,7 @@ export default function StudyReadingDesk({ state, actor, project, pack, chapter,
       evidence: step.nextStatus === 'submitted' ? `已阅读 ${pack.title}` : progress?.evidence || '', updatedAt: new Date().toISOString() })) notify(step.notice);
   }
   return <div className={s.desk}>
-    <section className={s.lessonIntro}><div className={s.cardEyebrow}><BookOpen size={14} />{chapter.unit}</div><h2>章节目录</h2><p>按 1.1、1.2 等二级章节打卡，三级小节仅作目录。</p></section>
+    <section className={s.lessonIntro}><div className={s.cardEyebrow}><BookOpen size={14} />{chapter.unit}</div><h2>章节目录</h2><p>{project.description || '按二级章节打卡，三级小节仅作目录。'}</p></section>
     <div className={s.personTabs}>{members.map(member => <button key={member.id} onClick={() => onViewLearner(member.id)} className={viewing === member.id ? s.personActive : ''}><Avatar learner={member} small />{member.name}的打卡</button>)}</div>
     <section className={s.record}><div className={s.sectionTitle}><h2>{pack.title}</h2><span>{completed ? `已完成 · ${progress?.completedDate || ''}` : progress ? '阅读中' : '未开始'}</span></div>{canEdit && <button className={s.primaryButton} onClick={checkin} aria-pressed={completed}>{completed ? <RotateCcw size={14} /> : <>{progress ? <Check size={14} /> : <Play size={14} />}</>}{step.label}</button>}</section>
     {Array.from(new Set(project.chapters.map(item => item.unit))).map(unit => <section key={unit}>
